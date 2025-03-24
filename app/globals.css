@@ -1,15 +1,10 @@
-@import "tailwindcss";
+@import 'tailwindcss/preflight';  /* Use this instead of @tailwind base */
+@tailwind utilities;
+@import 'tailwindcss';  /* Use this instead of @tailwind base */
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -20,7 +15,25 @@
 }
 
 body {
-  background: var(--background);
   color: var(--foreground);
+  background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.gradient-bg1 {
+  background: radial-gradient(circle, #2DA1EE 10%, white 80%);
+  border-radius: 50%;
+  padding: 10px;
+  display: inline-block;
+  position: relative;
+  box-shadow: 0 0 50px 10px rgba(45, 161, 238, 0.6);
+  overflow: visible;
+}
+
+
+.gradient-bg1  img {
+  object-fit: cover; /* Ensure the image fits properly within the div */
+  width: 160%; /* Increase the size to make the image extend outside */
+  height: 160%; /* Increase the size to make the image extend outside */
+  object-position: center; /* Keep the image centered */
 }
