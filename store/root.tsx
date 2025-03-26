@@ -4,6 +4,8 @@ import notificationSlice from '../features/notification.slice';
 import footballFieldSlice from '../features/footballField.slice';
 import fieldSlice from '../features/field.slice';
 import timeSlotSlice from '../features/timeSlot.slice';
+import teamSlice from '../features/team.slice';
+import matchSlice from '../features/match.slice';
 
 
 const rootReducer = combineReducers({
@@ -11,7 +13,9 @@ const rootReducer = combineReducers({
     notification: notificationSlice,
     footballField: footballFieldSlice,
     field: fieldSlice,
-    timeSlot: timeSlotSlice
+    timeSlot: timeSlotSlice,
+    team: teamSlice,
+    match: matchSlice
 
 });
 

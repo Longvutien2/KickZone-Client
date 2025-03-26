@@ -48,7 +48,7 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
 
   const items = [
     getItem("Trang chủ", "home", <Link href="/"><HomeOutlined /></Link>, "/home"),
-    getItem("Cấp kèo, tìm đội", "timDoi", <Link href="/timDoi"><ThunderboltOutlined /></Link>, "/timDoi"),
+    getItem("Cáp kèo, tìm đội", "timDoi", <Link href="/homepage/timDoi"><ThunderboltOutlined /></Link>, "/timDoi"),
     getItem("Bảng xếp hạng", "xepHang", <Link href="/xepHang"><TrophyOutlined /></Link>, "/xepHang"),
     getItem("Đặt sân", "datSan", <Link href="/homepage"><AimOutlined /></Link>, "/datSan"),
     getItem(
@@ -65,7 +65,7 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
       </Link>,
       "/thongBao"
     ),
-    getItem("Đội của tôi", "doiCuaToi", <Link href="/doiCuaToi"><UserOutlined /></Link>, "/doiCuaToi"),
+    getItem("Đội của tôi", "doiCuaToi", <Link href="/homepage/myTeam"><UserOutlined /></Link>, "/doiCuaToi"),
     user.value.user.role === 1 ?
       getItem("", "manager",
         <Link href="/manager/quanLiSanBong" className="flex items-center">
