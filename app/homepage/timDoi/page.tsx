@@ -7,6 +7,7 @@ import { DownOutlined, FilterOutlined, PlusOutlined } from '@ant-design/icons'
 import { Tabs, Select, Button } from 'antd'
 import 'antd/dist/reset.css'
 import moment from 'moment'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
@@ -127,7 +128,14 @@ const MainContent = () => {
                                 {/* Đội A */}
                                 <div>
                                     <div className="flex items-center space-x-3">
-                                        <img src={match.club_A?.teamImage} className="w-12 h-12 rounded-full object-cover" />
+                                        <div className="relative w-12 h-12">
+                                            <Image
+                                                src={match.club_A?.teamImage || ""}
+                                                className="rounded-full object-cover"
+                                                layout="fill"  // Lấp đầy toàn bộ container
+                                                alt="bg"
+                                            />
+                                        </div>
                                         <div className="font-semibold text-sm">{match.club_A?.teamName}</div>
                                     </div>
                                     <div className='flex items-center space-x-3 text-sm mt-2 text-orange-500'>
@@ -146,7 +154,14 @@ const MainContent = () => {
                                     <div>
                                         <div className="flex items-center justify-end space-x-3">
                                             <div className="font-semibold text-sm">{match.club_B?.teamName}</div>
-                                            <img src={match.club_B?.teamImage} className="w-12 h-12 rounded-full object-cover" />
+                                            <div className="relative w-12 h-12">
+                                                <Image
+                                                    src={match.club_B?.teamImage || ""}
+                                                    className="rounded-full object-cover"
+                                                    layout="fill"  // Lấp đầy toàn bộ container
+                                                    alt="bg"
+                                                />
+                                            </div>
                                         </div>
                                         <div className='flex items-center justify-end space-x-3 text-sm mt-2 text-orange-500'>
                                             <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{match.club_B?.ageGroup}</span>

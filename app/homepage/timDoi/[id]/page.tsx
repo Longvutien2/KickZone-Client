@@ -8,8 +8,9 @@ import Icon, { CalendarOutlined, ClockCircleOutlined, EditOutlined, EnvironmentO
 import { Button, Card, Form, Modal, Select } from 'antd';
 import { Input } from 'antd/lib';
 import moment from 'moment';
+import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 
 interface FormValues {
@@ -57,15 +58,18 @@ const MatchDetail = () => {
 
     moment.locale('vi');
     useEffect(() => {
-        const getData = async () => {
-            const data = await dispatch(getMatchByIdSlice(id as string));
-            if (auth.isLoggedIn) {
-                const teams = await getTeamByUserId(auth.value.user._id as string)
-                setDataTeams(teams.data)
+        const fetchData = async () => {
+            const [matchData, teamData] = await Promise.all([
+                dispatch(getMatchByIdSlice(id as string)),
+                auth.isLoggedIn ? getTeamByUserId(auth.value.user._id as string) : null
+            ]);
+            if (teamData) {
+                setDataTeams(teamData.data);
             }
-        }
-        getData();
-    }, [id])
+        };
+        fetchData();
+    }, [id, auth.isLoggedIn]);
+
     return (
         <div className="bg-white mx-auto">
             {/* Header */}
@@ -136,7 +140,14 @@ const MatchDetail = () => {
                         {/* Đội A */}
                         <div>
                             <div className="flex items-center space-x-3">
-                                <img src={match.club_A?.teamImage} className="w-20 h-20 rounded-full object-cover" />
+                                <div className="relative w-20 h-20">
+                                    <Image
+                                        src={match.club_A?.teamImage}
+                                        className="rounded-full object-cover"
+                                        layout="fill"  // Lấp đầy toàn bộ container
+                                        alt="bg"
+                                    />
+                                </div>
                                 <div className="font-semibold text-sm">{match.club_A?.teamName}</div>
                             </div>
                             <div className='flex items-center space-x-3 text-sm mt-2 text-orange-500'>
@@ -155,7 +166,14 @@ const MatchDetail = () => {
                             <div>
                                 <div className="flex items-center justify-end space-x-3">
                                     <div className="font-semibold text-sm">{match.club_B?.teamName}</div>
-                                    <img src={match.club_B?.teamImage} className="w-20 h-20 rounded-full object-cover" />
+                                    <div className="relative w-20 h-20">
+                                        <Image
+                                            src={match.club_B?.teamImage}
+                                            className="rounded-full object-cover"
+                                            layout="fill"  // Lấp đầy toàn bộ container
+                                            alt="bg"
+                                        />
+                                    </div>
                                 </div>
                                 <div className='flex items-center justify-end space-x-3 text-sm mt-2 text-orange-500'>
                                     <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{match.club_B?.ageGroup}</span>

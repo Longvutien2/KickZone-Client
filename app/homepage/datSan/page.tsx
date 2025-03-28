@@ -62,6 +62,8 @@ const BookField = () => {
     // const sortedData = [...data].sort((a, b) => b._id - a.rating);
     const getData = async () => {
       const data = await dispatch(getListFootballFieldSlice());
+      console.log("dataaa111111111111111111", data);
+      
       setFilteredData(data.payload as FootballField[]);
       setdfData(data.payload as FootballField[])
     }
