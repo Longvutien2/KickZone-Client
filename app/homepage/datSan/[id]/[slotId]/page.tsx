@@ -15,6 +15,7 @@ import { updateTimeSlotSlice } from "@/features/timeSlot.slice";
 import { addNotificationSlice } from "@/features/notification.slice";
 import { AppDispatch } from "@/store/store";
 import { useParams, useSearchParams } from "next/navigation";
+import { addBreadcrumb, resetBreadcrumb } from "@/features/breadcrumb.slice";
 // import { getTimeSlot, getTimeSlotById } from "@/api/timeSlot";
 // import { updateTimeSlotSlice } from "@/features/timeSlot/timeSlot.slice";/
 // import { addNotificationSlice } from "@/features/notification/notification.slice";
@@ -131,6 +132,9 @@ const BookingPage = () => {
                     setTimeslots(timeslot.data)
                 }
 
+                 dispatch(addBreadcrumb({ name: "Thanh toán", url: `/homepage/datSan/${id}/${slotId}` }));
+                 console.log("date",date);
+                 
             }
             getData();
         }
@@ -145,7 +149,7 @@ const BookingPage = () => {
                 {fieldData && (
                     <Card className="mb-4">
                         <h3 className="text-lg font-semibold">Tóm tắt đơn hàng</h3>
-                        <div className="mt-2 border-t pt-2">
+                        <div className="mt-2 border-t border-gray-200 pt-2">
                             <p><strong>Ngày:</strong> {fieldData.date}</p>
                             <p><strong>Tên sân:</strong> {fieldData.fieldName}</p>
                             <p><strong>Địa chỉ:</strong> {fieldData.address}</p>

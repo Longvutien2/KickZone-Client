@@ -1,4 +1,4 @@
-import { createFootballField, getFootballField, getFootballFieldByIdUser } from "@/api/football_fields"
+import { createFootballField, getFootballField, getFootballFieldById, getFootballFieldByIdUser } from "@/api/football_fields"
 import { FootballField } from "@/models/football_field"
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 
@@ -14,7 +14,7 @@ export const getListFootballFieldSlice = createAsyncThunk(
 export const getFootballFieldByIdSlice = createAsyncThunk(
     "footballField/getFootballFieldByIdSlice",
     async (id:string) => {
-        const { data } = await getFootballFieldByIdUser(id)
+        const { data } = await getFootballFieldById(id)
         return data
     }
 )
@@ -43,8 +43,7 @@ const footballFieldSlice = createSlice({
         detail: {},
         breadcrumb: ""
     },
-    reducers: {}
-    ,
+    reducers: {},
     extraReducers: (builder) => {
         builder.addCase(getListFootballFieldSlice.fulfilled, (state: any, action) => {
             state.value = action.payload

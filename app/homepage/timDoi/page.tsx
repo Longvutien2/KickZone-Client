@@ -1,5 +1,6 @@
 // pages/index.tsx
 'use client'
+import { setBreadcrumb } from '@/features/breadcrumb.slice'
 import { getListMatchesSlice } from '@/features/match.slice'
 import { Match } from '@/models/match'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -12,64 +13,38 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
-const { TabPane } = Tabs
-
-const matches = [
-    {
-        id: 1,
-        clubName: 'FC BA TEN ĐỜ',
-        logo: 'https://picsum.photos/200',
-        opponent: {
-            clubName: 'FC PHỐ NÚI',
-            logo: 'https://picsum.photos/200',
-            time: '16:00 | CN - 30/03/2025',
-            location: 'Sân An Dương, Quận Tây Hồ',
-            category: 'U23',
-            stats: { energy: 99, stars: '?', likes: 100 },
-            daysLeft: 11,
-        },
-        time: '16:00 | CN - 30/03/2025',
-        location: 'Sân An Dương, Quận Tây Hồ',
-        category: 'U23',
-        stats: { energy: 99, stars: '?', likes: 100 },
-        daysLeft: 11,
-    },
-    {
-        id: 2,
-        clubName: 'FC Hà Nội II',
-        logo: 'https://picsum.photos/200',
-        opponent: null,
-        time: '01:00 | Thứ 3 - 24/03/2025',
-        location: 'Sân XYZ',
-        category: 'U16',
-        stats: { energy: 200, stars: '?', likes: 100 },
-        daysLeft: 5,
-    },
-]
-
-
 export default function Home() {
+    const dispatch = useAppDispatch();
+    useEffect(() => {
+        dispatch(setBreadcrumb([
+            { name: 'Home', url: '/' },
+            { name: 'Tìm đối', url: '/homepage/timDoi' },
+        ]));
+    }, [])
 
     return (
         <div className="bg-white min-h-screen">
             {/* Header - time only */}
             <h1 className="text-2xl font-semibold mb-4">Tìm đối</h1>
-
-            {/* Tabs below header */}
             <Tabs
                 defaultActiveKey="1"
                 centered
-                className=" border-gray-200"
+                className="border-gray-200"
                 tabBarGutter={48}
                 tabBarStyle={{ marginBottom: 0 }}
-            >
-                <TabPane tab={<span className="text-base font-medium">Cộng Đồng</span>} key="1">
-                    <MainContent />
-                </TabPane>
-                <TabPane tab={<span className="text-base font-medium">Của Tôi</span>} key="2">
-                    <MyTeamTab />
-                </TabPane>
-            </Tabs>
+                items={[
+                    {
+                        key: "1",
+                        label: <span className="text-base font-medium">Cộng Đồng</span>,
+                        children: <MainContent />
+                    },
+                    {
+                        key: "2",
+                        label: <span className="text-base font-medium">Của Tôi</span>,
+                        children: <MyTeamTab />
+                    }
+                ]}
+            />
         </div>
     )
 }
@@ -78,7 +53,6 @@ const MainContent = () => {
     const matchs = useAppSelector(state => state.match.value)
     moment.locale('vi');
     const dispatch = useAppDispatch();
-    console.log("matchs", matchs);
 
     useEffect(() => {
         const getData = async () => {
@@ -211,35 +185,41 @@ const MyTeamTab = () => {
 
     return (
         <div className="mt-6 px-4">
-            <Tabs defaultActiveKey="home" centered tabBarGutter={40}>
-                {/* Vai trò đội nhà */}
-                <TabPane tab={<span className="text-sm font-medium">Vai Trò Đội Nhà</span>} key="home">
-                    <div className="flex flex-col items-center justify-center text-center mt-10">
-                        <p className="text-gray-500 mb-2 text-sm">
-                            Chưa có trận đấu nào? Bắt đầu tạo trận đấu mới để tham gia vào bảng xếp hạng của Sporta ngay!
-                        </p>
-                        <Button
-                            type="primary"
-                            className="bg-orange-500 hover:bg-orange-600 mt-4 px-6 rounded-full h-10 flex items-center"
-                            icon={<PlusOutlined className="text-xl mr-1" />}
-                            onClick={handleCreateMatch} // Gắn sự kiện onclick
-                        >
-                            Tạo Trận Đấu Mới
-                        </Button>
-                    </div>
-                </TabPane>
-
-                {/* Vai trò đội khách */}
-                <TabPane tab={<span className="text-sm font-medium">Vai Trò Đội Khách</span>} key="away">
-                    <div className="flex flex-col items-center justify-center text-center mt-10">
-                        <p className="text-gray-500 text-sm px-4">
-                            Bạn chưa được đội nào mời hoặc chưa tham gia vào đội nào.
-                            <br />
-                            Hãy tìm kiếm đội để tham gia ngay!
-                        </p>
-                    </div>
-                </TabPane>
-            </Tabs>
+            <Tabs
+                defaultActiveKey="home"
+                centered
+                tabBarGutter={40}
+                items={[
+                    {
+                        key: 'home',
+                        label: <span className="text-sm font-medium">Vai Trò Đội Nhà</span>,
+                        children: (
+                            <div className="flex flex-col items-center justify-center text-center mt-10">
+                                <p className="text-gray-500 mb-2 text-sm">Chưa có trận đấu nào? Bắt đầu tạo trận đấu mới để tham gia vào bảng xếp hạng của Sporta ngay!</p>
+                                <Button
+                                    type="primary"
+                                    className="bg-orange-500 mt-4 px-6 rounded-full h-10 flex items-center"
+                                    icon={<PlusOutlined className="text-xl mr-1" />}
+                                    onClick={handleCreateMatch} // Gắn sự kiện onclick
+                                >
+                                    Tạo Trận Đấu Mới
+                                </Button>
+                            </div>
+                        )
+                    },
+                    {
+                        key: 'away',
+                        label: <span className="text-sm font-medium">Vai Trò Đội Khách</span>,
+                        children: <div className="flex flex-col items-center justify-center text-center mt-10">
+                            <p className="text-gray-500 text-sm px-4">
+                                Bạn chưa được đội nào mời hoặc chưa tham gia vào đội nào.
+                                <br />
+                                Hãy tìm kiếm đội để tham gia ngay!
+                            </p>
+                        </div>
+                    }
+                ]}
+            />
         </div>
     )
 }

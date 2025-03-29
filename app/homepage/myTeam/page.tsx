@@ -6,11 +6,11 @@ import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { useEffect, useState } from 'react'
 import { getTeamByUserIdSlice, updateTeamSlice } from '@/features/team.slice'
 import { Team } from '@/models/team'
-import TabPane from 'antd/es/tabs/TabPane'
 import { Upload, UploadProps } from 'antd/lib'
 import { RcFile } from 'antd/es/upload'
 import { toast, ToastContainer } from 'react-toastify'
 import { upload } from '@/utils/upload'
+import { setBreadcrumb } from '@/features/breadcrumb.slice'
 
 const MyTeamPage = () => {
     const user = useAppSelector(state => state.auth)
@@ -29,11 +29,11 @@ const MyTeamPage = () => {
             if (user?.value?.user?._id) {
                 const data = await dispatch(getTeamByUserIdSlice(user.value.user._id as string))
                 if (data?.payload) {
-                    const newData = data.payload as Team
+                    const newData = (data.payload as Team[])[0];
                     setMyTeam(newData);
                     setHasTeam(true);
-                   
-                }else{
+
+                } else {
                     console.log("datadatadatadata", data.payload);
                 }
             }
@@ -128,10 +128,13 @@ const MyTeam = ({ data }: { data: Team | undefined }) => {
         setIsModalVisible(false);
     };
 
-    // useEffect(() => {
-    //     // setCoverImage
-    //     setProfileImage(data?.teamImage)
-    // }, [data])
+    useEffect(() => {
+
+        dispatch(setBreadcrumb([
+            { name: 'Home', url: '/' },
+            { name: 'Đội của tôi', url: '/homepage/myTeam' },
+        ]));
+    }, [data])
 
     return (
         <div className="bg-white">
@@ -193,41 +196,47 @@ const MyTeam = ({ data }: { data: Team | undefined }) => {
             </div>
 
             {/* Tab for Info, Match History, etc */}
-            <Tabs activeKey={activeTab} onChange={(key) => setActiveTab(key)}>
-                <TabPane tab="Thông tin" key="1">
-                    {/* Team Information */}
-                    <Card className="text-left">
-                        <h3 className="text-xl font-bold mb-3">Thông tin</h3>
-                        <div className="">
-                            <p><strong>Xếp hạng: </strong><span>#?</span></p>
-                            <p><strong>Địa chỉ: </strong>{data?.location}</p>
-                            <p><strong>Ngày thành lập: </strong>{data?.createdAt}</p>
-                            <p><strong>Mô tả: </strong>{data?.description}</p>
-                        </div>
-                    </Card>
+            <Tabs
+                activeKey={activeTab}
+                onChange={(key) => setActiveTab(key)}
+                items={[
+                    {
+                        key: '1',
+                        label: 'Thông tin',
+                        children: (
+                            <Card className="text-left">
+                                <h3 className="text-xl font-bold mb-3">Thông tin</h3>
+                                <div className="">
+                                    <p><strong>Xếp hạng: </strong><span>#?</span></p>
+                                    <p><strong>Địa chỉ: </strong>{data?.location}</p>
+                                    <p><strong>Ngày thành lập: </strong>{data?.createdAt}</p>
+                                    <p><strong>Mô tả: </strong>{data?.description}</p>
+                                </div>
+                            </Card>
+                        ),
+                    },
+                    {
+                        key: '2',
+                        label: 'Lịch sử đấu',
+                        children: (
+                            <div className="text-center text-gray-500">Chưa có trận đấu nào</div>
+                        ),
+                    },
+                    {
+                        key: '3',
+                        label: 'Bài đăng',
+                        children: (
+                            <div className="text-center text-gray-500">Chưa có bài đăng</div>
+                        ),
+                    },
+                ]}
+            />
 
-                    {/* Description */}
-                    <Card className="text-left">
-                        <h3 className="text-xl font-bold mb-3">Nhận xét</h3>
-                        <p><strong>Đánh giá: </strong><Rate disabled value={5} /> 0/5</p>
-                    </Card>
-                </TabPane>
-
-                <TabPane tab="Lịch sử đấu" key="2">
-                    {/* History Placeholder */}
-                    <div className="text-center text-gray-500">Chưa có trận đấu nào</div>
-                </TabPane>
-
-                <TabPane tab="Bài đăng" key="3">
-                    {/* Posts Placeholder */}
-                    <div className="text-center text-gray-500">Chưa có bài đăng</div>
-                </TabPane>
-            </Tabs>
 
             {/* Confirmation Modal */}
             <Modal
                 title="Xác nhận thay đổi"
-                visible={isModalVisible}
+                open={isModalVisible}
                 onOk={handleOk}
                 onCancel={() => setIsModalVisible(false)}
                 okText="Lưu"

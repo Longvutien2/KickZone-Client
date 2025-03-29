@@ -183,7 +183,7 @@ const ListField = () => {
             {/* Modal nhập thông tin ca đá */}
             <Modal
                 title={editingTimeSlot ? "Sửa Ca Đá" : "Thêm Ca Đá"}
-                visible={showModal}
+                open={showModal}
                 onCancel={handleClose}
                 onOk={handleSubmit}
             >

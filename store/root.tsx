@@ -6,6 +6,7 @@ import fieldSlice from '../features/field.slice';
 import timeSlotSlice from '../features/timeSlot.slice';
 import teamSlice from '../features/team.slice';
 import matchSlice from '../features/match.slice';
+import breadcrumbSlice from '../features/breadcrumb.slice';
 
 
 const rootReducer = combineReducers({
@@ -15,8 +16,8 @@ const rootReducer = combineReducers({
     field: fieldSlice,
     timeSlot: timeSlotSlice,
     team: teamSlice,
-    match: matchSlice
-
+    match: matchSlice,
+    breadcrumb: breadcrumbSlice,
 });
 
 export default rootReducer;

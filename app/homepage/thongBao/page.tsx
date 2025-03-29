@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { Notification } from '@/models/notification';
 import { RootStateType } from '@/models/type';
 import { useSelector } from 'react-redux';
-import { useAppSelector } from '@/store/hook';
+import { useAppDispatch, useAppSelector } from '@/store/hook';
+import { setBreadcrumb } from '@/features/breadcrumb.slice';
 
 const { Text } = Typography;
 const { TabPane } = Tabs;
@@ -21,6 +22,7 @@ const NotificationPage = () => {
     const [activeNotification, setActiveNotification] = useState<string>(); // Trạng thái thông báo đang được chọn
     const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
     const user = useAppSelector(state => state.auth.value);
+    const dispatch = useAppDispatch();
 
 
     useEffect(() => {
@@ -37,6 +39,11 @@ const NotificationPage = () => {
                 });
                 setFilteredNotifications(newData2);
             }
+
+            dispatch(setBreadcrumb([
+                { name: 'Home', url: '/' },
+                { name: 'Thông báo', url: '/homepage/thongBao' },
+              ]));
         }
         getData();
 
@@ -61,15 +68,28 @@ const NotificationPage = () => {
         return vietnamTime
     }
 
+    
+
     return (
         <div className="flex flex-col min-h-screen">
             <h1 className="text-2xl font-semibold mb-4">Thông báo</h1>
 
             {/* Tùy chọn lọc, chiếm full width */}
-            <Tabs activeKey={filter} onChange={setFilter} className="w-full mb-4">
-                <TabPane tab="Tất cả" key="all" />
-                <TabPane tab="Chưa đọc" key="unread" />
-            </Tabs>
+            <Tabs
+                activeKey={filter}
+                onChange={setFilter}
+                className="w-full mb-4"
+                items={[
+                    {
+                        key: 'all',
+                        label: 'Tất cả',
+                    },
+                    {
+                        key: 'unread',
+                        label: 'Chưa đọc',
+                    },
+                ]}
+            />
 
             {/* Danh sách thông báo chiếm toàn bộ chiều rộng */}
             <List

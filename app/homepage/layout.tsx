@@ -1,7 +1,7 @@
 
 'use client';
 import React, { useEffect, useState } from 'react';
-import { AimOutlined, BellOutlined, HomeOutlined, LogoutOutlined, ThunderboltOutlined, TrophyOutlined, UserOutlined } from "@ant-design/icons";
+import { AimOutlined, BellOutlined, HomeOutlined, LoginOutlined, LogoutOutlined, ThunderboltOutlined, TrophyOutlined, UserOutlined } from "@ant-design/icons";
 import { Breadcrumb, Dropdown, Layout, Menu, theme } from 'antd';
 import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
@@ -9,12 +9,10 @@ import { signout } from '@/features/auth.slice';
 import { RootStateType } from '@/models/type';
 import { getListNotificationSlice } from '@/features/notification.slice';
 import { AppDispatch } from '@/store/store';
-import { Avatar } from 'antd';
 import { Header } from 'antd/es/layout/layout';
+import CustomBreadcrumb from '@/components/Breadcrumb';
 
 const { Content, Sider } = Layout;
-
-
 
 
 const getItem = (label: string, key: string, icon: React.ReactNode, path: string) => ({
@@ -27,7 +25,6 @@ const getItem = (label: string, key: string, icon: React.ReactNode, path: string
 const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
   const user = useSelector((state: any) => state.auth)
   const notifications = useSelector((state: RootStateType) => state.notification.value)
-  console.log("user", user);
 
   const [collapsed, setCollapsed] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
@@ -39,12 +36,13 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
   };
 
   const menu = (
-    <Menu>
+    <Menu style={{ width: '150px' }}>
       <Menu.Item key="logout" onClick={handleLogout} icon={<LogoutOutlined />}>
         Đăng xuất
       </Menu.Item>
     </Menu>
   );
+
 
   const items = [
     getItem("Trang chủ", "home", <Link href="/"><HomeOutlined /></Link>, "/home"),
@@ -87,10 +85,10 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const getData = async () => {
-      await dispatch(getListNotificationSlice(user.value.user))
+      await dispatch( (user.value.user))
     }
     getData();
-  }, [user]);
+  }, [user]);  
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -105,48 +103,31 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
             mode="inline"
             items={items}
           />
-          {
-            user.isLoggedIn ?
-              <Menu
-                theme="light"
-                defaultSelectedKeys={["login"]}
-                mode="inline"
-                items={[getItem(` `, "user",
-                  <Dropdown overlay={menu} trigger={["click"]} >
-                    <div style={{ cursor: "pointer" }} className='gap-2'>
-                      <div><Avatar src="/newPts.png" size={20} /></div>
-                      <div> {String(user?.value.user.name)}</div>
-                    </div>
-                  </Dropdown>, "/timDoi")]}
-              />
-              :
-              <Menu
-                theme="light"
-                defaultSelectedKeys={["login"]}
-                mode="inline"
-                items={[getItem("Đăng nhập", "login",
-                  <Link href={`/auth/login`} className=" font-semibold hover:text-blue-500 hover:cursor-pointer w-full  py-4 ">
-                    <div className=''>
-                      <LogoutOutlined className="" />
-                      <span>Đăng nhập</span>
-                    </div>
-                  </Link>
-                  , "/login")]}
-              />
-
-          }
-
         </div>
       </Sider>
       <Layout>
-        <Header className="bg-white shadow-md px-8 ">
-          <div className="my-auto  text-right text-[16px] "><UserOutlined /> Vũ Tiến Long</div>
+        <Header className="bg-white  px-8 ">
+          <div>
+            {
+              user.isLoggedIn ?
+                <div className="my-auto  text-right text-[16px] ">
+                  <div>
+                    <UserOutlined /> {user?.value.user.name}
+                  </div>
+                  {/* </Dropdown> */}
+                </div>
+                :
+                <div className="my-auto  text-right text-[16px]  font-semibold hover:text-blue-500 hover:cursor-pointer">
+                  <Link href={`/auth/login`} className='gap-2' >
+                    <LoginOutlined className="" />
+                    <span> Đăng nhập</span>
+                  </Link>
+                </div>
+            }
+          </div>
         </Header>
         <Content style={{ margin: '20px' }}>
-          <Breadcrumb items={[
-            { title: 'Home' },
-            { title: 'About' }
-          ]} />
+          <CustomBreadcrumb />
           <div
             style={{
               padding: 24,
@@ -156,12 +137,8 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
             }}
           >
             <div>{children}</div>
-            {/* <div>trang chủ</div> */}
           </div>
         </Content>
-        {/* <Footer style={{ textAlign: 'center' }}>
-          Ant Design ©{new Date().getFullYear()} Created by Ant UED
-        </Footer> */}
       </Layout>
     </Layout>
   );

@@ -104,7 +104,7 @@ const QuanLiSanBong = () => {
         acc[booking.name].push(booking);
         return acc;
     }, {} as Record<string, typeof bookingsData>);
-    
+
     useEffect(() => {
         const getData = async () => {
             const data = await dispatch(getFootballFieldByIdUserSlice(user._id as string))
@@ -118,25 +118,16 @@ const QuanLiSanBong = () => {
             <Sider width={250} className="bg-gray-200 p-4">
                 <h2 className="text-lg font-medium mb-3">Sân đã được đặt</h2>
                 <h3 className="text-base font-medium mb-3">Ngày: {selectedDate}</h3>
-                <Menu mode="inline" className="border-0">
-                    {Object.keys(groupedBookings).length > 0 ? (
-                        Object.entries(groupedBookings).map(([field, bookings]) => (
-                            <Menu.SubMenu key={field} title={<span className="font-semibold">{field}</span>}>
-                                {bookings.map((booking) => (
-                                    <Menu.Item
-                                        key={booking.id}
-                                        className="text-red-500 hover:text-red-700"
-                                        onClick={() => handleViewBooking(booking.id)}
-                                    >
-                                        {booking.time}
-                                    </Menu.Item>
-                                ))}
-                            </Menu.SubMenu>
-                        ))
-                    ) : (
-                        <Menu.Item disabled>Không có ca đá nào trong ngày</Menu.Item>
-                    )}
-                </Menu>
+                <Menu mode="inline" className="border-0" items={Object.keys(groupedBookings).length > 0 ? Object.entries(groupedBookings).map(([field, bookings]) => ({
+                    key: field,
+                    label: <span className="font-semibold">{field}</span>,
+                    children: bookings.map((booking) => ({
+                        key: booking.id,
+                        label: booking.time,
+                        onClick: () => handleViewBooking(booking.id),
+                        className: "text-red-500 hover:text-red-700",
+                    }))
+                })) : [{ key: "noData", label: "Không có ca đá nào trong ngày", disabled: true }]} />
 
             </Sider>
 

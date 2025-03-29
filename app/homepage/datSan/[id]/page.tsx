@@ -10,6 +10,10 @@ import { Field, TimeSlot } from "@/models/field";
 import { RootStateType } from "@/models/type";
 import { getFieldsByIdFootball } from "@/api/field";
 import { useParams } from "next/navigation";
+import { useAppDispatch } from "@/store/hook";
+import { getFootballFieldByIdSlice } from "@/features/footballField.slice";
+import { addBreadcrumb, resetBreadcrumb, setBreadcrumb } from "@/features/breadcrumb.slice";
+import { FootballField } from "@/models/football_field";
 
 const { Panel } = Collapse
 
@@ -17,11 +21,10 @@ const Detail = () => {
     const footballField = useSelector((state: RootStateType) => state.footballField.value)
     const [data, setData] = useState<Field[]>([]); // Dữ liệu lọc the
     const { id } = useParams();
-
     const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs()); // Ngày đang chọn
     const [activeField, setActiveField] = useState<string | null>(null); // Sân nào đang mở
     const [selectedDate2, setSelectedDate2] = useState(dayjs().format("D/M"));
-
+    const dispatch = useAppDispatch();
     if (!data) return <p className="text-center text-red-500">Không tìm thấy sân bóng</p>;
 
     dayjs.locale("vi"); // Thiết lập ngôn ngữ cho Dayjs
@@ -74,6 +77,9 @@ const Detail = () => {
         const getData = async () => {
             const data = await getFieldsByIdFootball(id as string);
             setData(data.data)
+            const football = await dispatch(getFootballFieldByIdSlice(id as string))
+            const dataa = football.payload as FootballField
+            dispatch(addBreadcrumb({ name: dataa.name, url: `/homepage/datSan/${id}` }));
         }
         getData();
     }, [id])
@@ -81,7 +87,7 @@ const Detail = () => {
     return (
         <div className="container mx-auto">
             {/* Chọn ngày */}
-            <div className="max-w-4xl mx-auto p-2 bg-blue-50 p-2 px-12 rounded-lg w-full">
+            <div className="max-w-4xl mx-auto p-2 bg-blue-50 px-12 rounded-lg w-full">
                 <Tabs
                     defaultActiveKey={selectedDate.format("YYYY-MM-DD")} // Chuyển dayjs thành string
                     onChange={(item) => handleDateChange(item)}
@@ -94,51 +100,51 @@ const Detail = () => {
             </div>
 
             {/* Tabs sân bóng + trận đấu */}
-            <div className="mt-4 max-w-4xl mx-auto">
-                <Tabs defaultActiveKey="1" >
-                    {/* Danh sách sân */}
-                    <div className="max-w-4xl mx-auto  text-center">
-                        <h2 className="text-2xl font-bold my-4"> Danh sách sân ({selectedDate.format("DD/MM/YYYY")})</h2>
-                        {data &&
-                            <div className="space-y-4">
-                                {data.map((field: Field, index: number) => (
-                                    <div key={index + 1}>
-                                        <Collapse
-                                            className="transition-all duration-500 ease-in-out"
-                                            activeKey={activeField === field._id ? [field._id] : []}
-                                            onChange={() => setActiveField(field._id === activeField ? null : field._id)}
-                                        >
-                                            <Panel header={`${field.name} - ${field.status}`} key={field._id}>
-                                                <div className="gap-4 w-full text-left">
-                                                    {field.status === 'Bảo trì' ? (
-                                                        <p className="text-center text-gray-500">Sân này hiện đang bảo trì, không thể đặt lịch.</p>
-                                                    ) : (
-                                                        field.timeSlots && field.timeSlots.length > 0 ? (
-                                                            field.timeSlots.map((slot, idx) => (
-                                                                <Button
-                                                                    key={idx}
-                                                                    disabled={slot.isBooked && slot.datetime === selectedDate.format('DD/MM/YYYY')}
-                                                                    className={`border p-2 rounded-md text-center cursor-pointer m-1 '
-                                                                        }`}
-                                                                >
-                                                                    <Link href={`/homepage/datSan/${field._id}/${slot._id}?date=${selectedDate.format("DD/MM/YYYY")}`}>
-                                                                        {slot.time}
-                                                                    </Link>
-                                                                </Button>
-                                                            ))
+            <div className="mt-10 border-t border-gray-300 max-w-4xl mx-auto">
+                {/* Danh sách sân */}
+                <div className="max-w-4xl mx-auto  text-center">
+                    <h2 className="text-2xl font-bold my-4"> Danh sách sân ({selectedDate.format("DD/MM/YYYY")})</h2>
+                    {data &&
+                        <div className="space-y-4">
+                            {data.map((field: Field, index: number) => (
+                                <div key={index + 1}>
+                                    <Collapse
+                                        items={[
+                                            {
+                                                key: field._id,
+                                                label: `${field.name} - ${field.status}`,
+                                                children:
+                                                    <div className="gap-4 w-full text-left">
+                                                        {field.status === 'Bảo trì' ? (
+                                                            <p className="text-center text-gray-500">Sân này hiện đang bảo trì, không thể đặt lịch.</p>
                                                         ) : (
-                                                            <p className="text-center text-gray-500">Không có ca đá trong ngày này.</p>
-                                                        )
-                                                    )}
-                                                </div>
-                                            </Panel>
-                                        </Collapse>
-                                    </div>
-                                ))}
-                            </div>
-                        }
-                    </div>
-                </Tabs>
+                                                            field.timeSlots && field.timeSlots.length > 0 ? (
+                                                                field.timeSlots.map((slot, idx) => (
+                                                                    <Button
+                                                                        key={idx}
+                                                                        disabled={slot.isBooked && slot.datetime === selectedDate.format('DD/MM/YYYY')}
+                                                                        className={`border p-2 rounded-md text-center cursor-pointer m-1 '
+                                                                        }`}
+                                                                    >
+                                                                        <Link href={`/homepage/datSan/${field._id}/${slot._id}?date=${selectedDate.format("DD/MM/YYYY")}`}>
+                                                                            {slot.time}
+                                                                        </Link>
+                                                                    </Button>
+                                                                ))
+                                                            ) : (
+                                                                <p className="text-center text-gray-500">Không có ca đá trong ngày này.</p>
+                                                            )
+                                                        )}
+                                                    </div>,
+                                            }
+
+                                        ]}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    }
+                </div>
             </div>
 
             <Link href={`/homepage/datSan/${footballField._id}/detail`}>

@@ -1,6 +1,7 @@
 
 'use client'
 import { getTeamByUserId } from '@/api/team';
+import { addBreadcrumb } from '@/features/breadcrumb.slice';
 import { getMatchByIdSlice, updateMatchSlice } from '@/features/match.slice';
 import { Team } from '@/models/team';
 import { useAppDispatch, useAppSelector } from '@/store/hook';
@@ -68,6 +69,8 @@ const MatchDetail = () => {
             }
         };
         fetchData();
+
+        dispatch(addBreadcrumb({ name: 'Trận Đấu', url: `/homepage/timDoi/${id}` }));
     }, [id, auth.isLoggedIn]);
 
     return (
@@ -85,7 +88,7 @@ const MatchDetail = () => {
                         Muốn giao lưu với đội này?
                     </div>
                 }
-                visible={visible}
+                open={visible}
                 onCancel={handleCloseModal}
                 footer={[
                     <Button key="back" onClick={handleCloseModal} className="bg-gray-500 text-white">

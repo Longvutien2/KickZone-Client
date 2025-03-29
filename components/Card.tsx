@@ -10,7 +10,6 @@ interface CardProps {
 }
 
 const Card: React.FC<CardProps> = ({ name, location, imageUrl, verified }) => {
-  console.log("aa", imageUrl);
 
   return (
     <div className="bg-white  rounded-lg shadow-md overflow-hidden">
