@@ -7,6 +7,7 @@ import timeSlotSlice from '../features/timeSlot.slice';
 import teamSlice from '../features/team.slice';
 import matchSlice from '../features/match.slice';
 import breadcrumbSlice from '../features/breadcrumb.slice';
+import bookingSlice from '../features/booking.slice';
 
 
 const rootReducer = combineReducers({
@@ -18,6 +19,7 @@ const rootReducer = combineReducers({
     team: teamSlice,
     match: matchSlice,
     breadcrumb: breadcrumbSlice,
+    booking:bookingSlice
 });
 
 export default rootReducer;

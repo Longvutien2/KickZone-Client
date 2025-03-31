@@ -49,7 +49,7 @@ const footballFieldSlice = createSlice({
             state.value = action.payload
         })
         builder.addCase(getFootballFieldByIdUserSlice.fulfilled, (state: any, action) => {
-            state.value = action.payload
+            state.detail = action.payload
         })
         builder.addCase(getFootballFieldByIdSlice.fulfilled, (state: any, action) => {
             state.value = action.payload

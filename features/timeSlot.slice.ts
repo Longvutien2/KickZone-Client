@@ -1,4 +1,4 @@
-import { createTimeSlot, deleteTimeSlot, deleteTimeSlotByFieldId, getTimeSlot, updateTimeSlot } from "@/api/timeSlot"
+import { createTimeSlot, deleteTimeSlot, deleteTimeSlotByFieldId, getTimeSlot, getTimeSlotByIdFootballField, updateTimeSlot } from "@/api/timeSlot"
 import { Field, TimeSlot } from "@/models/field"
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 
@@ -7,6 +7,14 @@ export const getListTimeSlots = createAsyncThunk(
     "timeSlot/getListTimeSlots",
     async () => {
         const { data } = await getTimeSlot()
+        return data
+    }
+)
+
+export const getListTimeSlotsByFootballFieldId = createAsyncThunk(
+    "timeSlot/getListTimeSlotsByFootballFieldId",
+    async (id: string) => {
+        const { data } = await getTimeSlotByIdFootballField(id)
         return data
     }
 )
@@ -21,7 +29,7 @@ export const addTimeSlotSlice = createAsyncThunk(
 
 export const updateTimeSlotSlice = createAsyncThunk(
     "timeSlot/updateTimeSlotSlice",
-    async (timeSlot: TimeSlot) => {
+    async (timeSlot: any) => {
         const { data } = await updateTimeSlot(timeSlot._id, timeSlot)
         return data
     }
@@ -57,6 +65,9 @@ const timeSlotSlice = createSlice({
     ,
     extraReducers: (builder) => {
         builder.addCase(getListTimeSlots.fulfilled, (state: any, action) => {
+            state.value = action.payload
+        })
+        builder.addCase(getListTimeSlotsByFootballFieldId.fulfilled, (state: any, action) => {
             state.value = action.payload
         })
         builder.addCase(addTimeSlotSlice.fulfilled, (state: any, action) => {

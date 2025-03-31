@@ -11,6 +11,11 @@ export const createFootballField = (field: FootballField) => {
 export const getFootballField = () => {
   return API_NodeJS.get<FootballField[]>("footballField");
 };
+
+export const getFootballFieldAddress = () => {
+  return API_NodeJS.get<FootballField[]>("footballField/address/field");
+};
+
 // Lấy danh sách sân bóng theo user
 export const getFootballFieldByIdUser = (id: string) => {
   return API_NodeJS.get<FootballField>(`footballField/${id}/user`);

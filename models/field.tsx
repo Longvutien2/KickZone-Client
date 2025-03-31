@@ -5,8 +5,9 @@ export interface TimeSlot {
     time: string;
     price: string;
     isBooked: boolean;
-    fieldId: Field | string;
+    fieldId?: Field | string;
     datetime?: string;
+    footballField?: FootballField | string;
 }
 
 export interface Schedule {

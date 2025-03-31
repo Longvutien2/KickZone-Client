@@ -21,6 +21,11 @@ export const getBookingById = (bookingId: string) => {
   return API_NodeJS.get<Booking>(`booking/${bookingId}`);
 };
 
+export const getBookingsByFootballFieldAndDate  = (footballFieldId: string, date: string) => {
+  return API_NodeJS.get<Booking>(`booking/${footballFieldId}/${date}`);
+};
+
+
 // Xóa một booking theo ID
 export const deleteBooking = (id: string) => {
   return API_NodeJS.delete(`booking/${id}`);

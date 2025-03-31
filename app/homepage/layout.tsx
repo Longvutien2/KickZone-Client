@@ -35,19 +35,11 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
     // Xử lý đăng xuất tại đây (xóa token, điều hướng, v.v.)
   };
 
-  const menu = (
-    <Menu style={{ width: '150px' }}>
-      <Menu.Item key="logout" onClick={handleLogout} icon={<LogoutOutlined />}>
-        Đăng xuất
-      </Menu.Item>
-    </Menu>
-  );
-
-
+  
   const items = [
     getItem("Trang chủ", "home", <Link href="/"><HomeOutlined /></Link>, "/home"),
     getItem("Cáp kèo, tìm đội", "timDoi", <Link href="/homepage/timDoi"><ThunderboltOutlined /></Link>, "/timDoi"),
-    getItem("Bảng xếp hạng", "xepHang", <Link href="/xepHang"><TrophyOutlined /></Link>, "/xepHang"),
+    getItem("Bảng xếp hạng", "ranking", <Link href="/homepage/ranking"><TrophyOutlined /></Link>, "/ranking"),
     getItem("Đặt sân", "datSan", <Link href="/homepage"><AimOutlined /></Link>, "/datSan"),
     getItem(
       "",
@@ -105,6 +97,7 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
           />
         </div>
       </Sider>
+
       <Layout>
         <Header className="bg-white  px-8 ">
           <div>

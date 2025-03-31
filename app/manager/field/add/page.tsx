@@ -23,15 +23,12 @@ const AddFieldPage = () => {
     const handleSubmit = async (values: Field) => {
         console.log("values", values);
         const data = await dispatch(addFieldSlice({ ...values, foolballFieldId: String(fieldData._id) }));
-        console.log("data", data);
-
         if (data.payload) {
             toast.success("Thêm sân bóng thành công!");
             router.replace("/manager/field"); // Chuyển hướng về trang danh sách sân
         } else {
             toast.success("Thêm sân bóng thất bại, vui lòng thử lại!");
         }
-
     };
 
     return (

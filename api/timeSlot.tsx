@@ -16,6 +16,10 @@ export const getTimeSlot = () => {
   return API_NodeJS.get<TimeSlot[]>(`timeSlot`);
 };
 
+export const getTimeSlotByIdFootballField = (idFootBallField: string) => {
+  return API_NodeJS.get<TimeSlot[]>(`timeSlot/${idFootBallField}/idFootBallField`);
+};
+
 export const getTimeSlotById = (id: string) => {
   return API_NodeJS.get(`timeSlot/${id}`);
 };

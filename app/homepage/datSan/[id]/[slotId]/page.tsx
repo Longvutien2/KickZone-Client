@@ -92,7 +92,6 @@ const BookingPage = () => {
                     targetUser: user._id,
                 };
 
-                await dispatch(updateTimeSlotSlice({ ...timeslots, isBooked: true,  datetime: data.date }))
                 await dispatch(addNotificationSlice(userNotification));
                 await dispatch(addNotificationSlice(managerNotification));
 
@@ -116,7 +115,7 @@ const BookingPage = () => {
             const getData = async () => {
                 const timeslot = await getTimeSlotById(slotId as string);
                 const field = await getFieldById(id as string);
-
+                
                 if (field && timeslot) {
                     const mockData = {
                         date: date as string,
@@ -125,7 +124,7 @@ const BookingPage = () => {
                         field: field.data.name,
                         timeStart: timeslot.data.time,
                         price: Number(timeslot.data.price),
-                        footballFieldId: field.data.foolballFieldId
+                        footballField: field.data.foolballFieldId._id
                     };
                     setFieldData(mockData);
                     setField(field.data)

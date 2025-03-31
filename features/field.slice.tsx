@@ -13,7 +13,7 @@ export const getListFields = createAsyncThunk(
 
 export const getListFieldsSlice = createAsyncThunk(
     "field/getListFieldsSlice",
-    async (id:string) => {
+    async (id: string) => {
         const { data } = await getFieldsByIdFootball(id)
         return data
     }
