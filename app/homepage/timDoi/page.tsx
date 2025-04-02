@@ -17,9 +17,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import dayjs from 'dayjs';
 
 export default function Home() {
     const dispatch = useAppDispatch();
+
     useEffect(() => {
         dispatch(setBreadcrumb([
             { name: 'Home', url: '/' },
@@ -199,7 +201,7 @@ const MainContent = () => {
                                 <div className="flex items-center justify-between">
                                     <span className='capitalize'>{match.time} | {moment(match.date).format('dddd, DD/MM/YYYY')}</span>
                                     <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
-                                        {match.time} ngày nữa
+                                        {dayjs(match.date).diff(dayjs(), 'day')} ngày nữa
                                     </span>
                                 </div>
                                 <div>{match.footballField?.name}, {match.footballField?.address}</div>
@@ -231,6 +233,7 @@ const MyTeamTab = () => {
     const auth = useAppSelector(state => state.auth)
     const [myTeam, setmyTeam] = useState<Team>();
     const [currentPage, setCurrentPage] = useState(1);
+    dayjs.locale("vi");
 
     const handleCreateMatch = () => {
         // Chuyển đến trang tạo trận đấu mới
@@ -330,7 +333,7 @@ const MyTeamTab = () => {
                                                                 <div className="flex items-center justify-between">
                                                                     <span className='capitalize'>{match.time} | {moment(match.date).format('dddd, DD/MM/YYYY')}</span>
                                                                     <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
-                                                                        {match.time} ngày nữa
+                                                                        {dayjs(match.date).diff(dayjs(), 'day')} ngày nữa
                                                                     </span>
                                                                 </div>
                                                                 <div>{match.footballField?.name}, {match.footballField?.address}</div>

@@ -68,7 +68,8 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
           }
         </Link>,
         "/manager") :
-      getItem("Tạo sân bóng", "myField/add", <Link href="/addField"><TrophyOutlined /></Link>, "/myField/add")
+      getItem("Tạo sân bóng", "myField/add", <Link href="/addField"><TrophyOutlined /></Link>, "/myField/add"),
+      getItem("Admin", "home", <Link href="/admin"><HomeOutlined /></Link>, "/home"),
   ].filter(Boolean); // Lọc bỏ những phần tử null hoặc undefined
 
   const {
@@ -77,7 +78,7 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const getData = async () => {
-      await dispatch( (user.value.user))
+      await dispatch(getListNotificationSlice(user.value.user))
     }
     getData();
   }, [user]);  

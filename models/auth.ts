@@ -6,6 +6,6 @@ export interface IUser {
     image?: string,
     // birthday?: string,
     // age?: number,
-    role?: number,
-    status?: number
+    role: number,
+    status: number
 }

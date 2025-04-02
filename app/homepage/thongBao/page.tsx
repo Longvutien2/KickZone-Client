@@ -29,7 +29,7 @@ const NotificationPage = () => {
         const getData = async () => {
             // const data = await getNotifications();
             if (notifications && notifications.length > 0) {
-                const data: Notification[] = notifications.filter((item: Notification) => {
+                const data: Notification[] = notifications.filter((item:Notification) => item.actor === "user").filter((item: Notification) => {
                     if (filter === 'all') return true;
                     if (filter === 'unread') return item.read === false; // Lọc các thông báo chưa đọc
                 });
