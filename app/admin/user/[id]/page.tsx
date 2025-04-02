@@ -8,7 +8,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hook';
 import { getListBookingByIdSlice, updateBookingSlice } from '@/features/booking.slice';
 import { Booking } from '@/models/booking';
 import { toast } from 'react-toastify';
-import { IUser } from '@/models/auth';
+import { IUser, User } from '@/models/auth';
 import { updateUserSlice } from '@/features/user.slice';
 
 const { Option } = Select;
@@ -48,7 +48,7 @@ const EditUserPage = () => {
 
 
 
-    const user = users.filter((item: IUser) => item._id === id)[0] as IUser
+    const user = users.filter((item: any) => item._id === id)[0] as any
     useEffect(() => {
         const fetchBooking = async () => {
             user && setLoading(false);
@@ -57,7 +57,7 @@ const EditUserPage = () => {
     }, [id]);
 
 
-    const handleSubmit = async (values: IUser) => {
+    const handleSubmit = async (values: User) => {
         console.log("values", values);
 
         setUpdating(true);
