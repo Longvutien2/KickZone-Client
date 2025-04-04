@@ -16,6 +16,7 @@ import { addNotificationSlice } from "@/features/notification.slice";
 import { AppDispatch } from "@/store/store";
 import { useParams, useSearchParams } from "next/navigation";
 import { addBreadcrumb, resetBreadcrumb } from "@/features/breadcrumb.slice";
+import { useAppSelector } from "@/store/hook";
 // import { getTimeSlot, getTimeSlotById } from "@/api/timeSlot";
 // import { updateTimeSlotSlice } from "@/features/timeSlot/timeSlot.slice";/
 // import { addNotificationSlice } from "@/features/notification/notification.slice";
@@ -31,11 +32,11 @@ const paymentMethods = [
 interface FieldData {
     date: string;
     fieldName: string;
-    address: string;
+    address: any;
     field: string;
     timeStart: string;
     price: number;
-    footballFieldId?: FootballField | string;
+    footballField: FootballField | string;
 }
 
 interface Information {
@@ -45,7 +46,7 @@ interface Information {
 }
 
 const BookingPage = () => {
-    const user = useSelector((state: RootStateType) => state.auth.value)
+    const user = useAppSelector((state) => state.auth)
     const [fields, setField] = useState<FieldData | null>(null);
     const [timeslots, setTimeslots] = useState<TimeSlot>();
     const { id, slotId } = useParams();
@@ -58,6 +59,7 @@ const BookingPage = () => {
     const [isSuccess, setIsSuccess] = useState(false);
     const dispatch = useDispatch<AppDispatch>();
 
+    console.log("fieldData", fieldData);
 
     const handleSubmit = async (values: Information) => {
 
@@ -67,20 +69,23 @@ const BookingPage = () => {
                 payment_method: selectedPayment,
                 username: values.name,
                 email: values.email,
-                phoneNumber: values.phone
+                phoneNumber: values.phone,
+                user: user.value.user._id,
+                footballField: fieldData.footballField
             }
 
             const { data } = await createBooking(newBooking);
             if (data && timeslots) {
-                const userNotification: Notification = {
-                    actor: 'user',
-                    notificationType: 'field_booked',
-                    title: 'Đặt sân thành công!',
-                    content: `Chúc mừng bạn đã đặt sân thành công tại Sân bóng ${data.fieldName}.`,
-                    bookingId: data._id,
-                    footballfield: fieldData.footballFieldId,
-                    targetUser: user._id,
-                }
+                // const userNotification: Notification = {
+                //     actor: 'user',
+                //     notificationType: 'field_booked',
+                //     title: 'Đặt sân thành công!',
+                //     content: `Chúc mừng bạn đã đặt sân thành công tại Sân bóng ${data.fieldName}.`,
+                //     bookingId: data._id,
+                //     footballfield: fieldData.footballFieldId,
+                //     targetUser: user.value.user._id,
+                // }
+
                 // Thông tin thông báo cho Manager (quản lý sân)
                 const managerNotification: Notification = {
                     actor: 'manager',
@@ -88,18 +93,18 @@ const BookingPage = () => {
                     title: `${data.field} đã có người đặt!`,
                     content: `Sân của bạn đã có người đặt vào thời lúc: ${data.timeStart}, ngày ${data.date}.`,
                     bookingId: data._id,
-                    footballfield: fieldData.footballFieldId,
-                    targetUser: user._id,
+                    footballfield: fieldData.footballField,
+                    targetUser: user.value.user._id,
                 };
 
-                await dispatch(addNotificationSlice(userNotification));
+                // await dispatch(addNotificationSlice(userNotification));
                 await dispatch(addNotificationSlice(managerNotification));
 
                 setIsSuccess(true)
                 // Khi người dùng đặt sân thành công, hiển thị thông báo
                 notification.success({
                     message: 'BẠN ĐÃ ĐẶT SÂN THÀNH CÔNG',
-                    description: 'Chúc mừng bạn đã đặt sân thành công! Bạn có thể kiểm tra thông tin đặt sân trong trang "Thông báo đặt sân". Cảm ơn bạn đã sử dụng dịch vụ!',
+                    description: 'Gửi yêu cầu đặt sân của bạn đã thành công. Vui lòng chờ chủ sân duyệt.. Cảm ơn bạn đã sử dụng dịch vụ!',
                     placement: 'topRight', // Vị trí thông báo
                     className: 'bg-green-500 text-white', // Tailwind CSS cho màu nền và văn bản
                     duration: 3, // Thời gian hiển thị thông báo
@@ -115,25 +120,27 @@ const BookingPage = () => {
             const getData = async () => {
                 const timeslot = await getTimeSlotById(slotId as string);
                 const field = await getFieldById(id as string);
-                
+                console.log("field", field);
+
                 if (field && timeslot) {
                     const mockData = {
                         date: date as string,
                         fieldName: field.data.foolballFieldId?.name,
-                        address: field.data.foolballFieldId?.address,
+                        address: `${field.data.foolballFieldId?.address.detail ? `${field.data.foolballFieldId.address.detail}, ` : ""} ${field.data.foolballFieldId.address.ward}, ${field.data.foolballFieldId.address.district}, ${field.data.foolballFieldId.address.province}`,
                         field: field.data.name,
                         timeStart: timeslot.data.time,
                         price: Number(timeslot.data.price),
                         footballField: field.data.foolballFieldId._id
                     };
                     setFieldData(mockData);
+                    console.log("mockData", mockData);
+
                     setField(field.data)
                     setTimeslots(timeslot.data)
                 }
 
-                 dispatch(addBreadcrumb({ name: "Thanh toán", url: `/homepage/datSan/${id}/${slotId}` }));
-                 console.log("date",date);
-                 
+                dispatch(addBreadcrumb({ name: "Thanh toán", url: `/homepage/datSan/${id}/${slotId}` }));
+                console.log("date", date);
             }
             getData();
         }
@@ -211,8 +218,8 @@ const BookingPage = () => {
 
             {isSuccess && (
                 <div className="mt-4 p-6 bg-green-100 rounded-lg">
-                    <p className="text-xl text-green-800">BẠN ĐÃ ĐẶT SÂN THÀNH CÔNG!</p>
-                    <p className="text-green-600">Thông tin đặt sân đã được lưu. Bạn có thể kiểm tra lại thông tin đặt sân trong phần "Lịch sử".</p>
+                    <p className="text-xl text-green-800">YÊU CẦU ĐẶT SÂN THÀNH CÔNG!</p>
+                    <p className="text-green-600">Gửi yêu cầu đặt sân của bạn đã thành công. Vui lòng chờ chủ sân duyệt.. Cảm ơn bạn đã sử dụng dịch vụ!</p>
                 </div>
             )}
         </div>

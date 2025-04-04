@@ -105,7 +105,7 @@ const ListUser = () => {
     return (
         <div className="p-6 bg-gray-100 min-h-screen">
             <div className="bg-white p-6 rounded-lg shadow">
-                <h1 className="text-xl font-semibold mb-4">Quản lý người dùng</h1>
+                <h1 className="text-xl font-semibold mb-4">Danh sách người dùng</h1>
                 <div>
                     <div className="flex justify-between mb-4 ">
                        

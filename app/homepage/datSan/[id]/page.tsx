@@ -182,7 +182,7 @@ const Detail = () => {
                     >
                         <h2 className="text-2xl font-bold">{footballField.name}</h2>
                         <p className="text-gray-500 flex items-center">
-                            <EnvironmentOutlined className="mr-2" /> {footballField.address}
+                            <EnvironmentOutlined className="mr-2" /> {footballField.address && `${footballField.address?.detail ? `${footballField.address.detail}, ` : ""} ${footballField.address.ward}, ${footballField.address.district}, ${footballField.address.province}`}
                         </p>
                         <p className="text-gray-500 flex items-center">
                             <PhoneOutlined className="mr-2" /> {footballField.phone}

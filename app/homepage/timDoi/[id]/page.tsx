@@ -204,7 +204,7 @@ const MatchDetail = () => {
                                 {match.time} ngày nữa
                             </span>
                         </div>
-                        <div>{match.footballField?.name}, {match.footballField?.address}</div>
+                        <div>{match.footballField?.name},  {` ${match.footballField?.address.detail ? `${match.footballField?.address.detail}, ` : ""} ${match.footballField?.address.ward}, ${match.footballField?.address.district}, ${match.footballField?.address.province}`}</div>
                     </div>
                 </div>
             </Card>
@@ -239,7 +239,7 @@ const MatchDetail = () => {
                         {/* Địa điểm */}
                         <div className="flex items-center space-x-3">
                             <EnvironmentOutlined className="text-orange-500" />
-                            <span className="text-sm text-gray-700"><strong>Địa chỉ: </strong> {match.footballField?.address}</span>
+                            <span className="text-sm text-gray-700"><strong>Địa chỉ: </strong>  {` ${match.footballField?.address.detail ? `${match.footballField?.address.detail}, ` : ""} ${match.footballField?.address.ward}, ${match.footballField?.address.district}, ${match.footballField?.address.province}`}</span>
                         </div>
 
                         {/* Liên hệ */}

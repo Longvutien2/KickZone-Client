@@ -7,6 +7,10 @@ export const createFootballField = (field: FootballField) => {
   return API_NodeJS.post("footballField", field);
 };
 
+export const updateFootballField = (id: string, field: FootballField) => {
+  return API_NodeJS.patch(`footballField/${id}`, field);
+};
+
 // Lấy danh sách sân bóng
 export const getFootballField = () => {
   return API_NodeJS.get<FootballField[]>("footballField");

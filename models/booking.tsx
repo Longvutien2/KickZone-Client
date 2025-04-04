@@ -1,10 +1,14 @@
+import { FootballField } from "./football_field";
+
 export interface Booking {
   _id?: string;
   date: string;
   fieldName: string;
   address: string;
   field: string;
+  footballField?: string | FootballField;
   timeStart: string;
+  user: string | any;
   price: number;
   payment_method: string;
   username: string;

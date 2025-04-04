@@ -18,7 +18,8 @@ const BookField = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   // Lấy tất cả khu vực (location) từ filteredData[]
-  const locations = [...new Set(filteredData?.map((item: FootballField) => item.address))];
+  const locations = [...new Set(filteredData?.map((item: FootballField) => item.address?.province))];
+  console.log("locations", locations);
 
   // Lọc data theo khu vực đã chọn
   const handleLocationChange = (value: string) => {
@@ -27,7 +28,7 @@ const BookField = () => {
       setFilteredData(dfData);
     } else {
       const filtered = dfData.filter((item) =>
-        item.address.toLowerCase().includes(value.toLowerCase())
+        item.address.province.toLowerCase().includes(value.toLowerCase())
       );
       setFilteredData(filtered); // Cập nhật dữ liệu lọc
     }
@@ -109,13 +110,13 @@ const BookField = () => {
         </AutoComplete>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {filteredData.map((item, index) => (
+        {filteredData.map((item, index: number) => (
           <div key={index + 1}>
             <Link href={`/homepage/datSan/${item._id}`}>
               <Card
                 key={index + 1}
                 name={item.name}
-                location={item.address}
+                location={`${item.address.detail ? `${item.address.detail}, ` : ""} ${item.address.ward}, ${item.address.district}, ${item.address.province}`}
                 imageUrl={item.image}
                 verified={true}
               />

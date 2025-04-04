@@ -84,7 +84,7 @@ const MainContent = () => {
 
         if (value) {
             // Lọc danh sách trận đấu dựa trên địa chỉ sân bóng
-            const filtered = matchs.filter((match: Match) => match.footballField?.address === value);
+            const filtered = matchs.filter((match: Match) => match.footballField?.address.province === value);
             setFilteredMatches(filtered);
         } else {
             setFilteredMatches(matchs); // Nếu không có địa chỉ nào được chọn, hiển thị tất cả trận đấu
@@ -112,8 +112,8 @@ const MainContent = () => {
                             }}
                         >
                             {groupedByAddress.map((item: any, index: number) => (
-                                <Select.Option key={index + 1} value={item}>
-                                    {item}
+                                <Select.Option key={index + 1} value={groupedByAddress[index]}>
+                                    {groupedByAddress[index]}
                                 </Select.Option>
                             ))}
                         </Select>
@@ -204,7 +204,9 @@ const MainContent = () => {
                                         {dayjs(match.date).diff(dayjs(), 'day')} ngày nữa
                                     </span>
                                 </div>
-                                <div>{match.footballField?.name}, {match.footballField?.address}</div>
+                                <div>{match.footballField?.name},
+                                    {` ${match.footballField?.address.detail ? `${match.footballField?.address.detail}, ` : ""} ${match.footballField?.address.ward}, ${match.footballField?.address.district}, ${match.footballField?.address.province}`}
+                                </div>
                             </div>
                         </Link>
                     </div>
@@ -336,7 +338,9 @@ const MyTeamTab = () => {
                                                                         {dayjs(match.date).diff(dayjs(), 'day')} ngày nữa
                                                                     </span>
                                                                 </div>
-                                                                <div>{match.footballField?.name}, {match.footballField?.address}</div>
+                                                                <div>{match.footballField?.name},
+                                                                    {` ${match.footballField?.address.detail ? `${match.footballField?.address.detail}, ` : ""} ${match.footballField?.address.ward}, ${match.footballField?.address.district}, ${match.footballField?.address.province}`}
+                                                                </div>
                                                             </div>
                                                         </Link>
                                                     </div>

@@ -14,28 +14,28 @@ interface DataProps {
     data: Notification
 }
 
-const fakeNotification = {
-    id: 1,
-    title: 'Đặt sân bóng thành công!', // Tiêu đề thông báo
-    time: '5 phút trước',
-    status: 'unread',
-    // Nội dung tổng quan thông báo
-    content: 'Chúc mừng bạn đã đặt sân thành công! Dưới đây là thông tin về đặt sân',
-    // Thông tin chi tiết đặt sân
-    details: {
-        fieldName: 'Sân bóng Cộng Hòa',
-        address: '123 Đường Cộng Hòa, Quận Tân Bình, TP.HCM',
-        fieldNumber: 'Sân 1',
-        bookingTime: '2025-03-20 08:00 - 10:00',
-        price: 500000,
-        paymentMethod: 'Chuyển khoản ngân hàng',
-        username: 'Long Vu',
-        phoneNumber: '0378923745',
-        email: 'longvu@example.com',
-    },
-    // Phần nội dung bên dưới thông báo
-    closingMessage: 'Bạn có thể đến sân đúng giờ để trải nghiệm! Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.',
-};
+// const fakeNotification = {
+//     id: 1,
+//     title: 'Đặt sân bóng thành công!', // Tiêu đề thông báo
+//     time: '5 phút trước',
+//     status: 'unread',
+//     // Nội dung tổng quan thông báo
+//     content: 'Chúc mừng bạn đã đặt sân thành công! Dưới đây là thông tin về đặt sân',
+//     // Thông tin chi tiết đặt sân
+//     details: {
+//         fieldName: 'Sân bóng Cộng Hòa',
+//         address: '123 Đường Cộng Hòa, Quận Tân Bình, TP.HCM',
+//         fieldNumber: 'Sân 1',
+//         bookingTime: '2025-03-20 08:00 - 10:00',
+//         price: 500000,
+//         paymentMethod: 'Chuyển khoản ngân hàng',
+//         username: 'Long Vu',
+//         phoneNumber: '0378923745',
+//         email: 'longvu@example.com',
+//     },
+//     // Phần nội dung bên dưới thông báo
+//     closingMessage: 'Bạn có thể đến sân đúng giờ để trải nghiệm! Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.',
+// };
 
 const NotificationDetailPage = () => {
     const [data, setData] = useState<Notification>();
@@ -43,13 +43,14 @@ const NotificationDetailPage = () => {
     const router = useRouter();
     const dispatch = useAppDispatch();
     // Giả sử lấy thông báo dựa trên id từ dữ liệu fakeNotification
-    const notification = fakeNotification;
+    // const notification = fakeNotification;
     const { id } = useParams();
     // Quay lại trang trước
     const goBack = () => {
         router.back(); // Quay lại trang trước
     };
-
+    console.log("data",data);
+    
     useEffect(() => {
 
         const update = async () => {
@@ -89,7 +90,7 @@ const NotificationDetailPage = () => {
                         <br />
                         <Text strong>Tên sân: </Text>{data.footballfield?.name}
                         <br />
-                        <Text strong>Địa chỉ: </Text>{data.footballfield?.address}
+                        <Text strong>Địa chỉ: </Text>{data.bookingId?.address}
                         <br />
                         <Text strong>Số sân: </Text>{data.bookingId.field}
                         <br />
@@ -108,7 +109,7 @@ const NotificationDetailPage = () => {
                         <br />
 
                         {/* Phần nội dung kết thúc thông báo */}
-                        <Text strong>{notification.closingMessage}</Text>
+                        <Text strong>Bạn có thể đến sân đúng giờ để trải nghiệm! Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.</Text>
                     </div>
                 </>}
         </div>

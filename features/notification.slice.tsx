@@ -21,8 +21,8 @@ export const updateNotificationSlice = createAsyncThunk(
 
 export const getListNotificationSlice = createAsyncThunk(
     "notification/getListNotificationSlice",
-    async (user: IUser) => {
-        const { data } = await getNotificationByActor(user._id as string, user.role === 1 ? "manager" : "user")
+    async (user: { id: string, role: string }) => {
+        const { data } = await getNotificationByActor(user.id, user.role)
         return data
     }
 )

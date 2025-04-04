@@ -85,7 +85,7 @@ const NotificationDetailManager = () => {
                             <br />
                             <Text strong>Tên sân: </Text>{data.footballfield?.name}
                             <br />
-                            <Text strong>Địa chỉ: </Text>{data.footballfield?.address}
+                            <Text strong>Địa chỉ: </Text>{data.bookingId?.address}
                             <br />
                             <Text strong>Số sân: </Text>{data.bookingId.field}
                             <br />
@@ -104,7 +104,7 @@ const NotificationDetailManager = () => {
                             <br />
 
                             {/* Phần nội dung kết thúc thông báo */}
-                            <Text strong>{notification.closingMessage}</Text>
+                            {/* <Text strong>{notification.closingMessage}</Text> */}
                         </div>
                     </>}
             </div>

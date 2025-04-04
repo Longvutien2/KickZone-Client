@@ -8,6 +8,8 @@ import { useAppDispatch, useAppSelector } from '@/store/hook';
 import { getListBookingByIdSlice, updateBookingSlice } from '@/features/booking.slice';
 import { Booking } from '@/models/booking';
 import { toast } from 'react-toastify';
+import { addNotificationSlice } from '@/features/notification.slice';
+import { Notification } from '@/models/notification';
 
 const { Option } = Select;
 
@@ -33,6 +35,8 @@ const BookingUpdatePage = () => {
         const fetchBooking = async () => {
             const res = await dispatch(getListBookingByIdSlice(id as string));
             res.payload && setLoading(false);
+            console.log("DATAA", res);
+
         };
         fetchBooking();
     }, [id]);
@@ -40,7 +44,17 @@ const BookingUpdatePage = () => {
     const handleSubmit = async () => {
         if (!status) return message.warning('Vui lòng chọn trạng thái mới');
         setUpdating(true);
-        // try {
+
+        const userNotification: Notification = {
+            actor: 'user',
+            notificationType: 'field_booked',
+            title: 'Đặt sân thành công!',
+            content: `Chúc mừng bạn đã đặt sân thành công tại Sân bóng ${booking.fieldName}.`,
+            bookingId: booking._id,
+            footballfield: booking.footballField,
+            targetUser: booking.user,
+        }
+        await dispatch(addNotificationSlice(userNotification));
         await dispatch(updateBookingSlice({ _id: id, status })).unwrap();
         toast.success('Cập nhật thành công!');
         setUpdating(false);

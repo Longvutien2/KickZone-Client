@@ -11,14 +11,19 @@ import {
     TrophyOutlined,
     UserOutlined
 } from '@ant-design/icons';
-import { useAppSelector } from "@/store/hook";
+import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
+import { getListNotificationSlice } from "@/features/notification.slice";
 
 const { Header, Sider } = Layout;
 
 const LayoutManager = ({ children }: { children: React.ReactNode }) => {
     const pathname = usePathname();
+    const user = useAppSelector(state => state.auth)
     const notifications = useAppSelector(state => state.notification.value);
+    console.log("notifications111111", notifications);
+    const dispatch = useAppDispatch();
 
     const items = [
         {
@@ -52,9 +57,9 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
                 <Link href="/manager/notification" className="flex items-center gap-2">
                     <BellOutlined />
                     <span>Thông báo</span>
-                    {notifications.filter((item: any) => item.actor === "manager" && !item.read).length > 0 && (
+                    {notifications.filter((item: any) => !item.read).length > 0 && (
                         <span className="ml-1 text-white bg-red-500 text-xs font-bold rounded-full px-2 py-0.5">
-                            {notifications.filter((item: any) => item.actor === "manager" && !item.read).length}
+                            {notifications.filter((item: any) => !item.read).length}
                         </span>
                     )}
                 </Link>
@@ -67,6 +72,13 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
             path: "/manager/doiCuaToi"
         },
     ];
+
+    useEffect(() => {
+        const getData = async () => {
+            user.isLoggedIn && await dispatch(getListNotificationSlice({ id: user.value.user._id as string, role: "manager" }))
+        }
+        getData();
+    }, [user]);
 
     // Tìm key hiện tại dựa theo pathname
     const selectedKey = items.find(item => item.path === pathname || "")?.key;

@@ -5,7 +5,9 @@ import "dayjs/locale/vi";
 import Link from "next/link";
 import {
   AimOutlined,
+  AppstoreAddOutlined,
   BellOutlined,
+  FileSearchOutlined,
   HomeOutlined,
   ThunderboltOutlined,
   TrophyOutlined,
@@ -28,18 +30,18 @@ const LayoutAdmin = ({ children }: { children: React.ReactNode }) => {
     },
     {
       key: "listField",
-      label: <Link href="/admin/user"><ThunderboltOutlined /> Quản lý tài khoản</Link>,
+      label: <Link href="/admin/user"><UserOutlined  /> Quản lý tài khoản</Link>,
       path: "/manager/field"
     },
     {
       key: "quanLiSanBong",
-      label: <Link href="/manager/quanLiSanBong"><TrophyOutlined /> Quản lý sân bóng</Link>,
+      label: <Link href="/admin/footballField"><AppstoreAddOutlined  /> Quản lý sân bóng</Link>,
       path: "/manager/quanLiSanBong"
     },
     {
       key: "bookingField",
-      label: <Link href="/manager/bookingField"><AimOutlined /> Quản lý yêu cầu</Link>,
-      path: "/manager/bookingField"
+      label: <Link href="/admin/bookingField"><FileSearchOutlined  /> Quản lý yêu cầu</Link>,
+      path: "/admin/bookingField"
     },
     {
       key: "thongBao",

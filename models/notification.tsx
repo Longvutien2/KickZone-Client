@@ -8,7 +8,7 @@ export interface Notification {
     title: string; // Tiêu đề của thông báo
     content?: string; // Nội dung thông báo
     bookingId?: Booking | any ;
-    targetUser?: string; // ID của người nhận thông báo (nếu có)
+    targetUser?: string | any; // ID của người nhận thông báo (nếu có)
     footballfield?: FootballField | any;
     read?: boolean; // Trạng thái thông báo đã đọc hay chưa
     createdAt?: Date | any;

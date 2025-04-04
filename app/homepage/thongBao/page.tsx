@@ -107,7 +107,7 @@ const NotificationPage = () => {
                                 avatar={<Badge className='pl-4' status={item.read === false ? 'processing' : 'default'} />}
                                 title={<span className="text-lg font-medium">{item.title}</span>}
                                 description={item.content}
-                            />
+                            /> 
                         </List.Item>
                     </Link>
                 )}
