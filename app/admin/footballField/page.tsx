@@ -33,6 +33,7 @@ const ListFootballField = () => {
     useEffect(() => {
         const getData = async () => {
             const data = await dispath(getListFootballFieldSlice());
+            console.log("data", data);
         }
         getData()
     }, []);
@@ -48,18 +49,18 @@ const ListFootballField = () => {
                 <Image src={status || ""} alt="img" width={100} height={100} className="rounded" />
             ),
         },
-        {
-            title: "Địa chỉ",
-            key: "address", width: 150,
-            render: (item: FootballField) => (
-                <Tooltip title={`${item.address.detail ? `${item.address.detail}, ` : "" } ${item.address.ward}, ${item.address.district}, ${item.address.province}`}>
-                    <div className="truncate whitespace-nowrap overflow-hidden w-[350px]">
-                        {item.address.detail ? `${item.address.detail}, ` : ""}
-                        {item.address.ward}, {item.address.district}, {item.address.province}
-                    </div>
-                </Tooltip>
-            ),
-        },
+        // {
+        //     title: "Địa chỉ",
+        //     key: "address", width: 150,
+        //     render: (item: FootballField) => (
+        //         <Tooltip title={`${item.address.detail ? `${item.address.detail}, ` : ""} ${item.address.ward}, ${item.address.district}, ${item.address.province}`}>
+        //             <div className="truncate whitespace-nowrap overflow-hidden w-[350px]">
+        //                 {item.address.detail ? `${item.address.detail}, ` : ""}
+        //                 {item.address.ward}, {item.address.district}, {item.address.province}
+        //             </div>
+        //         </Tooltip>
+        //     ),
+        // },
         {
             title: "Chủ sân",
             key: "userid",
@@ -98,7 +99,7 @@ const ListFootballField = () => {
         },
     ];
 
-    const filteredData = footballFields?.map((item: FootballField, index: number) => ({
+    const filteredData = footballFields && footballFields.map((item: FootballField, index: number) => ({
         ...item,
         key: (index + 1).toString(), // 🛠 Tạo key tự động từ index
     })) || [];

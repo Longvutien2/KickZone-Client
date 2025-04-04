@@ -43,21 +43,21 @@ const LayoutAdmin = ({ children }: { children: React.ReactNode }) => {
       label: <Link href="/admin/bookingField"><FileSearchOutlined  /> Quản lý yêu cầu</Link>,
       path: "/admin/bookingField"
     },
-    {
-      key: "thongBao",
-      label: (
-        <Link href="/manager/notification" className="flex items-center gap-2">
-          <BellOutlined />
-          <span>Thông báo</span>
-          {notifications.filter((item: any) => item.actor === "manager" && !item.read).length > 0 && (
-            <span className="ml-1 text-white bg-red-500 text-xs font-bold rounded-full px-2 py-0.5">
-              {notifications.filter((item: any) => item.actor === "manager" && !item.read).length}
-            </span>
-          )}
-        </Link>
-      ),
-      path: "/manager/notification"
-    },
+    // {
+    //   key: "thongBao",
+    //   label: (
+    //     <Link href="/manager/notification" className="flex items-center gap-2">
+    //       <BellOutlined />
+    //       <span>Thông báo</span>
+    //       {notifications.filter((item: any) => item.actor === "manager" && !item.read).length > 0 && (
+    //         <span className="ml-1 text-white bg-red-500 text-xs font-bold rounded-full px-2 py-0.5">
+    //           {notifications.filter((item: any) => item.actor === "manager" && !item.read).length}
+    //         </span>
+    //       )}
+    //     </Link>
+    //   ),
+    //   path: "/manager/notification"
+    // },
   ];
 
   // Tìm key hiện tại dựa theo pathname

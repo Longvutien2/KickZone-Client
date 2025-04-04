@@ -19,7 +19,7 @@ const { Content, Sider } = Layout;
 const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
   const user = useAppSelector(state => state.auth)
   const notifications = useSelector((state: RootStateType) => state.notification.value)
-  console.log("notifications", notifications);
+  console.log("user", user);
 
   const [collapsed, setCollapsed] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
@@ -30,18 +30,6 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
     // Xử lý đăng xuất tại đây (xóa token, điều hướng, v.v.)
   };
 
-  const convertRole = (role: number) => {
-    switch (role) {
-      case 0:
-        return "user";
-      case 1:
-        return "manager";
-      case 2:
-        return "admin";
-      default:
-        return "unknown"; // Hoặc có thể trả về null nếu không xác định
-    }
-  };
 
   useEffect(() => {
     const getData = async () => {
@@ -67,8 +55,8 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
         {notifications.length > 0 &&
           <div>
             <span className=" text-white bg-red-500 text-xs font-bold rounded-full px-2 py-1">
-               {notifications.filter((item: any) => !item.read).length}
-               </span>
+              {notifications.filter((item: any) => !item.read).length}
+            </span>
           </div>
         }
       </div>,
@@ -80,7 +68,7 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
       icon: <UserOutlined />,
       path: "/addField",
     },
-    user.value.user.role === 1 || user.value.user.role === 2 && {
+    (user.value.user?.role === 1 || user.value.user?.role === 2) && {
       key: "manager",
       label: "Quản lí sân bóng",
       icon: <UserOutlined />,
@@ -139,7 +127,6 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
               label: (
                 <Link href={item.path} className="flex items-center">
                   <span className="ml-2">{item.label}</span>
-
                 </Link>
               ),
               icon: item.icon, // Lưu lại icon trong items

@@ -33,7 +33,7 @@ export const addUserSlice = createAsyncThunk(
 export const updateUserSlice = createAsyncThunk(
     'user/updateUserSlice',
     async (user: any) => {
-        const { data } = await updateUser(user._id, user);
+        const { data } = await updateUser(user);
         return data;
     }
 );

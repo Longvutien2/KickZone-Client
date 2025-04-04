@@ -7,8 +7,8 @@ export const createUser = (user: IUser) => {
 };
 
 // Cập nhật thông tin một user
-export const updateUser = (userId: string, user: IUser) => {
-  return API_NodeJS.patch(`user/${userId}`, user);
+export const updateUser = (user: any) => {
+  return API_NodeJS.patch(`user/${user._id}`, user);
 };
 
 // Lấy danh sách tất cả user

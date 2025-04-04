@@ -71,7 +71,8 @@ const BookingPage = () => {
                 email: values.email,
                 phoneNumber: values.phone,
                 user: user.value.user._id,
-                footballField: fieldData.footballField
+                footballField: fieldData.footballField,
+                date: date as string
             }
 
             const { data } = await createBooking(newBooking);

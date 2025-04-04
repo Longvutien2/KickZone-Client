@@ -25,6 +25,10 @@ export const getFootballFieldByIdUser = (id: string) => {
   return API_NodeJS.get<FootballField>(`footballField/${id}/user`);
 };
 
+export const getFootballFieldByStatus = (status: string) => {
+  return API_NodeJS.get<FootballField[]>(`footballField/${status}/status`);
+};
+
 export const getFootballFieldById = (id: string) => {
   return API_NodeJS.get<FootballField>(`footballField/${id}`);
 };

@@ -8,5 +8,6 @@ export interface FootballField {
     phone: string;
     desc: string;
     userId: any;
+    status?: string;
     timeSlot?: TimeSlot[];
 }
