@@ -40,7 +40,6 @@ export const changepass = createAsyncThunk(
   "auth/changepass",
   async (user: any) => {
     const { data } = await changepassword(user);
-    toast.success("Thay đổi mật khẩu thành công");
     return data;
   }
 );
@@ -49,7 +48,6 @@ export const changeuserprofile = createAsyncThunk(
   "auth/changeuserprofile",
   async (user: any) => {
     const { data } = await changeprofile(user);
-    toast.success("Thay đổi thông tin thành công");
     return data;
   }
 );
@@ -75,12 +73,12 @@ const authSlice = createSlice({
       state.error = action.error;
       state.isLoggedIn = false;
     });
-    builder.addCase(changepass.fulfilled, (state, action) => {
-      state.value = initialState.value;
-      state.error = initialState.error
-      state.isLoggedIn = false
-      localStorage.removeItem("persist:root");
-    });
+    // builder.addCase(changepass.fulfilled, (state, action) => {
+    //   state.value = initialState.value;
+    //   state.error = initialState.error
+    //   state.isLoggedIn = false
+    //   localStorage.removeItem("persist:root");
+    // });
     builder.addCase(changepass.rejected, (state, action) => {
       state.error = action.error;
       state.isLoggedIn = true;

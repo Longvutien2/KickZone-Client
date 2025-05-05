@@ -1,5 +1,5 @@
 'use client';
-import { AutoComplete, Input } from 'antd';
+import { AutoComplete, Input, Pagination } from 'antd';
 import { SearchOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import { FootballField } from '@/models/football_field';
@@ -16,10 +16,11 @@ const BookField = () => {
   const [filteredData, setFilteredData] = useState<FootballField[]>([]); // Dữ liệu lọc theo search
   const [dfData, setdfData] = useState<FootballField[]>([]); // Dữ liệu gốc để tham chiếu
   const dispatch = useDispatch<AppDispatch>();
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Lấy tất cả khu vực (location) từ filteredData[]
   const locations = [...new Set(filteredData?.map((item: FootballField) => item.address?.province))];
-  console.log("locations", locations);
+  console.log("locations", filteredData);
 
   // Lọc data theo khu vực đã chọn
   const handleLocationChange = (value: string) => {
@@ -110,7 +111,7 @@ const BookField = () => {
         </AutoComplete>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {filteredData.map((item, index: number) => (
+        {filteredData.slice((currentPage - 1) * 12, currentPage * 12).map((item, index: number) => (
           <div key={index + 1}>
             <Link href={`/homepage/datSan/${item._id}`}>
               <Card
@@ -124,6 +125,16 @@ const BookField = () => {
           </div>
         ))}
       </div>
+      
+      <div className="flex justify-center mt-6 mb-8">
+              <Pagination
+                current={currentPage}
+                total={filteredData.length}
+                onChange={(page) => setCurrentPage(page)}
+                pageSize={12}
+                showSizeChanger={false}
+              />
+            </div>
     </div>
   );
 };

@@ -11,10 +11,10 @@ export const signin = (user: any) => {
 //     return API_NodeJS.post(`signinwithnextauth`, user)
 // }
 
-export const changepassword = (user: IUser) => {
-    return API_NodeJS.put(`changepass`, user)
+export const changepassword = (user: any) => {
+    return API_NodeJS.patch(`/user/changepass/${user._id}`, user)
 }
 
 export const changeprofile = (user: IUser) => {
-    return API_NodeJS.put(`users/changeprofile`, user)
+    return API_NodeJS.patch(`user/${user._id}`, user)
 }

@@ -10,5 +10,6 @@ export interface Team {
     level: string;
     location: string;
     user: IUser;
+    members: any[];
     createdAt?: string;
 }

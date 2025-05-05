@@ -20,12 +20,18 @@ const AddTeamPage = () => {
         const linkImage = await upload(values.teamImage)
 
         console.log("🎉 Ảnh đã upload thành công:", linkImage);
-        const newData = { ...values, teamImage: linkImage, user: user.value.user._id }
+        const newData = {
+            ...values, teamImage: linkImage, user: user.value.user._id,
+            members: [{
+                user: user.value.user._id,
+                position: "Đội trưởng",
+            }]
+        }
         const newField = await dispatch(addTeamSlice(newData));
         if (newField.payload) {
             toast.success("Tạo câu lạc bộ thành công");
-            router.push("/homepage/myTeam");
-        }else{
+            router.push("/homepage/profile");
+        } else {
             toast.error("Tạo câu lạc bộ thất bại")
         }
     }

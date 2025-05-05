@@ -8,6 +8,7 @@ export interface IUser {
     // age?: number,
     role?: number,
     status?: number
+    contact?: string
 }
 
 export interface User {

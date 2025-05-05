@@ -120,10 +120,10 @@ const HomePage = () => {
                       alt="Soccer Player 3"
                     />
 
-                    {/* <img
-                      src="https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/10/foooooooooot-bal-1.png"
+                    <img
+                      src="https://i.postimg.cc/mD8cv6c1/img-2.png"
                       alt="Soccer Player 5"
-                    /> */}
+                    />
                   </Slider>
                 </div>
               </div>

@@ -24,7 +24,8 @@ const MatchDetail = () => {
     const auth = useAppSelector((state) => state.auth)
     const [dataTeam, setDataTeams] = useState<Team[]>();
     const router = useRouter();
-
+    console.log("match11111", match);
+    
     const { id } = useParams();
     const dispatch = useAppDispatch();
     const [visible, setVisible] = useState(false);
@@ -61,9 +62,11 @@ const MatchDetail = () => {
     useEffect(() => {
         const fetchData = async () => {
             const [matchData, teamData] = await Promise.all([
-                dispatch(getMatchByIdSlice(id as string)),
+              await dispatch(getMatchByIdSlice(id as string)),
                 auth.isLoggedIn ? getTeamByUserId(auth.value.user._id as string) : null
             ]);
+            console.log("matchData",matchData);
+            
             if (teamData) {
                 setDataTeams(teamData.data);
             }
@@ -74,7 +77,8 @@ const MatchDetail = () => {
     }, [id, auth.isLoggedIn]);
 
     return (
-        <div className="bg-white mx-auto">
+        match && (
+            <div className="bg-white mx-auto">
             {/* Header */}
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-semibold ">Trận Đấu</h2>
@@ -269,6 +273,7 @@ const MatchDetail = () => {
                 </div>
             </div>
         </div>
+        )
     );
 };
 

@@ -62,7 +62,7 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
       </div>,
       path: "/homepage/thongBao",
     },
-    user.value.user.role === 0 && {
+    user.value.user?.role === 0 && {
       key: "newField",
       label: "Tạo sân bóng",
       icon: <UserOutlined />,
@@ -74,7 +74,7 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
       icon: <UserOutlined />,
       path: "/manager/quanLiSanBong",
     },
-    user.value.user.role === 2 && {
+    user.value.user?.role === 2 && {
       key: "admin",
       label: "Admin",
       icon: <UserOutlined />,
@@ -141,9 +141,9 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
             {
               user.isLoggedIn ?
                 <div className="my-auto  text-right text-[16px] ">
-                  <div>
-                    <UserOutlined /> {user?.value.user.name}
-                  </div>
+                  <Link href={`/homepage/profile`}>
+                    <UserOutlined /> {user?.value.user?.name}
+                  </Link>
                   {/* </Dropdown> */}
                 </div>
                 :
