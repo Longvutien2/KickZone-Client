@@ -1,4 +1,4 @@
-import { createBooking, deleteBooking, getBookingById, getBookings, getBookingsByFootballFieldAndDate, updateBooking } from '@/api/booking';
+import { createBooking, deleteBooking, getBookingByFootballField, getBookingById, getBookings, getBookingsByFootballFieldAndDate, updateBooking } from '@/api/booking';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
 // Lấy danh sách booking theo id sân bóng
@@ -14,6 +14,14 @@ export const getBookingsByFootballFieldAndDateSlice = createAsyncThunk(
     'booking/getBookingsByFootballFieldAndDateSlice',
     async (data2: { id: string, date: string }) => {
         const { data } = await getBookingsByFootballFieldAndDate(data2.id, data2.date);
+        return data;
+    }
+);
+
+export const getListBookingByFootballFieldSlice = createAsyncThunk(
+    'booking/getListBookingByFootballFieldSlice',
+    async (id: string) => {
+        const { data } = await getBookingByFootballField(id);
         return data;
     }
 );
@@ -68,6 +76,9 @@ const bookingSlice = createSlice({
         });
         builder.addCase(getListBookingByIdSlice.fulfilled, (state: any, action) => {
             state.detail = action.payload;
+        });
+        builder.addCase(getListBookingByFootballFieldSlice.fulfilled, (state: any, action) => {
+            state.value = action.payload;
         });
 
         builder.addCase(getBookingsByFootballFieldAndDateSlice.fulfilled, (state: any, action) => {

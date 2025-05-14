@@ -45,6 +45,21 @@ const BookingTable = () => {
         toast.success('Cập nhật thành công!');
     }
 
+     const handleReject = async (book: any) => {
+        const userNotification: Notification = {
+            actor: 'user',
+            notificationType: 'field_booked',
+            title: 'Đặt sân thất bại!',
+            content: `Rất tiếc, đặt sân của bạn đã thất bại. Vui lòng liên hệ với chúng tôi để biết thêm thông tin.`,
+            bookingId: book._id,
+            footballfield: book.footballField,
+            targetUser: book.user,
+        }
+        await dispatch(addNotificationSlice(userNotification));
+        await dispatch(updateBookingSlice({ _id: book._id, status: "Đã huỷ" })).unwrap();
+        toast.success('Cập nhật thành công!');
+    }
+
     const groupBookings = () => {
         const grouped: any = {};
         bookings.forEach((booking: Booking) => {
@@ -111,9 +126,9 @@ const BookingTable = () => {
         },
     ];
 
-    const expandedRowRender = (record: any,) => {
-        const confirmedBookings = record.status === 'Đã xác nhận' ? record.bookings.filter((booking: any) => booking.status === 'Đã xác nhận') : record.bookings;
-        console.log("confirmedBookings", confirmedBookings);
+    const expandedRowRender = (record: any) => {
+        // Hiển thị tất cả các booking trong nhóm, không lọc theo trạng thái
+        const bookingsInGroup = record.bookings;
 
         const expandedColumns = [
             {
@@ -136,12 +151,12 @@ const BookingTable = () => {
                 dataIndex: 'createdAt',
                 key: 'createdAt',
                 render: (value: string) => new Date(value).toLocaleDateString('vi-VN', {
-                    weekday: 'long',  // Thêm ngày trong tuần
+                    weekday: 'long',
                     year: 'numeric',
                     month: 'numeric',
                     day: 'numeric',
-                    hour: '2-digit',  // Thêm giờ
-                    minute: '2-digit' // Thêm phút
+                    hour: '2-digit',
+                    minute: '2-digit'
                 }),
             },
             {
@@ -150,11 +165,15 @@ const BookingTable = () => {
                 render: (item: any) => (
                     <Space>
                         {
-                            record.status === "Đã xác nhận" ?
+                            item.status === "Đã xác nhận" ? (
                                 <Tag color={'green'}>
                                     Đã Duyệt
                                 </Tag>
-                                :
+                            ) : item.status === "Đã huỷ" ? (
+                                <Tag color={'red'}>
+                                    Đã Từ Chối
+                                </Tag>
+                            ) : (
                                 <>
                                     <Button
                                         type="primary"
@@ -165,23 +184,36 @@ const BookingTable = () => {
                                     >
                                         Duyệt
                                     </Button>
-                                    {/* <Button
-                                        type="dashed"
+                                    <Button
+                                        type="default"
+                                        className="bg-white text-red-500 border-red-500 hover:bg-red-50 hover:text-red-600 hover:border-red-600"
                                         icon={<CloseCircleOutlined />}
-                                        // onClick={() => handleReject(record.key)}
+                                        onClick={() => handleReject(item)}
                                         loading={loading}
                                     >
                                         Từ chối
-                                    </Button> */}
+                                    </Button>
                                 </>
+                            )
                         }
                     </Space>
                 ),
             },
-
         ];
 
-        return <Table columns={expandedColumns} dataSource={confirmedBookings} bordered pagination={false} />;
+        return (
+            <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <Table 
+                    columns={expandedColumns} 
+                    dataSource={bookingsInGroup} 
+                    bordered 
+                    pagination={false}
+                    rowClassName={(record, index) => 
+                        `${index % 2 === 0 ? 'bg-white' : 'bg-blue-50'} `
+                    }
+                />
+            </div>
+        );
     };
 
     useEffect(() => {
@@ -200,7 +232,32 @@ const BookingTable = () => {
                 <h1 className="text-xl font-semibold mb-4">Quản lý yêu cầu đặt sân</h1>
                 <div className="flex justify-between mb-4 ">
                     <div className='mt-auto text-[#1677FF]'>
-                        Bạn có <strong>{bookings.filter((e: Booking) => e.status === "Chờ xác nhận").length}</strong> yêu cầu mới đang chờ được xác nhận!
+                        Bạn có <strong>{bookings.filter((e: Booking) => {
+                            // Lọc theo trạng thái "Chờ xác nhận"
+                            if (e.status !== "Chờ xác nhận") return false;
+                            
+                            // Xử lý so sánh ngày
+                            if (e.date) {
+                                // Chuyển đổi định dạng ngày từ DD-MM-YYYY sang Date object
+                                const dateParts = e.date.split('-');
+                                // Đảm bảo định dạng ngày là DD-MM-YYYY
+                                if (dateParts.length === 3) {
+                                    const bookingDate = new Date(
+                                        parseInt(dateParts[2]), // Năm
+                                        parseInt(dateParts[1]) - 1, // Tháng (0-11)
+                                        parseInt(dateParts[0]) // Ngày
+                                    );
+                                    
+                                    // Lấy ngày hiện tại và đặt thời gian về 00:00:00
+                                    const today = new Date();
+                                    today.setHours(0, 0, 0, 0);
+                                    
+                                    // So sánh ngày đặt với ngày hiện tại
+                                    return bookingDate >= today;
+                                }
+                            }
+                            return false;
+                        }).length}</strong> yêu cầu mới đang chờ được xác nhận!
                     </div>
                     <Input
                         placeholder="Tìm kiếm..."

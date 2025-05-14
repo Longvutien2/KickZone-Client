@@ -74,12 +74,12 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
       icon: <UserOutlined />,
       path: "/manager/quanLiSanBong",
     },
-    user.value.user?.role === 2 && {
-      key: "admin",
-      label: "Admin",
-      icon: <UserOutlined />,
-      path: "/admin",
-    },
+    // user.value.user?.role === 2 && {
+    //   key: "admin",
+    //   label: "Admin",
+    //   icon: <UserOutlined />,
+    //   path: "/admin",
+    // },
   ]
   // Tạo mảng items chứa thông tin menu
   const items = [
@@ -91,7 +91,7 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
     },
     {
       key: "timDoi",
-      label: "Cấp kèo, tìm đội",
+      label: "Cáp kèo, tìm đội",
       icon: <ThunderboltOutlined />,
       path: "/homepage/timDoi",
     },

@@ -21,6 +21,10 @@ export const getMatchById = (id: string) => {
   return API_NodeJS.get<Match>(`match/${id}`);  // Lấy thông tin chi tiết của trận đấu theo id
 };
 
+export const getMatchByFootballFieldId = (id: string) => {
+  return API_NodeJS.get<Match>(`match/footballField/${id}`);  // Lấy thông tin chi tiết của trận đấu theo id
+};
+
 // 5. Xóa trận đấu theo ID
 export const deleteMatch = (id: string) => {
   return API_NodeJS.delete(`match/${id}`);  // Xóa trận đấu theo ID

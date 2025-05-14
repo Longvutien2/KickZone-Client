@@ -21,6 +21,10 @@ export const getBookingById = (bookingId: string) => {
   return API_NodeJS.get<Booking>(`booking/${bookingId}`);
 };
 
+export const getBookingByFootballField = (footballFieldId: string) => {
+  return API_NodeJS.get<Booking>(`booking/footballField/${footballFieldId}`);
+};
+
 export const getBookingsByFootballFieldAndDate  = (footballFieldId: string, date: string) => {
   return API_NodeJS.get<Booking>(`booking/${footballFieldId}/${date}`);
 };

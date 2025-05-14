@@ -3,12 +3,12 @@
 import { getFootballFieldAddress } from '@/api/football_fields'
 import { getTeamByUserId } from '@/api/team'
 import { setBreadcrumb } from '@/features/breadcrumb.slice'
-import { getListMatchesSlice } from '@/features/match.slice'
+import { getListMatchByFootballFieldIdSlice, getListMatchesSlice } from '@/features/match.slice'
 import { Match } from '@/models/match'
 import { Team } from '@/models/team'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { DownOutlined, FilterOutlined, PlusOutlined } from '@ant-design/icons'
-import { Tabs, Select, Button, Pagination } from 'antd'
+import { CalendarOutlined, ClockCircleOutlined, DownOutlined, EnvironmentOutlined, FilterOutlined, PlusOutlined } from '@ant-design/icons'
+import { Tabs, Select, Button, Pagination, DatePicker, TimePicker, Dropdown, Menu, Space } from 'antd'
 import 'antd/dist/reset.css'
 import moment from 'moment'
 import Image from 'next/image'
@@ -16,6 +16,9 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import dayjs from 'dayjs';
+import { FootballField } from '@/models/football_field'
+import { getListTimeSlotsByFootballFieldId } from "@/features/timeSlot.slice";
+import { TimeSlot } from "@/models/field";
 
 export default function Home() {
     const dispatch = useAppDispatch();
@@ -58,67 +61,139 @@ const { Option } = Select;
 
 const MainContent = () => {
     const matchs = useAppSelector(state => state.match.value)
-    const footballFields = useAppSelector(state => state.footballField.value)
+    const footballFields = useAppSelector(state => state.footballField.detail) as FootballField
     const [groupedByAddress, setGroupedByAddress] = useState<any>([]);
     const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
+    const [selectedDate, setSelectedDate] = useState<any>(null);
+    const [selectedTime, setSelectedTime] = useState<string | null>(null);
+    const [filtersVisible, setFiltersVisible] = useState(false);
+    const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
 
     moment.locale('vi');
     const dispatch = useAppDispatch();
-    const [value, setValue] = useState<string>(''); // State lưu giá trị được chọn
-    // const khuVucData = useAppSelector((state: any) => state.khuVuc.data); // Giả sử khu vực được lưu trong Redux
+    const [value, setValue] = useState<string>(''); // State lưu giá trị khu vực được chọn
 
-    const handleChange = (value: string) => {
-        setValue(value);
+    const handleDateChange = (date: any) => {
+        setSelectedDate(date);
     };
+
+    const handleTimeChange = (time: string) => {
+        setSelectedTime(time);
+    };
+
+    const toggleFilters = () => {
+        setFiltersVisible(!filtersVisible);
+    };
+
+    const clearFilters = () => {
+        setValue('');
+        setSelectedDate(null);
+        setSelectedTime(null);
+    };
+
+    // Lấy danh sách timeslot khi component mount hoặc khi footballField thay đổi
+    useEffect(() => {
+        const getTimeSlots = async () => {
+            if (footballFields?._id) {
+                try {
+                    const response = await dispatch(getListTimeSlotsByFootballFieldId(footballFields._id as string));
+                    if (response.payload) {
+                        setTimeSlots(response.payload as TimeSlot[]);
+                    }
+                } catch (error) {
+                    console.error("Error fetching time slots:", error);
+                }
+            }
+        };
+
+        getTimeSlots();
+    }, [footballFields, dispatch]);
 
     useEffect(() => {
         const getData = async () => {
-            const data = await dispatch(getListMatchesSlice())
+            const data = await dispatch(getListMatchByFootballFieldIdSlice(footballFields?._id as string))
             const data2 = await getFootballFieldAddress()
             setGroupedByAddress(data2.data)
-
         }
 
+        // Lấy ngày hiện tại ở đầu ngày (00:00:00)
+        const today = moment().startOf('day');
+
+        // Áp dụng tất cả các bộ lọc
+        let filtered = [...matchs];
+
+        // Lọc bỏ các trận đấu trong quá khứ
+        filtered = filtered.filter((match: Match) => {
+            const matchDate = moment(match.date).startOf('day');
+            return matchDate.isSameOrAfter(today);
+        });
+
+        // Lọc theo khu vực
         if (value) {
-            // Lọc danh sách trận đấu dựa trên địa chỉ sân bóng
-            const filtered = matchs.filter((match: Match) => match.footballField?.address.province === value);
-            setFilteredMatches(filtered);
-        } else {
-            setFilteredMatches(matchs); // Nếu không có địa chỉ nào được chọn, hiển thị tất cả trận đấu
+            filtered = filtered.filter((match: Match) =>
+                match.footballField?.address.province === value
+            );
         }
-        getData();
-    }, [footballFields, value])
 
+        // Lọc theo ngày
+        if (selectedDate) {
+            const selectedDateStr = moment(selectedDate).format('DD/MM/YYYY');
+            console.log("selectedDateStr", selectedDateStr);
+            filtered = filtered.filter((match: Match) =>
+                moment(match.date).format('DD/MM/YYYY') === selectedDateStr
+            );
+        }
+
+        // Lọc theo giờ
+        if (selectedTime) {
+            filtered = filtered.filter((match: Match) =>
+                match.time === selectedTime
+            );
+        }
+
+        // Sắp xếp theo ngày gần nhất
+        filtered.sort((a: Match, b: Match) => {
+            const dateA = moment(a.date);
+            const dateB = moment(b.date);
+
+            // Nếu cùng ngày, sắp xếp theo giờ
+            if (dateA.isSame(dateB, 'day')) {
+                return a.time.localeCompare(b.time);
+            }
+
+            return dateA.diff(dateB);
+        });
+
+        setFilteredMatches(filtered);
+        footballFields && getData();
+    }, [footballFields,selectedDate, selectedTime]);
+
+    // Lọc các timeslot duy nhất để hiển thị trong dropdown
+    const uniqueTimeSlots = [...new Set(timeSlots.map(slot => slot.time))].sort();
 
     return (
         <>
             {/* Bộ lọc và thống kê */}
             <div className="bg-white shadow rounded-xl px-4 py-3 mx-4 mt-4">
-                <div className="flex justify-between items-center w-full">
-                    {/* Trái: Khu vực */}
-                    <div className="w-70 mb-4">
-                        <label className="block text-sm font-medium text-gray-700">Khu vực</label>
-                        <Select
-                            showSearch
-                            value={value}
-                            onChange={handleChange}
-                            placeholder="Chọn khu vực"
-                            className="w-full mt-1"
-                            filterOption={(input, option: any) => {
-                                return option?.children.toLowerCase().includes(input.toLowerCase());
-                            }}
+                <div className="flex justify-between items-center w-full mb-2">
+                    <div className="flex items-center">
+                        <Button
+                            icon={<FilterOutlined />}
+                            onClick={toggleFilters}
+                            className="mr-2"
                         >
-                            {groupedByAddress.map((item: any, index: number) => (
-                                <Select.Option key={index + 1} value={groupedByAddress[index]}>
-                                    {groupedByAddress[index]}
-                                </Select.Option>
-                            ))}
-                        </Select>
+                            Bộ lọc
+                        </Button>
+                        {(value || selectedDate || selectedTime) && (
+                            <Button type="link" onClick={clearFilters} className="text-orange-500">
+                                Xóa bộ lọc
+                            </Button>
+                        )}
                     </div>
 
                     {/* Phải: Thống kê */}
-                    <div className="flex space-x-4">
+                    <div className="flex space-x-6">
                         <div className="text-right">
                             <div className="text-orange-500 text-lg font-bold leading-none">683</div>
                             <div className="text-xs text-gray-500">Người chơi</div>
@@ -129,13 +204,91 @@ const MainContent = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* Mở rộng bộ lọc */}
+                {filtersVisible && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3 pt-3 border-t border-gray-200">
+                        {/* Khu vực */}
+                        {/* <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Khu vực</label>
+                            <Select
+                                showSearch
+                                value={value}
+                                onChange={handleChange}
+                                placeholder="Chọn khu vực"
+                                className="w-full"
+                                style={{ width: '100%' }}
+                                optionFilterProp="children"
+                                filterOption={(input, option) => 
+                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                }
+                                options={groupedByAddress.map((province: string) => ({
+                                    value: province,
+                                    label: province
+                                }))}
+                                suffixIcon={<EnvironmentOutlined style={{ color: '#f97316' }} />}
+                                allowClear
+                            />
+                        </div> */}
+
+                        {/* Ngày */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Ngày thi đấu</label>
+                            <DatePicker
+                                className="w-full"
+                                format="DD/MM/YYYY"
+                                placeholder="Chọn ngày"
+                                value={selectedDate}
+                                onChange={handleDateChange}
+                                suffixIcon={<CalendarOutlined style={{ color: '#f97316' }} />}
+                                allowClear
+                            />
+                        </div>
+
+                        {/* Giờ - Sử dụng Select thay vì TimePicker */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Khung giờ</label>
+                            <Select
+                                showSearch
+                                value={selectedTime}
+                                onChange={handleTimeChange}
+                                placeholder="Chọn khung giờ"
+                                className="w-full"
+                                style={{ width: '100%' }}
+                                optionFilterProp="children"
+                                filterOption={(input, option) =>
+                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                                }
+                                options={uniqueTimeSlots.map((time: string) => ({
+                                    value: time,
+                                    label: time
+                                }))}
+                                suffixIcon={<ClockCircleOutlined style={{ color: '#f97316' }} />}
+                                allowClear
+                                notFoundContent="Không có khung giờ nào"
+                            />
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Hiển thị kết quả lọc */}
+            <div className="px-4 mt-4 text-sm text-gray-500">
+                {filtersVisible && (
+                    filteredMatches.length > 0 ? (
+                        <p>Tìm thấy {filteredMatches.length} trận đấu sắp tới</p>
+                    ) : (
+                        <p>Không tìm thấy trận đấu nào sắp tới phù hợp với bộ lọc</p>
+                    )
+                )}
             </div>
 
             {/* Match list */}
-            <div className="mt-8 px-4 space-y-4 pb-10">
+            <div className="mt-4 px-4 space-y-4 pb-10">
                 {filteredMatches.slice((currentPage - 1) * 5, currentPage * 5).map((match: Match) => (
                     <div key={match._id} className="bg-white p-4 shadow-md rounded-xl">
                         <Link href={`/homepage/timDoi/${match._id}`}>
+                            {/* Nội dung match giữ nguyên */}
                             {/* 3 phần: Đội A - VS - Đội B */}
                             <div className="grid grid-cols-3 items-center mb-2">
                                 {/* Đội A */}
@@ -145,7 +298,7 @@ const MainContent = () => {
                                             <Image
                                                 src={match.club_A?.teamImage || ""}
                                                 className="rounded-full object-cover"
-                                                layout="fill"  // Lấp đầy toàn bộ container
+                                                layout="fill"
                                                 alt="bg"
                                             />
                                         </div>
@@ -171,7 +324,7 @@ const MainContent = () => {
                                                 <Image
                                                     src={match.club_B?.teamImage || ""}
                                                     className="rounded-full object-cover"
-                                                    layout="fill"  // Lấp đầy toàn bộ container
+                                                    layout="fill"
                                                     alt="bg"
                                                 />
                                             </div>
@@ -183,7 +336,6 @@ const MainContent = () => {
                                             <span>👍 100</span>
                                         </div>
                                     </div>
-
                                 ) : (
                                     <div className="flex flex-col items-end text-right">
                                         <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-lg text-gray-500">
@@ -214,14 +366,13 @@ const MainContent = () => {
             {/* Phân trang với Ant Design */}
             <div className="flex justify-center mt-4">
                 <Pagination
-                    current={currentPage}  // Trang hiện tại
-                    total={filteredMatches.length}  // Tổng số trận đấu
-                    pageSize={5}  // Số lượng trận đấu mỗi trang
-                    onChange={(page) => setCurrentPage(page)}  // Thay đổi trang
-                    hideOnSinglePage={true}  // Ẩn phân trang nếu chỉ có 1 trang
+                    current={currentPage}
+                    total={filteredMatches.length}
+                    pageSize={5}
+                    onChange={(page) => setCurrentPage(page)}
+                    hideOnSinglePage={true}
                 />
             </div>
-
         </>
     )
 }

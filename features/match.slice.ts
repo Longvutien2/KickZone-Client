@@ -1,12 +1,20 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { Match } from '@/models/match';
-import { createMatch, deleteMatch, deleteMatchByUserId, getMatchById, getMatches, updateMatch } from '@/api/match';
+import { createMatch, deleteMatch, deleteMatchByUserId, getMatchByFootballFieldId, getMatchById, getMatches, updateMatch } from '@/api/match';
 
 // Action để lấy tất cả trận đấu
 export const getListMatchesSlice = createAsyncThunk(
     "match/getListMatches",
     async () => {
         const { data } = await getMatches();
+        return data;
+    }
+);
+
+export const getListMatchByFootballFieldIdSlice = createAsyncThunk(
+    "match/getListMatchByFootballFieldIdSlice",
+    async (id: string) => {
+        const { data } = await getMatchByFootballFieldId(id);
         return data;
     }
 );
@@ -68,6 +76,10 @@ const matchSlice = createSlice({
     extraReducers: (builder) => {
         // 1. Xử lý khi lấy danh sách trận đấu thành công
         builder.addCase(getListMatchesSlice.fulfilled, (state: any, action) => {
+            state.value = action.payload;
+        });
+
+        builder.addCase(getListMatchByFootballFieldIdSlice.fulfilled, (state: any, action) => {
             state.value = action.payload;
         });
 

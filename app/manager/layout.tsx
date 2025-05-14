@@ -22,7 +22,7 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
     const pathname = usePathname();
     const user = useAppSelector(state => state.auth)
     const notifications = useAppSelector(state => state.notification.value);
-    console.log("notifications111111", notifications);
+    const bookings = useAppSelector(state => state.booking.value);
     const dispatch = useAppDispatch();
 
     const items = [
@@ -48,7 +48,41 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
         },
         {
             key: "bookingField",
-            label: <Link href="/manager/bookingField"><AimOutlined /> Quản lý yêu cầu</Link>,
+            label: <Link href="/manager/bookingField"><AimOutlined />
+                <span>Quản lý yêu cầu</span>
+                {bookings.filter((item: any) => {
+                    // Lọc booking có trạng thái "Chờ xác nhận"
+                    if (item.status === "Chờ xác nhận") {
+                        // Kiểm tra ngày đặt
+                        if (item.date) {
+                            // Chuyển đổi định dạng ngày từ DD-MM-YYYY sang Date object
+                            const bookingDate = item.date.split('-').reverse().join('-');
+                            const bookingDateTime = new Date(bookingDate);
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0); // Đặt thời gian về 00:00:00
+
+                            // Chỉ lấy các đơn từ ngày hôm nay trở đi
+                            return bookingDateTime >= today;
+                        }
+                    }
+                    return false;
+                }).length > 0 && (
+                        <span className="ml-1 text-white bg-red-500 text-xs font-bold rounded-full px-2 py-0.5">
+                            {bookings.filter((item: any) => {
+                                if (item.status === "Chờ xác nhận") {
+                                    if (item.date) {
+                                        const bookingDate = item.date.split('-').reverse().join('-');
+                                        const bookingDateTime = new Date(bookingDate);
+                                        const today = new Date();
+                                        today.setHours(0, 0, 0, 0);
+                                        return bookingDateTime >= today;
+                                    }
+                                }
+                                return false;
+                            }).length}
+                        </span>
+                    )}
+            </Link>,
             path: "/manager/bookingField"
         },
         {
@@ -85,8 +119,8 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
 
     return (
         <Layout className="min-h-screen">
-            <Sider width={200} className="bg-gray-900 text-white">
-                <div className="p-5 text-lg font-bold">STBall</div>
+            <Sider width={220} className="bg-gray-900 text-white">
+                <div className="p-5 text-lg font-bold">KichZone</div>
                 <Menu
                     theme="dark"
                     mode="inline"
