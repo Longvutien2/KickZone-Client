@@ -39,21 +39,23 @@ const BookingTable = () => {
             bookingId: book._id,
             footballfield: book.footballField,
             targetUser: book.user,
+            createdAt: new Date() // Thêm thời gian hiện tại khi tạo thông báo
         }
         await dispatch(addNotificationSlice(userNotification));
         await dispatch(updateBookingSlice({ _id: book._id, status: "Đã xác nhận" })).unwrap();
         toast.success('Cập nhật thành công!');
     }
 
-     const handleReject = async (book: any) => {
+    const handleReject = async (book: any) => {
         const userNotification: Notification = {
             actor: 'user',
-            notificationType: 'field_booked',
-            title: 'Đặt sân thất bại!',
+            notificationType: 'field_booking_failed',
+            title: 'Đặt sân thất bại !',
             content: `Rất tiếc, đặt sân của bạn đã thất bại. Vui lòng liên hệ với chúng tôi để biết thêm thông tin.`,
             bookingId: book._id,
             footballfield: book.footballField,
             targetUser: book.user,
+            createdAt: new Date() // Thêm thời gian hiện tại khi tạo thông báo
         }
         await dispatch(addNotificationSlice(userNotification));
         await dispatch(updateBookingSlice({ _id: book._id, status: "Đã huỷ" })).unwrap();

@@ -1,98 +1,199 @@
 'use client'
 
-import { Select, Form, Button, Input, DatePicker, TimePicker } from 'antd'
-import { PlusOutlined } from '@ant-design/icons'
+import { Select, Form, Button, Input, DatePicker, TimePicker, Tooltip } from 'antd'
+import { PlusOutlined, InfoCircleOutlined } from '@ant-design/icons'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { useEffect } from 'react'
-import { getListTeamsSlice } from '@/features/team.slice'
+import { useEffect, useState } from 'react'
+import { getListTeamsSlice, getTeamByUserIdSlice } from '@/features/team.slice'
 import { Team } from '@/models/team'
 import { FootballField } from '@/models/football_field'
-import { addMatchSlice } from '@/features/match.slice'
+import { addMatchSlice, getListMatchByFootballFieldIdSlice } from '@/features/match.slice'
 import moment from 'moment';
 import { toast } from 'react-toastify'
 import { useRouter } from 'next/navigation'
+import { Notification } from '@/models/notification'
+import { addNotificationSlice } from '@/features/notification.slice'
+import { getTeamByUserId } from '@/api/team'
+import { getBookingsByUserId } from '@/api/booking'
+import { Booking } from '@/models/booking'
+import { Match } from '@/models/match'
 
 const { Option } = Select
 
 const CreateMatchPage = () => {
   const user = useAppSelector(state => state.auth)
-  const teams = useAppSelector(state => state.team.value)
-  const footballFields = useAppSelector(state => state.footballField.value)
+  const footballField = useAppSelector(state => state.footballField.detail) as FootballField
+  const allMatches = useAppSelector(state => state.match.value) as Match[]
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [form] = Form.useForm()
+  const [myTeam, setmyTeam] = useState<Team[]>([]);
+  const [myBookings, setMyBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [usedBookingIds, setUsedBookingIds] = useState<string[]>([]);
+
+  // Lấy danh sách trận đấu và đặt sân
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // Lấy danh sách đội của người dùng
+        const teamResponse = await getTeamByUserId(user.value.user._id as string);
+        teamResponse.data && setmyTeam(teamResponse.data);
+
+        // Lấy danh sách đặt sân thành công của người dùng
+        const bookingResponse = await getBookingsByUserId(user.value.user._id as string);
+
+        // Lọc chỉ lấy các đặt sân đã xác nhận và chưa diễn ra
+        const confirmedBookings = bookingResponse.data.filter((booking: Booking) => {
+          // Kiểm tra trạng thái đặt sân
+          if (booking.status !== "Đã xác nhận") return false;
+
+          // Chuyển đổi chuỗi ngày từ định dạng "DD-MM-YYYY" sang moment
+          const bookingDate = moment(booking.date, "DD-MM-YYYY");
+
+          // Lấy ngày hiện tại (đầu ngày)
+          const today = moment().startOf('day');
+
+          // So sánh ngày đặt với ngày hiện tại
+          return bookingDate.isSameOrAfter(today);
+        });
+
+        setMyBookings(confirmedBookings);
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu:", error);
+        toast.error("Không thể tải dữ liệu. Vui lòng thử lại sau.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user.value?.user?._id) {
+      fetchData();
+    }
+  }, [user.value?.user?._id, dispatch]);
+
+  // Kiểm tra các bookingId đã được sử dụng
+  useEffect(() => {
+    if (allMatches && allMatches.length > 0) {
+      // Lấy danh sách bookingId đã được sử dụng (chỉ lấy _id)
+      const usedIds = allMatches
+        .filter(match => match.bookingId && match.bookingId._id)
+        .map(match => match.bookingId._id);
+
+      setUsedBookingIds(usedIds);
+    }
+  }, [allMatches]);
 
   const handleSubmit = async (values: any) => {
-    const formattedTime = moment(values.time.$d).format('HH:mm');
-    const newData = {
-      ...values,
-      date: values.date.$d,
-      time: formattedTime,
-      user: user.value.user._id
+    try {
+      // Tạo dữ liệu trận đấu mới
+      const newData = {
+        ...values,
+        footballField: footballField._id, // ID sân bóng
+        user: user.value.user._id,
+        bookingId: values.bookingId // Lưu ID đặt sân để tham chiếu
+      }
+
+      // Thêm trận đấu mới
+      const data = await dispatch(addMatchSlice(newData));
+
+      // Tạo thông báo
+      const userNotification: Notification = {
+        actor: 'user',
+        notificationType: 'posted_opponent',
+        title: 'Đã đăng tìm đối !',
+        content: `Bạn đã đăng tìm đối thành công. Vui lòng chờ đội bóng khác liên hệ để xác nhận.`,
+        club_A: values.club_A,
+        footballfield: footballField._id,
+        targetUser: user.value.user._id,
+      }
+      await dispatch(addNotificationSlice(userNotification));
+
+      // Tải lại danh sách trận đấu
+      await dispatch(getListMatchByFootballFieldIdSlice(footballField._id as string));
+
+      toast.success("Tạo trận đấu thành công!");
+      router.push("/homepage/timDoi");
+    } catch (error) {
+      console.error("Lỗi khi tạo trận đấu:", error);
+      toast.error("Có lỗi xảy ra khi tạo trận đấu. Vui lòng thử lại!");
     }
-    const data = await dispatch(addMatchSlice(newData))
-    toast.success("Tạo trận đấu thành công !")
-    router.push("/homepage/timDoi");
-    console.log('Received values:', data.payload)
-    // Xử lý dữ liệu gửi đi
   }
 
-  useEffect(() => {
-    const getData = async () => {
-      await dispatch(getListTeamsSlice())
-    }
-    getData();
-  }, [])
+  // Hiển thị thông báo nếu không có đặt sân nào
+  if (!loading && myBookings.length === 0) {
+    return (
+      <div className="p-4 bg-white">
+        <h2 className="text-xl font-semibold text-center mb-6">Tạo Trận Đấu Mới</h2>
+        <div className="text-center p-8">
+          <div className="text-red-500 mb-4">
+            Bạn chưa có đặt sân nào đã được xác nhận!
+          </div>
+          <p className="mb-4">
+            Để tạo trận đấu mới, bạn cần đặt sân trước và được xác nhận.
+          </p>
+          <Button
+            type="primary"
+            onClick={() => router.push('/homepage/datSan')}
+            className="bg-orange-500 hover:bg-orange-600"
+          >
+            Đặt Sân Ngay
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 bg-white">
       <h2 className="text-xl font-semibold text-center mb-6">Tạo Trận Đấu Mới</h2>
       <Form form={form} onFinish={handleSubmit} layout="vertical">
         {/* Chọn câu lạc bộ */}
-        <Form.Item label="Chọn câu lạc bộ" name="club_A" rules={[{ required: true }]}>
-          <Select placeholder="Chọn câu lạc bộ">
-            {teams.length > 0 && teams.map((item: Team) => (
-              <Option value={item._id}>{item.teamName}</Option>
-            ))
-
-            }
-          </Select>
-        </Form.Item>
-
-        {/* Chọn sân bóng với tính năng tìm kiếm */}
-        <Form.Item label="Sân bóng" name="footballField" rules={[{ required: true }]}>
-          <Select
-            showSearch
-            placeholder="Chọn sân"
-            optionFilterProp="children"
-            filterOption={(input, option: any) =>
-              option?.children.toLowerCase().includes(input.toLowerCase())
-            }
-          >
-            {footballFields.map((court: FootballField) => (
-              <Option key={court._id} value={court._id}>
-                {court.name}
-              </Option>
+        <Form.Item label="Chọn câu lạc bộ" name="club_A" rules={[{ required: true, message: 'Vui lòng chọn câu lạc bộ!' }]}>
+          <Select placeholder="Chọn câu lạc bộ của bạn">
+            {myTeam.length > 0 && myTeam.map((item: Team) => (
+              <Option key={item._id} value={item._id}>{item.teamName}</Option>
             ))}
           </Select>
         </Form.Item>
 
-        {/* Ngày đấu */}
-        <Form.Item label="Ngày đấu" name="date" rules={[{ required: true }]}>
-          <DatePicker className="w-full" />
-        </Form.Item>
+        {/* Chọn đặt sân đã xác nhận */}
+        <Form.Item
+          label="Danh sách sân đã đặt"
+          name="bookingId"
+          rules={[{ required: true, message: 'Vui lòng chọn đặt sân!' }]}
+          extra="Chỉ hiển thị các đặt sân đã được xác nhận và chưa diễn ra"
+        >
+          <Select placeholder="Chọn đặt sân">
+            {myBookings.map((booking: Booking) => {
+              // Đảm bảo booking._id là string
+              const bookingId = booking._id as string;
+              // Kiểm tra xem bookingId có trong danh sách usedBookingIds không
+              const isUsed = usedBookingIds.includes(bookingId);
 
-        {/* Giờ đấu */}
-        <Form.Item label="Giờ đấu" name="time" rules={[{ required: true }]}>
-          <TimePicker className="w-full" format="HH:mm" />
-        </Form.Item>
+              console.log(`Booking ${bookingId} isUsed:`, isUsed); // Log để debug
 
-        {/* Thời lượng */}
-        <Form.Item label="Thời lượng" name="duration" rules={[{ required: true }]}>
-          <Select placeholder="Chọn thời lượng">
-            <Option value="60">60 phút</Option>
-            <Option value="90">90 phút</Option>
-            <Option value="120">120 phút</Option>
+              return (
+                <Option
+                  key={bookingId}
+                  value={bookingId}
+                  disabled={isUsed}
+                >
+                  {isUsed ? (
+                    <div className="flex items-center">
+                      <InfoCircleOutlined className="text-red-500 mr-2" />
+                      <span className="line-through text-gray-400">
+                        {`${booking.field}, ${booking.date}, ${booking.timeStart}`}
+                      </span>
+                      <span className="ml-2 text-xs text-red-500">(Đã tạo trận đấu)</span>
+                    </div>
+                  ) : (
+                    `${booking.field}, ${booking.date}, ${booking.timeStart}`
+                  )}
+                </Option>
+              );
+            })}
           </Select>
         </Form.Item>
 
@@ -120,6 +221,7 @@ const CreateMatchPage = () => {
             htmlType="submit"
             icon={<PlusOutlined />}
             className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+            loading={loading}
           >
             Tạo và tìm đối
           </Button>

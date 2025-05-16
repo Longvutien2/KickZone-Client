@@ -15,6 +15,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { getListNotificationSlice } from "@/features/notification.slice";
+import { getListBookingsSlice } from "@/features/booking.slice";
 
 const { Header, Sider } = Layout;
 
@@ -109,7 +110,10 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
 
     useEffect(() => {
         const getData = async () => {
-            user.isLoggedIn && await dispatch(getListNotificationSlice({ id: user.value.user._id as string, role: "manager" }))
+            if (user.isLoggedIn) {
+                await dispatch(getListNotificationSlice({ id: user.value.user._id as string, role: "manager" }))
+                await dispatch(getListBookingsSlice())
+            }
         }
         getData();
     }, [user]);

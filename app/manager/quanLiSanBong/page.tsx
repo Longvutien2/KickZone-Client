@@ -182,11 +182,6 @@ const QuanLiSanBong = () => {
         );
     };
 
-    // Thống kê số lượng
-    const totalBookings = bookings.length;
-    const todayBookings = bookings.filter((booking: any) => booking.date === dayjs().format('DD-MM-YYYY')).length;
-    const uniqueCustomers = [...new Set(bookings.map((booking: any) => booking.username))].length;
-
     // Nhóm bookings theo field hoặc ngày
     const groupedBookings = viewMode === 'day' ? groupBookings() : getListBookings();
 
@@ -265,7 +260,7 @@ const QuanLiSanBong = () => {
                 
                 {/* Lịch */}
                 <Card className="lg:w-2/3 shadow-sm rounded-xl overflow-hidden">
-                    <div className="p-4">
+                    <div >
                         <ConfigProvider 
                             locale={viVN}
                             theme={{
@@ -280,7 +275,7 @@ const QuanLiSanBong = () => {
                                 },
                             }}
                         >
-                            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                            <div className="">
                                 <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100">
                                     <div className="flex items-center space-x-3">
                                         <Button 
@@ -744,8 +739,8 @@ const QuanLiSanBong = () => {
                                     <Text strong>{selectedBooking.timeStart || ""}</Text>
                                 </div>
                                 <div className="flex items-center">
-                                    <Text className="min-w-32">Tiền cọc:</Text>
-                                    <Text strong>{selectedBooking.deposit ? selectedBooking.deposit.toLocaleString() + " VND" : "Không có thông tin"}</Text>
+                                    <Text className="min-w-32">Giá tiền:</Text>
+                                    <Text strong>{selectedBooking.price ? Intl.NumberFormat('vi-VN').format(selectedBooking.price) + " VND" : "Không có thông tin"}</Text>
                                 </div>
                             </div>
                         </div>

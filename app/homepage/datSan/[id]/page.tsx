@@ -1,4 +1,16 @@
-// 'use client';
+'use client';
+import React from 'react'
+
+const page = () => {
+  return (
+    <div>
+      
+    </div>
+  )
+}
+
+export default page
+
 // import { useEffect, useState } from "react";
 // import { Card, Tabs, Button, Collapse } from "antd";
 // import { EnvironmentOutlined, PhoneOutlined } from '@ant-design/icons';

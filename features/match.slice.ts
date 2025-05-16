@@ -90,7 +90,7 @@ const matchSlice = createSlice({
 
         // 3. Xử lý khi thêm trận đấu thành công
         builder.addCase(addMatchSlice.fulfilled, (state: any, action) => {
-            state.value.push(action.payload);
+            state.value = [...state.value, action.payload]
         });
 
         // 4. Xử lý khi cập nhật trận đấu thành công

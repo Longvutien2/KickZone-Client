@@ -130,7 +130,7 @@ const BookingPage = () => {
                 // Thông tin thông báo cho Manager (quản lý sân)
                 const managerNotification: Notification = {
                     actor: 'manager',
-                    notificationType: 'field_booked', // Loại thông báo Sân đã có người đặt
+                    notificationType: 'new_order', // Loại thông báo Sân đã có người đặt
                     title: `${data.field} đã có người đặt!`,
                     content: `Sân của bạn đã có người đặt vào thời lúc: ${data.timeStart}, ngày ${data.date}.`,
                     bookingId: data._id,
@@ -140,15 +140,18 @@ const BookingPage = () => {
 
                 await dispatch(addNotificationSlice(managerNotification));
 
-                setIsSuccess(true)
                 // Khi người dùng đặt sân thành công, hiển thị thông báo
-                notification.success({
-                    message: 'BẠN ĐÃ ĐẶT SÂN THÀNH CÔNG',
-                    description: 'Gửi yêu cầu đặt sân của bạn đã thành công. Vui lòng chờ chủ sân duyệt. Cảm ơn bạn đã sử dụng dịch vụ!',
-                    placement: 'topRight', // Vị trí thông báo
-                    className: 'bg-green-500 text-white', // Tailwind CSS cho màu nền và văn bản
-                    duration: 3, // Thời gian hiển thị thông báo
-                });
+                const userNotification: Notification = {
+                    actor: 'user',
+                    notificationType: 'new_order',
+                    title: `Yêu cầu đặt sân của bạn đã được gửi`,
+                    content: `Gửi yêu cầu đặt sân của bạn đã thành công. Vui lòng chờ chủ sân duyệt. Cảm ơn bạn đã sử dụng dịch vụ!`,
+                    bookingId: data._id,
+                    footballfield: fieldData.footballField,
+                    targetUser: user.value.user._id,
+                };
+                await dispatch(addNotificationSlice(userNotification));
+                setIsSuccess(true)
             }
         }
     }

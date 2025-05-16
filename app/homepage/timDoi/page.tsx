@@ -7,7 +7,7 @@ import { getListMatchByFootballFieldIdSlice, getListMatchesSlice } from '@/featu
 import { Match } from '@/models/match'
 import { Team } from '@/models/team'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { CalendarOutlined, ClockCircleOutlined, DownOutlined, EnvironmentOutlined, FilterOutlined, PlusOutlined } from '@ant-design/icons'
+import { CalendarOutlined, ClockCircleOutlined, DownOutlined, EnvironmentOutlined, FilterOutlined, HourglassOutlined, PlusOutlined } from '@ant-design/icons'
 import { Tabs, Select, Button, Pagination, DatePicker, TimePicker, Dropdown, Menu, Space } from 'antd'
 import 'antd/dist/reset.css'
 import moment from 'moment'
@@ -108,11 +108,11 @@ const MainContent = () => {
         };
 
         getTimeSlots();
-    }, [footballFields, dispatch]);
+    }, []);
 
     useEffect(() => {
         const getData = async () => {
-            const data = await dispatch(getListMatchByFootballFieldIdSlice(footballFields?._id as string))
+            const data = await dispatch(getListMatchByFootballFieldIdSlice("67ce9ea74c79326f98b8bf8e" as string))
             const data2 = await getFootballFieldAddress()
             setGroupedByAddress(data2.data)
         }
@@ -123,51 +123,45 @@ const MainContent = () => {
         // Áp dụng tất cả các bộ lọc
         let filtered = [...matchs];
 
-        // Lọc bỏ các trận đấu trong quá khứ
+        // Lọc bỏ các trận đấu trong quá khứ - chỉ lấy từ ngày hiện tại trở đi
         filtered = filtered.filter((match: Match) => {
-            const matchDate = moment(match.date).startOf('day');
-            return matchDate.isSameOrAfter(today);
+            // Nếu có bookingId.date, sử dụng nó
+            if (match.bookingId?.date) {
+                const matchDate = moment(match.bookingId.date, "DD-MM-YYYY").startOf('day');
+                return matchDate.isSameOrAfter(today);
+            }
+            return false; // Nếu không có ngày, loại bỏ
         });
 
-        // Lọc theo khu vực
-        if (value) {
-            filtered = filtered.filter((match: Match) =>
-                match.footballField?.address.province === value
-            );
-        }
-
-        // Lọc theo ngày
+        // Lọc theo ngày được chọn
         if (selectedDate) {
-            const selectedDateStr = moment(selectedDate).format('DD/MM/YYYY');
-            console.log("selectedDateStr", selectedDateStr);
-            filtered = filtered.filter((match: Match) =>
-                moment(match.date).format('DD/MM/YYYY') === selectedDateStr
-            );
+            filtered = filtered.filter((match: Match) => {
+                const selectedDateMoment = moment(selectedDate.$d || selectedDate).startOf('day');
+
+                // Nếu có bookingId.date, sử dụng nó
+                if (match.bookingId?.date) {
+                    const matchDate = moment(match.bookingId.date, "DD-MM-YYYY").startOf('day');
+                    return matchDate.isSame(selectedDateMoment, 'day');
+                }
+                return false; // Nếu không có ngày, loại bỏ
+            });
         }
 
         // Lọc theo giờ
         if (selectedTime) {
-            filtered = filtered.filter((match: Match) =>
-                match.time === selectedTime
-            );
+            filtered = filtered.filter((match: Match) => {
+                // Nếu có bookingId.timeStart, sử dụng nó
+                if (match.bookingId?.timeStart) {
+                    return match.bookingId.timeStart === selectedTime;
+                }
+                // Nếu không có bookingId.timeStart, sử dụng match.time
+                return match.time === selectedTime;
+            });
         }
-
-        // Sắp xếp theo ngày gần nhất
-        filtered.sort((a: Match, b: Match) => {
-            const dateA = moment(a.date);
-            const dateB = moment(b.date);
-
-            // Nếu cùng ngày, sắp xếp theo giờ
-            if (dateA.isSame(dateB, 'day')) {
-                return a.time.localeCompare(b.time);
-            }
-
-            return dateA.diff(dateB);
-        });
 
         setFilteredMatches(filtered);
         footballFields && getData();
-    }, [footballFields,selectedDate, selectedTime]);
+    }, [footballFields, selectedDate, selectedTime]);
 
     // Lọc các timeslot duy nhất để hiển thị trong dropdown
     const uniqueTimeSlots = [...new Set(timeSlots.map(slot => slot.time))].sort();
@@ -300,6 +294,7 @@ const MainContent = () => {
                                                 className="rounded-full object-cover"
                                                 layout="fill"
                                                 alt="bg"
+                                                unoptimized={true}
                                             />
                                         </div>
                                         <div className="font-semibold text-sm">{match.club_A?.teamName}</div>
@@ -349,13 +344,54 @@ const MainContent = () => {
                             {/* Time + location */}
                             <div className="mt-3 text-sm text-gray-700">
                                 <div className="flex items-center justify-between">
-                                    <span className='capitalize'>{match.time} | {moment(match.date).format('dddd, DD/MM/YYYY')}</span>
-                                    <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
-                                        {dayjs(match.date).diff(dayjs(), 'day')} ngày nữa
+                                    <span className='capitalize'>
+                                        {match.bookingId?.timeStart} | {
+                                            match.bookingId?.date ?
+                                                moment(match.bookingId.date, "DD-MM-YYYY")
+                                                    .locale('vi')
+                                                    .format('dddd, DD-MM-YYYY')
+                                                : moment(match.date).format('dddd, DD/MM/YYYY')
+                                        }
                                     </span>
+                                    {(() => {
+                                        // Chuyển đổi ngày trận đấu sang định dạng chuẩn
+                                        const matchDate = moment(match.bookingId.date, "DD-MM-YYYY").startOf('day');
+                                        // Lấy ngày hiện tại ở đầu ngày (00:00:00)
+                                        const today = moment().startOf('day');
+
+                                        // So sánh ngày
+                                        const isSameDay = matchDate.isSame(today, 'day');
+                                        const diffDays = matchDate.diff(today, 'day');
+
+                                        if (isSameDay) {
+                                            // Nếu là ngày hôm nay và chưa có đối thủ
+                                            if (!match.club_B) {
+                                                return (
+                                                    <span className="bg-red-100 text-red-600 rounded-md px-2 py-1 text-xs font-bold flex items-center">
+                                                        <ClockCircleOutlined className="mr-1" />
+                                                        Hôm nay,  {match.bookingId?.timeStart || match.time}
+                                                    </span>
+                                                );
+                                            } else {
+                                                // Nếu là ngày hôm nay nhưng đã có đối thủ
+                                                return (
+                                                    <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
+                                                        Hôm nay, {match.bookingId?.timeStart || match.time}
+                                                    </span>
+                                                );
+                                            }
+                                        } else {
+                                            // Nếu là ngày khác, hiển thị số ngày còn lại
+                                            return (
+                                                <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
+                                                    {diffDays} ngày nữa
+                                                </span>
+                                            );
+                                        }
+                                    })()}
                                 </div>
                                 <div>{match.footballField?.name},
-                                    {` ${match.footballField?.address.detail ? `${match.footballField?.address.detail}, ` : ""} ${match.footballField?.address.ward}, ${match.footballField?.address.district}, ${match.footballField?.address.province}`}
+                                    {match.footballField && (` ${match.footballField?.address?.detail ? `${match.footballField?.address?.detail}, ` : ""} ${match.footballField?.address?.ward}, ${match.footballField?.address?.district}, ${match.footballField?.address?.province}`)}
                                 </div>
                             </div>
                         </Link>
@@ -383,6 +419,9 @@ const MyTeamTab = () => {
     const matchs = useAppSelector(state => state.match.value)
     const auth = useAppSelector(state => state.auth)
     const [myTeam, setmyTeam] = useState<Team>();
+    const [matchsHome, setMatchsHome] = useState<Match[]>([]);
+    const [matchsAway, setMatchsAway] = useState<Match[]>([]);
+
     const [currentPage, setCurrentPage] = useState(1);
     dayjs.locale("vi");
 
@@ -394,13 +433,39 @@ const MyTeamTab = () => {
     useEffect(() => {
         const getData = async () => {
             const data = await getTeamByUserId(auth.value.user._id as string)
-            setmyTeam(data.data[0])
-        }
-        getData()
-    }, [])
+            if (data.data.length > 0) {
+                // Lấy tất cả ID của các đội của người dùng
+                const myTeamIds = data.data.map(team => team._id);
 
-    console.log("matchs", matchs);
-    console.log("myTeam", myTeam);
+
+
+                // Lọc bỏ các trận đấu trong quá khứ - chỉ lấy từ ngày hiện tại trở đi
+                const today = moment().startOf('day');
+                const fie = matchs.filter((match: Match) => {
+                    // Nếu có bookingId.date, sử dụng nó
+                    if (match.bookingId?.date) {
+                        const matchDate = moment(match.bookingId.date, "DD-MM-YYYY").startOf('day');
+                        return matchDate.isSameOrAfter(today);
+                    }
+                    return false; // Nếu không có ngày, loại bỏ
+                });
+
+                // Lọc tất cả các trận đấu có club_A._id nằm trong danh sách myTeamIds
+                const matchesForMyTeamsHome = fie.filter((item: Match) =>
+                    item.club_A && myTeamIds.includes(item.club_A._id)
+                );
+                const matchesForMyTeamsAway = fie.filter((item: Match) =>
+                    item.club_B && myTeamIds.includes(item.club_A._id)
+                );
+
+                setMatchsHome(matchesForMyTeamsHome);
+                setMatchsAway(matchesForMyTeamsAway);
+                setmyTeam(data.data[0]); // Vẫn giữ đội đầu tiên làm đội mặc định
+            }
+        }
+        getData();
+    }, [matchs, auth.value.user._id]);
+
     return (
         <div className="mt-6 px-4">
             <Tabs
@@ -418,7 +483,7 @@ const MyTeamTab = () => {
                                     auth.isLoggedIn ?
                                         <div>
                                             <div className="mt-8 px-4 space-y-4 pb-10">
-                                                {matchs.slice((currentPage - 1) * 5, currentPage * 5).filter((item: Match) => item.club_A._id === myTeam?._id).map((match: Match) => (
+                                                {matchsHome.slice((currentPage - 1) * 5, currentPage * 5).map((match: Match) => (
                                                     <div key={match._id} className="bg-white p-4 shadow-md rounded-xl">
                                                         <Link href={`/homepage/timDoi/${match._id}`}>
                                                             {/* 3 phần: Đội A - VS - Đội B */}
@@ -482,13 +547,39 @@ const MyTeamTab = () => {
                                                             {/* Time + location */}
                                                             <div className="mt-3 text-sm text-gray-700">
                                                                 <div className="flex items-center justify-between">
-                                                                    <span className='capitalize'>{match.time} | {moment(match.date).format('dddd, DD/MM/YYYY')}</span>
-                                                                    <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
-                                                                        {dayjs(match.date).diff(dayjs(), 'day')} ngày nữa
+                                                                    <span className='capitalize'>
+                                                                        {match.bookingId?.timeStart} | {
+                                                                            match.bookingId?.date ?
+                                                                                moment(match.bookingId.date, "DD-MM-YYYY")
+                                                                                    .locale('vi')
+                                                                                    .format('dddd, DD-MM-YYYY')
+                                                                                : moment(match.date).format('dddd, DD/MM/YYYY')
+                                                                        }
                                                                     </span>
+                                                                    {(() => {
+                                                                        const matchDate = dayjs(match.date);
+                                                                        const today = dayjs();
+                                                                        const diffDays = matchDate.diff(today, 'day');
+
+                                                                        if (diffDays === 0) {
+                                                                            // Nếu là ngày hôm nay, hiển thị "Hôm nay" và giờ bắt đầu
+                                                                            return (
+                                                                                <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
+                                                                                    Hôm nay, {match.bookingId?.timeStart || match.time}
+                                                                                </span>
+                                                                            );
+                                                                        } else {
+                                                                            // Nếu là ngày khác, hiển thị số ngày còn lại
+                                                                            return (
+                                                                                <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
+                                                                                    {diffDays} ngày nữa
+                                                                                </span>
+                                                                            );
+                                                                        }
+                                                                    })()}
                                                                 </div>
                                                                 <div>{match.footballField?.name},
-                                                                    {` ${match.footballField?.address.detail ? `${match.footballField?.address.detail}, ` : ""} ${match.footballField?.address.ward}, ${match.footballField?.address.district}, ${match.footballField?.address.province}`}
+                                                                    {match.footballField && (` ${match.footballField?.address?.detail ? `${match.footballField?.address?.detail}, ` : ""} ${match.footballField?.address?.ward}, ${match.footballField?.address?.district}, ${match.footballField?.address?.province}`)}
                                                                 </div>
                                                             </div>
                                                         </Link>
@@ -498,7 +589,7 @@ const MyTeamTab = () => {
                                                 <div className="flex justify-center mt-4">
                                                     <Pagination
                                                         current={currentPage}  // Trang hiện tại
-                                                        total={matchs.length}  // Tổng số trận đấu
+                                                        total={matchsHome && matchsHome.length}  // Tổng số trận đấu
                                                         pageSize={5}  // Số lượng trận đấu mỗi trang
                                                         onChange={(page) => setCurrentPage(page)}  // Thay đổi trang
                                                         hideOnSinglePage={true}  // Ẩn phân trang nếu chỉ có 1 trang
@@ -540,97 +631,145 @@ const MyTeamTab = () => {
                             <div>
                                 {/* Match list */}
                                 {
-                                    <div>
-                                        <div className="mt-8 px-4 space-y-4 pb-10">
-                                            {
-                                                auth.isLoggedIn &&
-                                                    matchs.filter((item: Match) => item.club_B?._id === myTeam?._id).length > 0 ?
-                                                    matchs.filter((item: Match) => item.club_B?._id === myTeam?._id).map((match: Match) => (
-                                                        <div key={match._id} className="bg-white p-4 shadow-md rounded-xl">
-                                                            <Link href={`/homepage/timDoi/${match._id}`}>
-                                                                {/* 3 phần: Đội A - VS - Đội B */}
-                                                                <div className="grid grid-cols-3 items-center mb-2">
-                                                                    {/* Đội A */}
+                                    auth.isLoggedIn ?
+                                        <div>
+                                            <div className="mt-8 px-4 space-y-4 pb-10">
+                                                {matchsAway.slice((currentPage - 1) * 5, currentPage * 5).map((match: Match) => (
+                                                    <div key={match._id} className="bg-white p-4 shadow-md rounded-xl">
+                                                        <Link href={`/homepage/timDoi/${match._id}`}>
+                                                            {/* 3 phần: Đội A - VS - Đội B */}
+                                                            <div className="grid grid-cols-3 items-center mb-2">
+                                                                {/* Đội A */}
+                                                                <div>
+                                                                    <div className="flex items-center space-x-3">
+                                                                        <div className="relative w-12 h-12">
+                                                                            <Image
+                                                                                src={match.club_A?.teamImage || ""}
+                                                                                className="rounded-full object-cover"
+                                                                                layout="fill"  // Lấp đầy toàn bộ container
+                                                                                alt="bg"
+                                                                            />
+                                                                        </div>
+                                                                        <div className="font-semibold text-sm">{match.club_A?.teamName}</div>
+                                                                    </div>
+                                                                    <div className='flex items-center space-x-3 text-sm mt-2 text-orange-500'>
+                                                                        <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{match.club_A?.ageGroup}</span>
+                                                                        <span>⚡ 99</span>
+                                                                        <span>⭐ ?</span>
+                                                                        <span>👍 100</span>
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* VS */}
+                                                                <div className="text-center text-3xl font-bold">VS</div>
+
+                                                                {/* Đội B nếu có */}
+                                                                {match.club_B ? (
                                                                     <div>
-                                                                        <div className="flex items-center space-x-3">
+                                                                        <div className="flex items-center justify-end space-x-3">
+                                                                            <div className="font-semibold text-sm">{match.club_B?.teamName}</div>
                                                                             <div className="relative w-12 h-12">
                                                                                 <Image
-                                                                                    src={match.club_A?.teamImage || ""}
+                                                                                    src={match.club_B?.teamImage || ""}
                                                                                     className="rounded-full object-cover"
                                                                                     layout="fill"  // Lấp đầy toàn bộ container
                                                                                     alt="bg"
                                                                                 />
                                                                             </div>
-                                                                            <div className="font-semibold text-sm">{match.club_A?.teamName}</div>
                                                                         </div>
-                                                                        <div className='flex items-center space-x-3 text-sm mt-2 text-orange-500'>
-                                                                            <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{match.club_A?.ageGroup}</span>
+                                                                        <div className='flex items-center justify-end space-x-3 text-sm mt-2 text-orange-500'>
+                                                                            <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{match.club_B?.ageGroup}</span>
                                                                             <span>⚡ 99</span>
                                                                             <span>⭐ ?</span>
                                                                             <span>👍 100</span>
                                                                         </div>
                                                                     </div>
 
-                                                                    {/* VS */}
-                                                                    <div className="text-center text-3xl font-bold">VS</div>
-
-                                                                    {/* Đội B nếu có */}
-                                                                    {match.club_B ? (
-                                                                        <div>
-                                                                            <div className="flex items-center justify-end space-x-3">
-                                                                                <div className="font-semibold text-sm">{match.club_B?.teamName}</div>
-                                                                                <div className="relative w-12 h-12">
-                                                                                    <Image
-                                                                                        src={match.club_B?.teamImage || ""}
-                                                                                        className="rounded-full object-cover"
-                                                                                        layout="fill"  // Lấp đầy toàn bộ container
-                                                                                        alt="bg"
-                                                                                    />
-                                                                                </div>
-                                                                            </div>
-                                                                            <div className='flex items-center justify-end space-x-3 text-sm mt-2 text-orange-500'>
-                                                                                <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{match.club_B?.ageGroup}</span>
-                                                                                <span>⚡ 99</span>
-                                                                                <span>⭐ ?</span>
-                                                                                <span>👍 100</span>
-                                                                            </div>
+                                                                ) : (
+                                                                    <div className="flex flex-col items-end text-right">
+                                                                        <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-lg text-gray-500">
+                                                                            ?
                                                                         </div>
-
-                                                                    ) : (
-                                                                        <div className="flex flex-col items-end text-right">
-                                                                            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-lg text-gray-500">
-                                                                                ?
-                                                                            </div>
-                                                                            <div className="text-xs text-gray-400 mt-1">Chưa có đối thủ</div>
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-
-                                                                {/* Time + location */}
-                                                                <div className="mt-3 text-sm text-gray-700">
-                                                                    <div className="flex items-center justify-between">
-                                                                        <span className='capitalize'>{match.time} | {moment(match.date).format('dddd, DD/MM/YYYY')}</span>
-                                                                        <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
-                                                                            {match.time} ngày nữa
-                                                                        </span>
+                                                                        <div className="text-xs text-gray-400 mt-1">Chưa có đối thủ</div>
                                                                     </div>
-                                                                    <div>{match.footballField?.name}, {match.footballField?.address}</div>
-                                                                </div>
-                                                            </Link>
-                                                        </div>
-                                                    ))
-                                                    :
-                                                    <div className="flex flex-col items-center justify-center text-center mt-10">
-                                                        <p className="text-gray-500 text-sm px-4">
-                                                            Bạn chưa được đội nào mời hoặc chưa tham gia vào đội nào.
-                                                            <br />
-                                                            Hãy tìm kiếm đội để tham gia ngay!
-                                                        </p>
-                                                    </div>
-                                            }
-                                        </div>
+                                                                )}
+                                                            </div>
 
-                                    </div>
+                                                            {/* Time + location */}
+                                                            <div className="mt-3 text-sm text-gray-700">
+                                                                <div className="flex items-center justify-between">
+                                                                    <span className='capitalize'>
+                                                                        {match.bookingId?.timeStart} | {
+                                                                            match.bookingId?.date ?
+                                                                                moment(match.bookingId.date, "DD-MM-YYYY")
+                                                                                    .locale('vi')
+                                                                                    .format('dddd, DD-MM-YYYY')
+                                                                                : moment(match.date).format('dddd, DD/MM/YYYY')
+                                                                        }
+                                                                    </span>
+                                                                    {(() => {
+                                                                        const matchDate = dayjs(match.date);
+                                                                        const today = dayjs();
+                                                                        const diffDays = matchDate.diff(today, 'day');
+
+                                                                        if (diffDays === 0) {
+                                                                            // Nếu là ngày hôm nay, hiển thị "Hôm nay" và giờ bắt đầu
+                                                                            return (
+                                                                                <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
+                                                                                    Hôm nay, {match.bookingId?.timeStart || match.time}
+                                                                                </span>
+                                                                            );
+                                                                        } else {
+                                                                            // Nếu là ngày khác, hiển thị số ngày còn lại
+                                                                            return (
+                                                                                <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
+                                                                                    {diffDays} ngày nữa
+                                                                                </span>
+                                                                            );
+                                                                        }
+                                                                    })()}
+                                                                </div>
+                                                                <div>{match.footballField?.name},
+                                                                    {match.footballField && (` ${match.footballField?.address?.detail ? `${match.footballField?.address?.detail}, ` : ""} ${match.footballField?.address?.ward}, ${match.footballField?.address?.district}, ${match.footballField?.address?.province}`)}
+                                                                </div>
+                                                            </div>
+                                                        </Link>
+                                                    </div>
+                                                ))}
+
+                                                <div className="flex justify-center mt-4">
+                                                    <Pagination
+                                                        current={currentPage}  // Trang hiện tại
+                                                        total={matchsHome && matchsHome.length}  // Tổng số trận đấu
+                                                        pageSize={5}  // Số lượng trận đấu mỗi trang
+                                                        onChange={(page) => setCurrentPage(page)}  // Thay đổi trang
+                                                        hideOnSinglePage={true}  // Ẩn phân trang nếu chỉ có 1 trang
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col items-center justify-center text-center">
+                                                <Button
+                                                    type="primary"
+                                                    className="bg-orange-500 mt-4 px-6 rounded-full h-10 flex items-center"
+                                                    icon={<PlusOutlined className="text-xl mr-1" />}
+                                                    onClick={handleCreateMatch} // Gắn sự kiện onclick
+                                                >
+                                                    Tạo Trận Đấu Mới
+                                                </Button>
+                                            </div>
+                                        </div>
+                                        :
+                                        <div className="flex flex-col items-center justify-center text-center mt-10">
+                                            <p className="text-gray-500 mb-2 text-sm">Chưa có trận đấu nào? Bắt đầu tạo trận đấu mới để tham gia vào bảng xếp hạng của Sporta ngay!</p>
+                                            <Button
+                                                type="primary"
+                                                className="bg-orange-500 mt-4 px-6 rounded-full h-10 flex items-center"
+                                                icon={<PlusOutlined className="text-xl mr-1" />}
+                                                onClick={handleCreateMatch} // Gắn sự kiện onclick
+                                            >
+                                                Tạo Trận Đấu Mới
+                                            </Button>
+                                        </div>
                                 }
                             </div>
                     }

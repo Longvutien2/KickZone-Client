@@ -164,8 +164,7 @@ import { Booking } from "@/models/booking";
 const { Panel } = Collapse
 
 const Detail = () => {
-  const user = useAppSelector((state) => state.auth.value)
-  // const footballField = useSelector((state: RootStateType) => state.footballField.value)
+  const auth = useAppSelector((state) => state.auth)
   const timeslots = useAppSelector(state => state.timeSlot.value)
   const bookings = useAppSelector(state => state.booking.value)
   const footballField = useAppSelector(state => state.footballField.detail) as FootballField
@@ -232,13 +231,12 @@ const Detail = () => {
     const getData = async () => {
       try {
         // Lấy thông tin sân bóng của người dùng
-        await dispatch(getFootballFieldByIdUserSlice(user.user._id as string));
+        await dispatch(getFootballFieldByIdSlice("67ce9ea74c79326f98b8bf8e"));
         if (!footballField._id) return;
 
         // Lấy danh sách sân và timeslots
-        const fieldsResponse = await getFieldsByIdFootball(footballField._id as string);
+        const fieldsResponse = await getFieldsByIdFootball(footballField._id as string);   
         setData(fieldsResponse.data);
-
         // Lấy danh sách khung giờ
         await dispatch(getListTimeSlotsByFootballFieldId(footballField._id as string));
 
@@ -261,7 +259,7 @@ const Detail = () => {
     };
 
     getData();
-  }, [user.user._id, selectedDate]);
+  }, [auth.value, selectedDate]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -310,7 +308,7 @@ const Detail = () => {
                                     timeslots.map((slot: TimeSlot, idx) => (
                                       <Button
                                         key={idx}
-                                        disabled={bookings.some(
+                                        disabled={bookings.length > 0 && bookings.some(
                                           (b: Booking) =>
                                             b.date === selectedDate.format('DD-MM-YYYY') &&
                                             b.field === field.name &&
@@ -381,7 +379,7 @@ const Detail = () => {
             <div className="space-y-2">
               <p><strong>Tổng số sân:</strong> {data?.length || 0}</p>
               <p><strong>Khung giờ có sẵn:</strong> {timeslots?.length || 0}</p>
-              <p><strong>Đã đặt hôm nay:</strong> {bookings?.filter((b: Booking) => b.date === dayjs().format('DD-MM-YYYY'))?.length || 0}</p>
+              <p><strong>Đã đặt hôm nay:</strong> {bookings.length > 0 && bookings?.filter((b: Booking) => b.date === dayjs().format('DD-MM-YYYY'))?.length || 0}</p>
             </div>
           </Card>
         </div>

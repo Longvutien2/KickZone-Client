@@ -12,6 +12,7 @@ import { AppDispatch } from '@/store/store';
 import { Header } from 'antd/es/layout/layout';
 import CustomBreadcrumb from '@/components/Breadcrumb';
 import { useAppSelector } from '@/store/hook';
+import { getListBookingsSlice } from '@/features/booking.slice';
 
 const { Content, Sider } = Layout;
 
@@ -31,12 +32,15 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
   };
 
 
-  useEffect(() => {
-    const getData = async () => {
-      user.isLoggedIn && await dispatch(getListNotificationSlice({ id: user.value.user._id as string, role: "user" }))
-    }
-    getData();
-  }, [user]);
+    useEffect(() => {
+          const getData = async () => {
+              if (user.isLoggedIn) {
+                  await dispatch(getListNotificationSlice({ id: user.value.user._id as string, role: "user" }))
+                  await dispatch(getListBookingsSlice())
+              }
+          }
+          getData();
+      }, [user]);
 
   const {
     token: { colorBgContainer, borderRadiusLG },
