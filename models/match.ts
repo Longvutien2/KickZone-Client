@@ -16,6 +16,7 @@ export interface Match {
     duration: string;
     description?: string;
     bookingId?: string | any;
+    orderId?: string | any;
     createdAt?: Date;
     updatedAt?: Date;
 }

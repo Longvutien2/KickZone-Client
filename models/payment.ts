@@ -1,5 +1,6 @@
 // types/payment.ts
 export interface Order {
+  _id?: string;
   sepayId?: string;
   userId?: string;
   bookingId?: string;

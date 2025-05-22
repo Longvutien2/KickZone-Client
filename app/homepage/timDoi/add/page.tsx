@@ -17,6 +17,8 @@ import { getTeamByUserId } from '@/api/team'
 import { getBookingsByUserId } from '@/api/booking'
 import { Booking } from '@/models/booking'
 import { Match } from '@/models/match'
+import { getOrdersByUserId } from '@/api/payment'
+import { Order } from '@/models/payment'
 
 const { Option } = Select
 
@@ -28,10 +30,12 @@ const CreateMatchPage = () => {
   const dispatch = useAppDispatch();
   const [form] = Form.useForm()
   const [myTeam, setmyTeam] = useState<Team[]>([]);
-  const [myBookings, setMyBookings] = useState<Booking[]>([]);
+  const [myOrder, setMyOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [usedBookingIds, setUsedBookingIds] = useState<string[]>([]);
 
+  console.log("myOrder", myOrder);
+  
   // Lấy danh sách trận đấu và đặt sân
   useEffect(() => {
     const fetchData = async () => {
@@ -42,12 +46,12 @@ const CreateMatchPage = () => {
         teamResponse.data && setmyTeam(teamResponse.data);
 
         // Lấy danh sách đặt sân thành công của người dùng
-        const bookingResponse = await getBookingsByUserId(user.value.user._id as string);
+        const bookingResponse = await getOrdersByUserId(user.value.user._id as string);
 
         // Lọc chỉ lấy các đặt sân đã xác nhận và chưa diễn ra
-        const confirmedBookings = bookingResponse.data.filter((booking: Booking) => {
+        const confirmedBookings = bookingResponse.data.filter((booking: Order) => {
           // Kiểm tra trạng thái đặt sân
-          if (booking.status !== "Đã xác nhận") return false;
+          if (booking.paymentStatus !== "success") return false;
 
           // Chuyển đổi chuỗi ngày từ định dạng "DD-MM-YYYY" sang moment
           const bookingDate = moment(booking.date, "DD-MM-YYYY");
@@ -59,7 +63,7 @@ const CreateMatchPage = () => {
           return bookingDate.isSameOrAfter(today);
         });
 
-        setMyBookings(confirmedBookings);
+        setMyOrders(confirmedBookings);
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu:", error);
         toast.error("Không thể tải dữ liệu. Vui lòng thử lại sau.");
@@ -73,13 +77,13 @@ const CreateMatchPage = () => {
     }
   }, [user.value?.user?._id, dispatch]);
 
-  // Kiểm tra các bookingId đã được sử dụng
+  // Kiểm tra các orderId đã được sử dụng
   useEffect(() => {
     if (allMatches && allMatches.length > 0) {
-      // Lấy danh sách bookingId đã được sử dụng (chỉ lấy _id)
+      // Lấy danh sách orderId đã được sử dụng (chỉ lấy _id)
       const usedIds = allMatches
-        .filter(match => match.bookingId && match.bookingId._id)
-        .map(match => match.bookingId._id);
+        .filter(match => match.orderId && match.orderId._id)
+        .map(match => match.orderId._id);
 
       setUsedBookingIds(usedIds);
     }
@@ -92,7 +96,7 @@ const CreateMatchPage = () => {
         ...values,
         footballField: footballField._id, // ID sân bóng
         user: user.value.user._id,
-        bookingId: values.bookingId // Lưu ID đặt sân để tham chiếu
+        orderId: values.orderId // Lưu ID đặt sân để tham chiếu
       }
 
       // Thêm trận đấu mới
@@ -122,7 +126,7 @@ const CreateMatchPage = () => {
   }
 
   // Hiển thị thông báo nếu không có đặt sân nào
-  if (!loading && myBookings.length === 0) {
+  if (!loading && myOrder.length === 0) {
     return (
       <div className="p-4 bg-white">
         <h2 className="text-xl font-semibold text-center mb-6">Tạo Trận Đấu Mới</h2>
@@ -161,35 +165,35 @@ const CreateMatchPage = () => {
         {/* Chọn đặt sân đã xác nhận */}
         <Form.Item
           label="Danh sách sân đã đặt"
-          name="bookingId"
+          name="orderId"
           rules={[{ required: true, message: 'Vui lòng chọn đặt sân!' }]}
           extra="Chỉ hiển thị các đặt sân đã được xác nhận và chưa diễn ra"
         >
           <Select placeholder="Chọn đặt sân">
-            {myBookings.map((booking: Booking) => {
+            {myOrder.map((order: Order) => {
               // Đảm bảo booking._id là string
-              const bookingId = booking._id as string;
-              // Kiểm tra xem bookingId có trong danh sách usedBookingIds không
-              const isUsed = usedBookingIds.includes(bookingId);
+              const orderId = order._id as string;
+              // Kiểm tra xem orderId có trong danh sách usedBookingIds không
+              const isUsed = usedBookingIds.includes(orderId);
 
-              console.log(`Booking ${bookingId} isUsed:`, isUsed); // Log để debug
+              console.log(`Booking ${orderId} isUsed:`, isUsed); // Log để debug
 
               return (
                 <Option
-                  key={bookingId}
-                  value={bookingId}
+                  key={orderId}
+                  value={orderId}
                   disabled={isUsed}
                 >
                   {isUsed ? (
                     <div className="flex items-center">
                       <InfoCircleOutlined className="text-red-500 mr-2" />
                       <span className="line-through text-gray-400">
-                        {`${booking.field}, ${booking.date}, ${booking.timeStart}`}
+                        {`${order.fieldName}, ${order.date}, ${order.timeStart}`}
                       </span>
                       <span className="ml-2 text-xs text-red-500">(Đã tạo trận đấu)</span>
                     </div>
                   ) : (
-                    `${booking.field}, ${booking.date}, ${booking.timeStart}`
+                    `${order.fieldName}, ${order.date}, ${order.timeStart}`
                   )}
                 </Option>
               );

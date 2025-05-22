@@ -235,17 +235,50 @@ const MatchDetail = () => {
                         <div className="mt-3 text-sm text-gray-700">
                             <div className="flex items-center justify-between">
                                 <span className='capitalize'>
-                                    {match.bookingId?.timeStart} | {
-                                        match.bookingId?.date ?
-                                            moment(match.bookingId.date, "DD-MM-YYYY")
+                                    {match.orderId?.timeStart} | {
+                                        match.orderId?.date ?
+                                            moment(match.orderId.date, "DD-MM-YYYY")
                                                 .locale('vi')
                                                 .format('dddd, DD-MM-YYYY')
                                             : moment(match.date).format('dddd, DD/MM/YYYY')
                                     }
                                 </span>
-                                <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
-                                    {dayjs(match.date).diff(dayjs(), 'day')} ngày nữa
-                                </span>
+                                {(() => {
+                                    // Chuyển đổi ngày trận đấu sang định dạng chuẩn
+                                    const matchDate = moment(match.orderId.date, "DD-MM-YYYY").startOf('day');
+                                    // Lấy ngày hiện tại ở đầu ngày (00:00:00)
+                                    const today = moment().startOf('day');
+
+                                    // So sánh ngày
+                                    const isSameDay = matchDate.isSame(today, 'day');
+                                    const diffDays = matchDate.diff(today, 'day');
+
+                                    if (isSameDay) {
+                                        // Nếu là ngày hôm nay và chưa có đối thủ
+                                        if (!match.club_B) {
+                                            return (
+                                                <span className="bg-red-100 text-red-600 rounded-md px-2 py-1 text-xs font-bold flex items-center">
+                                                    <ClockCircleOutlined className="mr-1" />
+                                                    Hôm nay,  {match.orderId?.timeStart || match.time}
+                                                </span>
+                                            );
+                                        } else {
+                                            // Nếu là ngày hôm nay nhưng đã có đối thủ
+                                            return (
+                                                <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
+                                                    Hôm nay, {match.orderId?.timeStart || match.time}
+                                                </span>
+                                            );
+                                        }
+                                    } else {
+                                        // Nếu là ngày khác, hiển thị số ngày còn lại
+                                        return (
+                                            <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
+                                                {diffDays} ngày nữa
+                                            </span>
+                                        );
+                                    }
+                                })()}
                             </div>
                             <div>{match.footballField?.name},
                                 {match.footballField && (` ${match.footballField?.address?.detail ? `${match.footballField?.address?.detail}, ` : ""} ${match.footballField?.address?.ward}, ${match.footballField?.address?.district}, ${match.footballField?.address?.province}`)}

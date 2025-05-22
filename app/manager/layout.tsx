@@ -4,11 +4,14 @@ import { Layout, Menu } from "antd";
 import "dayjs/locale/vi";
 import Link from "next/link";
 import {
-    AimOutlined,
-    BellOutlined,
     HomeOutlined,
-    ThunderboltOutlined,
-    TrophyOutlined,
+    AppstoreOutlined,
+    FieldTimeOutlined,
+    ShoppingCartOutlined,
+    BellOutlined,
+    TeamOutlined,
+    FileSearchOutlined,
+    EnvironmentOutlined,
     UserOutlined
 } from '@ant-design/icons';
 import { useAppDispatch, useAppSelector } from "@/store/hook";
@@ -34,27 +37,27 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
         },
         {
             key: "listField",
-            label: <Link href="/manager/field"><ThunderboltOutlined /> Quản lý loại sân</Link>,
+            label: <Link href="/manager/field"><AppstoreOutlined /> Quản lý loại sân</Link>,
             path: "/manager/field"
         },
         {
             key: "myField",
-            label: <Link href="/manager/myField"><ThunderboltOutlined /> Sân bóng của tôi</Link>,
+            label: <Link href="/manager/myField"><EnvironmentOutlined /> Sân bóng của tôi</Link>,
             path: "/manager/myField"
         },
         {
             key: "quanLiSanBong",
-            label: <Link href="/manager/quanLiSanBong"><TrophyOutlined /> Lịch đặt sân</Link>,
+            label: <Link href="/manager/quanLiSanBong"><FieldTimeOutlined /> Lịch đặt sân</Link>,
             path: "/manager/quanLiSanBong"
         },
-          {
+        {
             key: "orders",
-            label: <Link href="/manager/orders"><TrophyOutlined /> Quản lý đơn hàng</Link>,
+            label: <Link href="/manager/orders"><ShoppingCartOutlined /> Quản lý đơn hàng</Link>,
             path: "/manager/orders"
         },
         {
             key: "bookingField",
-            label: <Link href="/manager/bookingField"><AimOutlined />
+            label: <Link href="/manager/bookingField"><FileSearchOutlined />
                 <span>Quản lý yêu cầu</span>
                 {bookings.filter((item: any) => {
                     // Lọc booking có trạng thái "Chờ xác nhận"
@@ -97,9 +100,15 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
                 <Link href="/manager/notification" className="flex items-center gap-2">
                     <BellOutlined />
                     <span>Thông báo</span>
-                    {notifications.filter((item: any) => !item.read).length > 0 && (
+                    {notifications.filter((item: any) => 
+                        item.actor === "manager" && 
+                        !item.read 
+                    ).length > 0 && (
                         <span className="ml-1 text-white bg-red-500 text-xs font-bold rounded-full px-2 py-0.5">
-                            {notifications.filter((item: any) => !item.read).length}
+                            {notifications.filter((item: any) => 
+                                item.actor === "manager" && 
+                                !item.read
+                            ).length}
                         </span>
                     )}
                 </Link>
@@ -108,7 +117,7 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
         },
         {
             key: "doiCuaToi",
-            label: <Link href="/manager/doiCuaToi"><UserOutlined /> Quản lý nhân viên</Link>,
+            label: <Link href="/manager/doiCuaToi"><TeamOutlined /> Quản lý nhân viên</Link>,
             path: "/manager/doiCuaToi"
         },
     ];
@@ -128,19 +137,23 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
 
     return (
         <Layout className="min-h-screen">
-            <Sider width={220} className="bg-gray-900 text-white">
-                <div className="p-5 text-lg font-bold">KichZone</div>
+            <Sider width={220} className="bg-white text-gray-800 shadow-md">
+                <div className="p-5 text-lg font-bold text-blue-600 border-b border-gray-100">KichZone</div>
                 <Menu
-                    theme="dark"
+                    theme="light"
                     mode="inline"
                     selectedKeys={[selectedKey || "/"]}
                     items={items}
+                    className="border-r-0"
+                    style={{ 
+                        borderRight: 'none',
+                    }}
                 />
             </Sider>
             <Layout>
-                <Header className="bg-white shadow-md px-8">
+                <Header className="bg-white shadow-sm px-8">
                     <div className="text-right text-[16px]">
-                        <UserOutlined /> Vũ Tiến Long
+                        <UserOutlined className="mr-2" /> Vũ Tiến Long
                     </div>
                 </Header>
                 {children}

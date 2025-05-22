@@ -69,7 +69,7 @@ const MainContent = () => {
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [filtersVisible, setFiltersVisible] = useState(false);
     const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
-
+    
     moment.locale('vi');
     const dispatch = useAppDispatch();
     const [value, setValue] = useState<string>(''); // State lưu giá trị khu vực được chọn
@@ -125,9 +125,9 @@ const MainContent = () => {
 
         // Lọc bỏ các trận đấu trong quá khứ - chỉ lấy từ ngày hiện tại trở đi
         filtered = filtered.filter((match: Match) => {
-            // Nếu có bookingId.date, sử dụng nó
-            if (match.bookingId?.date) {
-                const matchDate = moment(match.bookingId.date, "DD-MM-YYYY").startOf('day');
+            // Nếu có orderId.date, sử dụng nó
+            if (match.orderId?.date) {
+                const matchDate = moment(match.orderId.date, "DD-MM-YYYY").startOf('day');
                 return matchDate.isSameOrAfter(today);
             }
             return false; // Nếu không có ngày, loại bỏ
@@ -138,9 +138,9 @@ const MainContent = () => {
             filtered = filtered.filter((match: Match) => {
                 const selectedDateMoment = moment(selectedDate.$d || selectedDate).startOf('day');
 
-                // Nếu có bookingId.date, sử dụng nó
-                if (match.bookingId?.date) {
-                    const matchDate = moment(match.bookingId.date, "DD-MM-YYYY").startOf('day');
+                // Nếu có orderId.date, sử dụng nó
+                if (match.orderId?.date) {
+                    const matchDate = moment(match.orderId.date, "DD-MM-YYYY").startOf('day');
                     return matchDate.isSame(selectedDateMoment, 'day');
                 }
                 return false; // Nếu không có ngày, loại bỏ
@@ -150,11 +150,11 @@ const MainContent = () => {
         // Lọc theo giờ
         if (selectedTime) {
             filtered = filtered.filter((match: Match) => {
-                // Nếu có bookingId.timeStart, sử dụng nó
-                if (match.bookingId?.timeStart) {
-                    return match.bookingId.timeStart === selectedTime;
+                // Nếu có orderId.timeStart, sử dụng nó
+                if (match.orderId?.timeStart) {
+                    return match.orderId.timeStart === selectedTime;
                 }
-                // Nếu không có bookingId.timeStart, sử dụng match.time
+                // Nếu không có orderId.timeStart, sử dụng match.time
                 return match.time === selectedTime;
             });
         }
@@ -345,9 +345,9 @@ const MainContent = () => {
                             <div className="mt-3 text-sm text-gray-700">
                                 <div className="flex items-center justify-between">
                                     <span className='capitalize'>
-                                        {match.bookingId?.timeStart} | {
-                                            match.bookingId?.date ?
-                                                moment(match.bookingId.date, "DD-MM-YYYY")
+                                        {match.orderId?.timeStart} | {
+                                            match.orderId?.date ?
+                                                moment(match.orderId.date, "DD-MM-YYYY")
                                                     .locale('vi')
                                                     .format('dddd, DD-MM-YYYY')
                                                 : moment(match.date).format('dddd, DD/MM/YYYY')
@@ -355,7 +355,7 @@ const MainContent = () => {
                                     </span>
                                     {(() => {
                                         // Chuyển đổi ngày trận đấu sang định dạng chuẩn
-                                        const matchDate = moment(match.bookingId.date, "DD-MM-YYYY").startOf('day');
+                                        const matchDate = moment(match.orderId.date, "DD-MM-YYYY").startOf('day');
                                         // Lấy ngày hiện tại ở đầu ngày (00:00:00)
                                         const today = moment().startOf('day');
 
@@ -369,14 +369,14 @@ const MainContent = () => {
                                                 return (
                                                     <span className="bg-red-100 text-red-600 rounded-md px-2 py-1 text-xs font-bold flex items-center">
                                                         <ClockCircleOutlined className="mr-1" />
-                                                        Hôm nay,  {match.bookingId?.timeStart || match.time}
+                                                        Hôm nay,  {match.orderId?.timeStart || match.time}
                                                     </span>
                                                 );
                                             } else {
                                                 // Nếu là ngày hôm nay nhưng đã có đối thủ
                                                 return (
                                                     <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
-                                                        Hôm nay, {match.bookingId?.timeStart || match.time}
+                                                        Hôm nay, {match.orderId?.timeStart || match.time}
                                                     </span>
                                                 );
                                             }
@@ -442,9 +442,9 @@ const MyTeamTab = () => {
                 // Lọc bỏ các trận đấu trong quá khứ - chỉ lấy từ ngày hiện tại trở đi
                 const today = moment().startOf('day');
                 const fie = matchs.filter((match: Match) => {
-                    // Nếu có bookingId.date, sử dụng nó
-                    if (match.bookingId?.date) {
-                        const matchDate = moment(match.bookingId.date, "DD-MM-YYYY").startOf('day');
+                    // Nếu có orderId.date, sử dụng nó
+                    if (match.orderId?.date) {
+                        const matchDate = moment(match.orderId.date, "DD-MM-YYYY").startOf('day');
                         return matchDate.isSameOrAfter(today);
                     }
                     return false; // Nếu không có ngày, loại bỏ
@@ -548,9 +548,9 @@ const MyTeamTab = () => {
                                                             <div className="mt-3 text-sm text-gray-700">
                                                                 <div className="flex items-center justify-between">
                                                                     <span className='capitalize'>
-                                                                        {match.bookingId?.timeStart} | {
-                                                                            match.bookingId?.date ?
-                                                                                moment(match.bookingId.date, "DD-MM-YYYY")
+                                                                        {match.orderId?.timeStart} | {
+                                                                            match.orderId?.date ?
+                                                                                moment(match.orderId.date, "DD-MM-YYYY")
                                                                                     .locale('vi')
                                                                                     .format('dddd, DD-MM-YYYY')
                                                                                 : moment(match.date).format('dddd, DD/MM/YYYY')
@@ -565,7 +565,7 @@ const MyTeamTab = () => {
                                                                             // Nếu là ngày hôm nay, hiển thị "Hôm nay" và giờ bắt đầu
                                                                             return (
                                                                                 <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
-                                                                                    Hôm nay, {match.bookingId?.timeStart || match.time}
+                                                                                    Hôm nay, {match.orderId?.timeStart || match.time}
                                                                                 </span>
                                                                             );
                                                                         } else {
@@ -699,9 +699,9 @@ const MyTeamTab = () => {
                                                             <div className="mt-3 text-sm text-gray-700">
                                                                 <div className="flex items-center justify-between">
                                                                     <span className='capitalize'>
-                                                                        {match.bookingId?.timeStart} | {
-                                                                            match.bookingId?.date ?
-                                                                                moment(match.bookingId.date, "DD-MM-YYYY")
+                                                                        {match.orderId?.timeStart} | {
+                                                                            match.orderId?.date ?
+                                                                                moment(match.orderId.date, "DD-MM-YYYY")
                                                                                     .locale('vi')
                                                                                     .format('dddd, DD-MM-YYYY')
                                                                                 : moment(match.date).format('dddd, DD/MM/YYYY')
@@ -716,7 +716,7 @@ const MyTeamTab = () => {
                                                                             // Nếu là ngày hôm nay, hiển thị "Hôm nay" và giờ bắt đầu
                                                                             return (
                                                                                 <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
-                                                                                    Hôm nay, {match.bookingId?.timeStart || match.time}
+                                                                                    Hôm nay, {match.orderId?.timeStart || match.time}
                                                                                 </span>
                                                                             );
                                                                         } else {

@@ -1,113 +1,162 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Typography, Button } from 'antd';
-import { ArrowLeftOutlined } from '@ant-design/icons';
-import { getNotificationsById, updateNotification } from '@/api/notification';
+import { Typography, Button, Card, Divider, Tag, Space, Avatar } from 'antd';
+import { ArrowLeftOutlined, CheckCircleOutlined, CloseCircleOutlined, TeamOutlined, SearchOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { getNotificationsById } from '@/api/notification';
 import { Notification } from '@/models/notification';
 import { useAppDispatch } from '@/store/hook';
 import { updateNotificationSlice } from '@/features/notification.slice';
 import { useParams, useRouter } from 'next/navigation';
+import moment from 'moment';
 
-const { Title, Text } = Typography;
-
-
-const fakeNotification = {
-    id: 1,
-    title: 'Đặt sân bóng thành công!', // Tiêu đề thông báo
-    time: '5 phút trước',
-    status: 'unread',
-    // Nội dung tổng quan thông báo
-    content: 'Chúc mừng bạn đã đặt sân thành công! Dưới đây là thông tin về đặt sân',
-    // Thông tin chi tiết đặt sân
-    details: {
-        fieldName: 'Sân bóng Cộng Hòa',
-        address: '123 Đường Cộng Hòa, Quận Tân Bình, TP.HCM',
-        fieldNumber: 'Sân 1',
-        bookingTime: '2025-03-20 08:00 - 10:00',
-        price: 500000,
-        paymentMethod: 'Chuyển khoản ngân hàng',
-        username: 'Long Vu',
-        phoneNumber: '0378923745',
-        email: 'longvu@example.com',
-    },
-    // Phần nội dung bên dưới thông báo
-    closingMessage: 'Bạn có thể đến sân đúng giờ để trải nghiệm! Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.',
-};
+const { Title, Text, Paragraph } = Typography;
 
 const NotificationDetailManager = () => {
     const [data, setData] = useState<Notification>();
-    // const user = useAppSelector((state) => state.auth.value.user)
+    const [loading, setLoading] = useState(true);
     const router = useRouter();
     const dispatch = useAppDispatch();
-    // Giả sử lấy thông báo dựa trên id từ dữ liệu fakeNotification
-    const notification = fakeNotification;
     const { id } = useParams();
+
     // Quay lại trang trước
     const goBack = () => {
-        router.back(); // Quay lại trang trước
+        router.back();
+    };
+
+    // Lấy icon phù hợp với loại thông báo
+    const getNotificationIcon = (item: Notification) => {
+        // Dựa vào notificationType để xác định icon phù hợp
+        if (item.notificationType === 'field_booked' || item.notificationType === 'new_order') {
+            return <CheckCircleOutlined style={{ color: '#52c41a', fontSize: '24px' }} />;
+        } else if (item.notificationType === 'field_booking_failed') {
+            return <CloseCircleOutlined style={{ color: '#f5222d', fontSize: '24px' }} />;
+        } else if (item.notificationType === 'opponent_found') {
+            return <TeamOutlined style={{ color: '#722ed1', fontSize: '24px' }} />;
+        } else if (item.notificationType === 'posted_opponent') {
+            return <SearchOutlined style={{ color: '#fa8c16', fontSize: '24px' }} />;
+        } else if (item.notificationType === 'field_created') {
+            return <PlusCircleOutlined style={{ color: '#13c2c2', fontSize: '24px' }} />;
+        } else {
+            return <CheckCircleOutlined style={{ color: '#1890ff', fontSize: '24px' }} />;
+        }
+    };
+
+    // Format thời gian
+    const formatTime = (time: any) => {
+        if (!time) return '';
+        return moment(time).format('DD/MM/YYYY HH:mm');
     };
 
     useEffect(() => {
         const update = async () => {
-            const data = await getNotificationsById(id as string);
-            setData(data.data)
-            if (data) {
-                const newdata = {
-                    ...data.data,
-                    read: true
+            setLoading(true);
+            try {
+                const response = await getNotificationsById(id as string);
+                setData(response.data);
+                if (response.data && !response.data.read) {
+                    const newdata = {
+                        ...response.data,
+                        read: true
+                    };
+                    await dispatch(updateNotificationSlice(newdata));
                 }
-                await dispatch(updateNotificationSlice(newdata))
+            } catch (error) {
+                console.error("Error fetching notification:", error);
+            } finally {
+                setLoading(false);
             }
-        }
+        };
         update();
-    }, [id])
+    }, [id, dispatch]);
 
     return (
         <div className="p-6 bg-gray-100 min-h-screen w-full">
-            <div className="bg-white p-6 rounded-lg shadow">
-                {/* Dấu mũi tên quay lại */}
+            <Card loading={loading} className="shadow-md rounded-lg">
                 <Button
                     type="link"
                     icon={<ArrowLeftOutlined />}
                     onClick={goBack}
-                    className="text-blue-600 mb-2 mx-0 px-0"
+                    className="text-blue-600 mb-4 mx-0 px-0"
                 >
-                    Quay lại
+                    Quay lại danh sách thông báo
                 </Button>
 
-                {data &&
-                    <>
-                        {/* Tiêu đề thông báo */}
-                        <h1 className="text-2xl font-semibold mb-4">{data.title || 'Chi tiết thông báo'}</h1>
-                        {/* Nội dung thông báo */}
-                        <div className="text-sm text-gray-700 p-4">
-                            <p className='text-lg font-semibold'>{data.content} </p>
-                            <br />
-                            <Text strong>Tên sân: </Text>{data.footballfield?.name}
-                            <br />
-                            <Text strong>Địa chỉ: </Text>{data.bookingId?.address}
-                            <br />
-                            <Text strong>Số sân: </Text>{data.bookingId.field}
-                            <br />
-                            <Text strong>Thời gian đặt: </Text>{data.bookingId.timeStart}
-                            <br />
-                            <Text strong>Giá: </Text>{data.bookingId.price} VND
-                            <br />
-                            <Text strong>Phương thức thanh toán: </Text>{data.bookingId.payment_method}
-                            <br />
-                            <Text strong>Người đặt: </Text>{data.bookingId.username}
-                            <br />
-                            <Text strong>Email: </Text>{data.bookingId.email}
-                            <br />
-                            <Text strong>Số điện thoại: </Text>{data.bookingId.phoneNumber}
-                            <br />
-                            <br />
-
-                            {/* Phần nội dung kết thúc thông báo */}
-                            {/* <Text strong>{notification.closingMessage}</Text> */}
+                {data && (
+                    <div className="space-y-6">
+                        <div className="flex items-center space-x-4">
+                            <Avatar
+                                size={64}
+                                icon={getNotificationIcon(data)}
+                                className="bg-blue-50"
+                            />
+                            <div>
+                                <Title level={3} className="mb-1 ml-2">{data.title}</Title>
+                            </div>
                         </div>
-                    </>}
-            </div>
+
+                        <Divider />
+
+                        <div className="bg-gray-50 p-5 rounded-lg">
+                            <Paragraph className="text-lg">{data.content}</Paragraph>
+                        </div>
+
+                        {data.orderId && (
+                            <div className="mt-6">
+                                <Title level={4} className="mb-4">Chi tiết đặt sân</Title>
+                                <div className="bg-white p-5 rounded-lg border border-gray-200 space-y-3">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <Text strong className="block text-gray-500">Tên sân:</Text>
+                                            <Text className="text-lg">{data.footballfield?.name || "Không có thông tin"}</Text>
+                                        </div>
+                                        <div>
+                                            <Text strong className="block text-gray-500">Địa chỉ:</Text>
+                                            <Text className="text-lg">{data.footballfield?.address &&
+                                                `${data.footballfield.address.detail ? `${data.footballfield.address.detail}, ` : ""}
+                                             ${data.footballfield.address.ward}, ${data.footballfield.address.district},
+                                              ${data.footballfield.address.province}` || "Không có thông tin"}</Text>
+                                        </div>
+                                        <div>
+                                            <Text strong className="block text-gray-500">Số sân:</Text>
+                                            <Text className="text-lg">{data.orderId?.fieldName || "Không có thông tin"}</Text>
+                                        </div>
+                                        <div>
+                                            <Text strong className="block text-gray-500">Thời gian đặt:</Text>
+                                            <Text className="text-lg">{data.orderId?.timeStart || "Không có thông tin"}</Text>
+                                        </div>
+                                        <div>
+                                            <Text strong className="block text-gray-500">Giá:</Text>
+                                            <Text className="text-lg">{data.orderId?.amount ? `${data.orderId.amount.toLocaleString()} VND` : "Không có thông tin"}</Text>
+                                        </div>
+                                        <div>
+                                            <Text strong className="block text-gray-500">Phương thức thanh toán:</Text>
+                                            <Text className="text-lg">{data.orderId?.payment_method || "QR"}</Text>
+                                        </div>
+                                    </div>
+
+                                    <Divider />
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <Text strong className="block text-gray-500">Người đặt (Tên đội bóng):</Text>
+                                            <Text className="text-lg">{data.orderId?.teamName || "Không có thông tin"}</Text>
+                                        </div>
+                                     
+                                        <div>
+                                            <Text strong className="block text-gray-500">Số điện thoại:</Text>
+                                            <Text className="text-lg">{data.orderId?.phoneNumber || "Không có thông tin"}</Text>
+                                        </div>
+                                        <div>
+                                            <Text strong className="block text-gray-500">Ghi chú:</Text>
+                                            <Text className="text-lg">{data.orderId?.description || "Không có thông tin"}</Text>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </Card>
         </div>
     );
 };
