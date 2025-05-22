@@ -15,7 +15,7 @@ const NotificationDetailPage = () => {
     const [loading, setLoading] = useState(false); // Đặt false để hiển thị ngay lập tức
     const [notification, setNotification] = useState<any>(); // Sử dụng dữ liệu giả ngay từ đầu
     const notifications = useAppSelector(state => state.notification.value)
-
+    
     const router = useRouter();
     const dispatch = useAppDispatch();
     const { id } = useParams();
@@ -109,7 +109,7 @@ const NotificationDetailPage = () => {
                         </Text>
                     </div>
 
-                    {(notification.notificationType === 'field_booked' || notification.notificationType === 'new_order' || notification.notificationType === 'field_booking_failed') && notification.bookingId && (
+                    {(notification.notificationType === 'field_booked' || notification.notificationType === 'new_order' || notification.notificationType === 'field_booking_failed') && notification.orderId && (
                         <>
                             <Title level={5} className="mt-6 mb-3">Thông tin đặt sân</Title>
 
@@ -125,7 +125,12 @@ const NotificationDetailPage = () => {
                                     <div className="flex">
                                         <EnvironmentOutlined className="mr-2 text-gray-500" />
                                         <Text strong className="w-28">Địa chỉ:</Text>
-                                        <Text>{notification.bookingId.address}</Text>
+                                        <Text>
+                                            {notification.footballfield?.address?.detail || ''}
+                                            {notification.footballfield?.address?.ward ? `${notification.footballfield.address.detail ? ', ' : ''}${notification.footballfield.address.ward}` : ''}
+                                            {notification.footballfield?.address?.district ? `${notification.footballfield.address.ward || notification.footballfield.address.detail ? ', ' : ''}${notification.footballfield.address.district}` : ''}
+                                            {notification.footballfield?.address?.province ? `${notification.footballfield.address.district || notification.footballfield.address.ward || notification.footballfield.address.detail ? ', ' : ''}${notification.footballfield.address.province}` : ''}
+                                        </Text>
                                     </div>
                                 </Col>
 
@@ -133,7 +138,7 @@ const NotificationDetailPage = () => {
                                     <div className="flex">
                                         <AppstoreOutlined className="mr-2 text-gray-500" />
                                         <Text strong className="w-24">Số sân:</Text>
-                                        <Tag color="blue">{notification.bookingId.field}</Tag>
+                                        <Tag color="blue">{notification.orderId.fieldName}</Tag>
                                     </div>
                                 </Col>
 
@@ -141,7 +146,7 @@ const NotificationDetailPage = () => {
                                     <div className="flex">
                                         <ClockCircleOutlined className="mr-2 text-gray-500" />
                                         <Text strong className="w-20">Thời gian:</Text>
-                                        <Text>{notification.bookingId.timeStart}</Text>
+                                        <Text>{notification.orderId.timeStart}</Text>
                                     </div>
                                 </Col>
 
@@ -150,7 +155,7 @@ const NotificationDetailPage = () => {
                                         <DollarOutlined className="mr-2 text-gray-500" />
                                         <Text strong className="w-20">Giá:</Text>
                                         <Text className="text-red-600 font-medium">
-                                            {notification.bookingId.price?.toLocaleString()} VND
+                                            {notification.orderId.amount?.toLocaleString()} VND
                                         </Text>
                                     </div>
                                 </Col>
@@ -159,7 +164,7 @@ const NotificationDetailPage = () => {
                                     <div className="flex">
                                         <CreditCardOutlined className="mr-2 text-gray-500" />
                                         <Text strong className="w-20">Thanh toán:</Text>
-                                        <Text>{notification.bookingId.payment_method}</Text>
+                                        <Text>{notification.orderId.gateway}</Text>
                                     </div>
                                 </Col>
 
@@ -167,7 +172,7 @@ const NotificationDetailPage = () => {
                                     <Col span={24}>
                                         <div className="flex mt-2">
                                             <Text strong className="w-32 text-red-500">Lý do từ chối:</Text>
-                                            <Text className="text-red-500">{notification.bookingId.reason}</Text>
+                                            <Text className="text-red-500">Thanh toán không hợp lệ</Text>
                                         </div>
                                     </Col>
                                 )}
@@ -181,16 +186,8 @@ const NotificationDetailPage = () => {
                                 <Col span={24}>
                                     <div className="flex">
                                         <UserOutlined className="mr-2 text-gray-500" />
-                                        <Text strong className="w-32">Người đặt:</Text>
-                                        <Text>{notification.bookingId.username}</Text>
-                                    </div>
-                                </Col>
-
-                                <Col span={24}>
-                                    <div className="flex">
-                                        <MailOutlined className="mr-2 text-gray-500" />
-                                        <Text strong className="w-32">Email:</Text>
-                                        <Text>{notification.bookingId.email}</Text>
+                                        <Text strong className="w-32">Tên đội:</Text>
+                                        <Text>{notification.orderId.teamName}</Text>
                                     </div>
                                 </Col>
 
@@ -198,7 +195,7 @@ const NotificationDetailPage = () => {
                                     <div className="flex">
                                         <PhoneOutlined className="mr-2 text-gray-500" />
                                         <Text strong className="w-32">Số điện thoại:</Text>
-                                        <Text>{notification.bookingId.phoneNumber}</Text>
+                                        <Text>{notification.orderId.phoneNumber}</Text>
                                     </div>
                                 </Col>
                             </Row>
@@ -432,7 +429,12 @@ const NotificationDetailPage = () => {
                                     <div className="flex">
                                         <EnvironmentOutlined className="mr-2 text-gray-500" />
                                         <Text strong className="w-28">Địa chỉ:</Text>
-                                        <Text>{notification.footballfield.address}</Text>
+                                         <Text>
+                                            {notification.footballfield?.address?.detail || ''}
+                                            {notification.footballfield?.address?.ward ? `${notification.footballfield.address.detail ? ', ' : ''}${notification.footballfield.address.ward}` : ''}
+                                            {notification.footballfield?.address?.district ? `${notification.footballfield.address.ward || notification.footballfield.address.detail ? ', ' : ''}${notification.footballfield.address.district}` : ''}
+                                            {notification.footballfield?.address?.province ? `${notification.footballfield.address.district || notification.footballfield.address.ward || notification.footballfield.address.detail ? ', ' : ''}${notification.footballfield.address.province}` : ''}
+                                        </Text>
                                     </div>
                                 </Col>
 

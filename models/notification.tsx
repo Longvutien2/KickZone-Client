@@ -1,5 +1,6 @@
 import { Booking } from "./booking";
 import { FootballField } from "./football_field";
+import { Order } from "./payment";
 import { Team } from "./team";
 
 export interface Notification {
@@ -9,6 +10,7 @@ export interface Notification {
     title: string; // Tiêu đề của thông báo
     content?: string; // Nội dung thông báo
     bookingId?: Booking | any ;
+    orderId?: Order | any;
     targetUser?: string | any; // ID của người nhận thông báo (nếu có)
     footballfield?: FootballField | any;
     club_A?: Team | any;

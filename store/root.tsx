@@ -9,6 +9,7 @@ import matchSlice from '../features/match.slice';
 import breadcrumbSlice from '../features/breadcrumb.slice';
 import bookingSlice from '../features/booking.slice';
 import userSlice from '../features/user.slice';
+import orderSlice from '../features/order.slice';
 
 
 const rootReducer = combineReducers({
@@ -21,7 +22,8 @@ const rootReducer = combineReducers({
     match: matchSlice,
     breadcrumb: breadcrumbSlice,
     booking:bookingSlice,
-    user: userSlice
+    user: userSlice,
+    order: orderSlice
 });
 
 export default rootReducer;

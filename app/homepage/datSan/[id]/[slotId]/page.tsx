@@ -18,6 +18,9 @@ import { addBreadcrumb, resetBreadcrumb } from "@/features/breadcrumb.slice";
 import { useAppSelector } from "@/store/hook";
 import { BankOutlined, CheckCircleOutlined, CreditCardOutlined, InfoCircleOutlined, LockOutlined, MailOutlined, MobileOutlined, PhoneOutlined, QrcodeOutlined, UserOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import { toast } from 'react-toastify';
+import PaymentQR from "@/components/Payment";
+import { createOrder } from "@/api/payment";
+import { Order } from "@/models/payment";
 
 const paymentMethods = [
     { id: "bank", name: "Chuyển khoản / Internet Banking" },
@@ -38,9 +41,9 @@ interface FieldData {
 }
 
 interface Information {
-    name: string;
-    email: string;
-    phone: string
+    teamName: string;
+    phone: string;
+    note?: string;
 }
 
 const BookingPage = () => {
@@ -58,7 +61,12 @@ const BookingPage = () => {
     const [confirmModalVisible, setConfirmModalVisible] = useState(false);
     const [formValues, setFormValues] = useState<Information | null>(null);
     const [qrContent, setQrContent] = useState("");
+    const [orderId, setOrderId] = useState("");
+    const [orderCreated, setOrderCreated] = useState(false);
+    const [newOrder, setNewOrder] = useState<any>();
+
     const dispatch = useDispatch<AppDispatch>();
+    console.log("fieldData", fieldData);
 
     // Thêm state để kiểm tra sân đã được đặt chưa
     const [isFieldBooked, setIsFieldBooked] = useState(false);
@@ -77,25 +85,53 @@ const BookingPage = () => {
             const accountNo = "29777777729"; // Số tài khoản
             const amount = fieldData.price; // Số tiền
             const accountName = "VU TIEN LONG"; // Tên tài khoản
-            const description = `${fieldData.fieldName} ${fieldData.date} ${fieldData.timeStart}`; // Nội dung chuyển khoản
+            const description = `${fieldData.field} ${fieldData.date} ${fieldData.timeStart}`; // Nội dung chuyển khoản
 
-            // Mã hóa các thông tin để đưa vào URL
-            const encodedDescription = encodeURIComponent(description);
-            const encodedAccountName = encodeURIComponent(accountName);
+            // // Mã hóa các thông tin để đưa vào URL
+            // const encodedDescription = encodeURIComponent(description);
+            // const encodedAccountName = encodeURIComponent(accountName);
 
+            const orderId = `${Date.now()}`;
             // Tạo URL VietQR
-            const vietQrUrl = `https://img.vietqr.io/image/${bankId}-${accountNo}-compact.png?amount=${amount}&addInfo=${encodedDescription}&accountName=${encodedAccountName}`;
-
+            const vietQrUrl = `https://qr.sepay.vn/img?acc=VQRQACMYR4474&bank=MBBank&amount=${amount}&des=DH${description}`;
+            setOrderId(orderId);
             setQrContent(vietQrUrl);
         }
     };
 
-    const showConfirmModal = (values: Information) => {
+    const showConfirmModal = async (values: Information) => {
         setFormValues(values);
 
         // Generate QR code if not already generated
         if (selectedPayment === "qr" && !qrContent) {
             generateQRCode();
+        }
+
+        // Nếu chọn thanh toán QR, tạo đơn hàng ngay khi hiển thị modal
+        if (selectedPayment === "qr" && orderId && user.value.user._id && fieldData) {
+            try {
+                console.log("đã tạo order");
+                const { data } = await createOrder({
+                    sepayId: orderId,
+                    userId: user.value.user._id,
+                    teamName: values.teamName,
+                    phoneNumber: values.phone,
+                    description: values.note,
+                    fieldName: fieldData.field,
+                    timeStart: fieldData.timeStart,
+                    date: fieldData.date,
+                    gateway: "MBBank",
+                    accountNumber: "29777777729",
+                    amount: fieldData.price as number,
+                    content: `${fieldData.field} ${fieldData.date} ${fieldData.timeStart}`,
+                    paymentStatus: "pending",
+                });
+                setOrderCreated(true);
+                data && setNewOrder(data);
+            } catch (error) {
+                console.error("Lỗi khi tạo đơn hàng:", error);
+                toast.error("Có lỗi xảy ra khi tạo đơn hàng. Vui lòng thử lại!");
+            }
         }
 
         setConfirmModalVisible(true);
@@ -105,56 +141,20 @@ const BookingPage = () => {
         setConfirmModalVisible(false);
     };
 
-    const handleConfirmOk = async () => {
-        setConfirmModalVisible(false);
-        if (formValues) {
-            await processBooking(formValues);
-        }
-    };
+    // const handleConfirmOk = async () => {
+    //     setConfirmModalVisible(false);
+    //     if (formValues) {
+    //         await processBooking(formValues);
+    //     }
+    // };
 
-    const processBooking = async (values: Information) => {
-        if (fieldData) {
-            const newBooking = {
-                ...fieldData,
-                payment_method: selectedPayment,
-                username: values.name,
-                email: values.email,
-                phoneNumber: values.phone,
-                user: user.value.user._id,
-                footballField: fieldData.footballField,
-                date: date as string
-            }
-
-            const { data } = await createBooking(newBooking);
-            if (data && timeslots) {
-                // Thông tin thông báo cho Manager (quản lý sân)
-                const managerNotification: Notification = {
-                    actor: 'manager',
-                    notificationType: 'new_order', // Loại thông báo Sân đã có người đặt
-                    title: `${data.field} đã có người đặt!`,
-                    content: `Sân của bạn đã có người đặt vào thời lúc: ${data.timeStart}, ngày ${data.date}.`,
-                    bookingId: data._id,
-                    footballfield: fieldData.footballField,
-                    targetUser: user.value.user._id,
-                };
-
-                await dispatch(addNotificationSlice(managerNotification));
-
-                // Khi người dùng đặt sân thành công, hiển thị thông báo
-                const userNotification: Notification = {
-                    actor: 'user',
-                    notificationType: 'new_order',
-                    title: `Yêu cầu đặt sân của bạn đã được gửi`,
-                    content: `Gửi yêu cầu đặt sân của bạn đã thành công. Vui lòng chờ chủ sân duyệt. Cảm ơn bạn đã sử dụng dịch vụ!`,
-                    bookingId: data._id,
-                    footballfield: fieldData.footballField,
-                    targetUser: user.value.user._id,
-                };
-                await dispatch(addNotificationSlice(userNotification));
-                setIsSuccess(true)
-            }
-        }
-    }
+    // const processBooking = async (values: Information) => {
+    //     if (fieldData) {
+    //         // Không cần tạo booking và gửi thông báo ở đây nữa
+    //         // Việc này đã được xử lý trong component PaymentQR
+    //         setIsSuccess(true);
+    //     }
+    // }
 
     // Giả lập dữ liệu sân từ server
     useEffect(() => {
@@ -204,14 +204,14 @@ const BookingPage = () => {
     }, [id, slotId]);
 
     // Nếu đã đặt sân thành công, hiển thị trang kết quả
-    if (isSuccess) {
+    if (isSuccess && formValues) {
         return (
             <div className="container mx-auto py-6 px-4">
                 <Result
                     status="success"
                     title="Đặt sân thành công!"
                     subTitle="Bạn đã đặt sân thành công. Vui lòng chờ chủ sân xác nhận."
-                    className="text-left" // Căn lề trái cho toàn bộ Result
+                    className="text-left"
                     extra={[
                         <div key="booking-details" className=" bg-gray-50 p-6 rounded-lg mb-6 border border-gray-200 max-w-full">
                             <h3 className="text-lg font-semibold  mb-4">Thông tin đặt sân</h3>
@@ -441,15 +441,15 @@ const BookingPage = () => {
                             <h3 className="text-lg font-semibold mb-3">Thông tin cá nhân</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <Form.Item
-                                    name="name"
-                                    label="Họ và tên"
+                                    name="teamName"
+                                    label="Tên đội bóng"
                                     labelCol={{ span: 24 }}
                                     wrapperCol={{ span: 24 }}
                                     rules={[{ required: true, message: "Vui lòng nhập họ và tên!" }]}
                                 >
                                     <Input
                                         size="large"
-                                        placeholder="Họ và tên"
+                                        placeholder="Tên đội bóng"
                                         prefix={<UserOutlined />}
                                         className="border-gray-200"
                                     />
@@ -474,7 +474,7 @@ const BookingPage = () => {
                                 </Form.Item>
                             </div>
 
-                            <Form.Item
+                            {/* <Form.Item
                                 name="email"
                                 label="Email"
                                 labelCol={{ span: 24 }}
@@ -490,7 +490,7 @@ const BookingPage = () => {
                                     prefix={<MailOutlined />}
                                     className="border-gray-200"
                                 />
-                            </Form.Item>
+                            </Form.Item> */}
 
                             <Form.Item
                                 name="note"
@@ -567,92 +567,47 @@ const BookingPage = () => {
                     <Button key="back" onClick={handleConfirmCancel}>
                         Hủy
                     </Button>,
-                    <Button
-                        key="submit"
-                        type="primary"
-                        onClick={handleConfirmOk}
-                        className="bg-orange-500"
-                    >
-                        {selectedPayment === "qr" ? "Tôi đã quét mã QR" : "Tôi đã chuyển khoản"}
-                    </Button>,
+                    selectedPayment !== "qr" && (
+                        <Button
+                            key="submit"
+                            type="primary"
+                            onClick={() => {
+                                setConfirmModalVisible(false);
+                                setIsSuccess(true);
+                            }}
+                            className="bg-orange-500"
+                        >
+                            Tôi đã chuyển khoản
+                        </Button>
+                    ),
                 ]}
                 centered
             >
                 <div className="py-4">
                     {selectedPayment === "qr" ? (
                         <div className="text-center">
-                            <p className="mb-4">Vui lòng quét mã QR hoặc nhấp vào liên kết để thanh toán:</p>
-
-                            <div className="flex flex-col items-center mb-4">
-                                {/* Hiển thị mã QR */}
-                                <img
-                                    src={qrContent}
-                                    alt="QR Code thanh toán"
-                                    className="h-64 w-64 border-gray-200 rounded-md mb-4"
-                                />
-                            </div>
-
-                            <div className="bg-gray-50 p-4 rounded-lg mb-4 border border-gray-200 text-left">
-                                <table className="w-full text-sm">
-                                    <tbody>
-                                        <tr>
-                                            <td className="py-1 font-medium w-1/3">Ngân hàng:</td>
-                                            <td className="text-blue-600">MB Bank</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="py-1 font-medium">Số tài khoản:</td>
-                                            <td>29777777729</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="py-1 font-medium">Chủ tài khoản:</td>
-                                            <td>VŨ TIẾN LONG</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="py-1 font-medium">Số tiền:</td>
-                                            <td className="text-red-600 font-bold">{fieldData?.price?.toLocaleString()} VNĐ</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="py-1 font-medium">Nội dung CK:</td>
-                                            <td className="font-bold">{fieldData?.fieldName} {fieldData?.date} {fieldData?.timeStart}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                            <PaymentQR
+                                onSuccess={(success) => {
+                                    if (success) {
+                                        setIsSuccess(true);
+                                    }
+                                }}
+                                orderId={orderId}
+                                userId={user.value.user._id as string}
+                                qrContent={qrContent}
+                                amount={fieldData?.price as number}
+                                description={`${fieldData?.field} ${fieldData?.date} ${fieldData?.timeStart}`}
+                                orderCreated={orderCreated}
+                                fieldData={fieldData} // Truyền thêm fieldData
+                                newOrder={newOrder} // Truyền thêm newOrder
+                            />
                         </div>
                     ) : (
                         <div>
                             <p className="mb-4">Vui lòng thực hiện chuyển khoản với thông tin sau:</p>
-
-                            <div className="bg-gray-50 p-4 rounded-lg mb-4 border border-gray-200">
-                                <table className="w-full text-sm">
-                                    <tbody>
-                                        <tr>
-                                            <td className="py-1 font-medium w-1/3">Ngân hàng:</td>
-                                            <td className="text-blue-600">Vietcombank</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="py-1 font-medium">Số tài khoản:</td>
-                                            <td>1234567890</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="py-1 font-medium">Chủ tài khoản:</td>
-                                            <td>CÔNG TY TNHH KICKZONE</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="py-1 font-medium">Số tiền:</td>
-                                            <td className="text-red-600 font-bold">{fieldData?.price?.toLocaleString()} VNĐ</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="py-1 font-medium">Nội dung CK:</td>
-                                            <td className="font-bold">{fieldData?.fieldName} {fieldData?.date} {fieldData?.timeStart}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                            {/* Thông tin chuyển khoản */}
                         </div>
                     )}
-
-                    <p className="text-red-500 font-medium">Lưu ý: Đơn đặt sân sẽ được xác nhận sau khi chủ sân nhận được thanh toán của bạn.</p>
                 </div>
             </Modal>
         </div>

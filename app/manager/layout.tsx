@@ -44,8 +44,13 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
         },
         {
             key: "quanLiSanBong",
-            label: <Link href="/manager/quanLiSanBong"><TrophyOutlined /> Quản lý sân bóng</Link>,
+            label: <Link href="/manager/quanLiSanBong"><TrophyOutlined /> Lịch đặt sân</Link>,
             path: "/manager/quanLiSanBong"
+        },
+          {
+            key: "orders",
+            label: <Link href="/manager/orders"><TrophyOutlined /> Quản lý đơn hàng</Link>,
+            path: "/manager/orders"
         },
         {
             key: "bookingField",

@@ -1,146 +1,3 @@
-// 'use client';
-// import { AutoComplete, Input, Pagination } from 'antd';
-// import { SearchOutlined, EnvironmentOutlined } from '@ant-design/icons';
-// import Link from 'next/link';
-// import { FootballField } from '@/models/football_field';
-// import Card from '@/components/Card';
-// import { useEffect, useState } from 'react';
-// import { useDispatch } from 'react-redux';
-// import { getListFootballFieldSlice } from '@/features/footballField.slice';
-// import { AppDispatch } from '@/store/store';
-// import { addBreadcrumb, setBreadcrumb } from '@/features/breadcrumb.slice';
-
-// const BookField = () => {
-//   const [searchValue, setSearchValue] = useState<string>(''); // Dữ liệu cho tìm kiếm
-//   const [selectedLocation, setSelectedLocation] = useState<string>(''); // Khu vực đã chọn
-//   const [filteredData, setFilteredData] = useState<FootballField[]>([]); // Dữ liệu lọc theo search
-//   const [dfData, setdfData] = useState<FootballField[]>([]); // Dữ liệu gốc để tham chiếu
-//   const dispatch = useDispatch<AppDispatch>();
-//   const [currentPage, setCurrentPage] = useState(1);
-
-//   // Lấy tất cả khu vực (location) từ filteredData[]
-//   const locations = [...new Set(filteredData?.map((item: FootballField) => item.address?.province))];
-//   console.log("locations", filteredData);
-
-//   // Lọc data theo khu vực đã chọn
-//   const handleLocationChange = (value: string) => {
-//     setSelectedLocation(value); // Lưu khu vực đã chọn
-//     if (value === "") {
-//       setFilteredData(dfData);
-//     } else {
-//       const filtered = dfData.filter((item) =>
-//         item.address.province.toLowerCase().includes(value.toLowerCase())
-//       );
-//       setFilteredData(filtered); // Cập nhật dữ liệu lọc
-//     }
-//   };
-
-//   // Lọc dữ liệu theo tên sân bóng (searchValue)
-//   const handleSearch = (value: string) => {
-//     setSearchValue(value); // Lưu giá trị tìm kiếm
-//     if (value === "") {
-//       setFilteredData(dfData);
-//     } else {
-//       const filtered = dfData.filter((item) =>
-//         item.name.toLowerCase().includes(value.toLowerCase())
-//       );
-//       setFilteredData(filtered); // Cập nhật dữ liệu lọc
-//     }
-//   };
-
-//   const handleSearchEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
-//     if (e.key === 'Enter') {
-//       // Lọc dữ liệu khi nhấn Enter
-//       const filtered = dfData.filter((item) =>
-//         item.name.toLowerCase().includes(searchValue.toLowerCase())
-//       );
-//       setFilteredData(filtered); // Cập nhật dữ liệu lọc
-//     }
-//   };
-
-//   // Lấy dữ liệu và sắp xếp
-//   useEffect(() => {
-//     const getData = async () => {
-//       const data = await dispatch(getListFootballFieldSlice());
-//       setFilteredData(data.payload as FootballField[]);
-//       setdfData(data.payload as FootballField[]); // Lưu dữ liệu gốc
-//       dispatch(setBreadcrumb([
-//         { name: 'Home', url: '/' },  // Breadcrumb gốc
-//         { name: 'Đặt sân', url: '/homepage/datSan' },  // Breadcrumb cho trang này
-//       ]));
-//     };
-//     getData();
-//   }, [dispatch]);
-
-//   return (
-//     <div className="container mx-auto">
-//       <h1 className="text-2xl font-semibold mb-4">Sân bóng</h1>
-//       <div className="items-center w-full my-4">
-//         <div className='w-full mb-2'>
-//           <AutoComplete
-//             value={selectedLocation}
-//             onChange={handleLocationChange}
-//             options={locations
-//               .filter(location =>
-//                 location.toLowerCase().includes(selectedLocation.toLowerCase())
-//               )
-//               .map((location) => ({
-//                 value: location,
-//               }))
-//             }
-//             className='w-full'
-//           >
-//             <Input
-//               prefix={<EnvironmentOutlined />}
-//               placeholder="Khu vực"
-//             />
-//           </AutoComplete>
-//         </div>
-
-//         <AutoComplete
-//           value={searchValue}
-//           onChange={handleSearch}
-//           onKeyDown={handleSearchEnter}
-//           className='w-full mb-2'
-//         >
-//           <Input
-//             prefix={<SearchOutlined />}
-//             placeholder="Nhập tên để tìm"
-//             className="w-full"
-//           />
-//         </AutoComplete>
-//       </div>
-//       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-//         {filteredData.slice((currentPage - 1) * 12, currentPage * 12).map((item, index: number) => (
-//           <div key={index + 1}>
-//             <Link href={`/homepage/datSan/${item._id}`}>
-//               <Card
-//                 key={index + 1}
-//                 name={item.name}
-//                 location={`${item.address.detail ? `${item.address.detail}, ` : ""} ${item.address.ward}, ${item.address.district}, ${item.address.province}`}
-//                 imageUrl={item.image}
-//                 verified={true}
-//               />
-//             </Link>
-//           </div>
-//         ))}
-//       </div>
-
-//       <div className="flex justify-center mt-6 mb-8">
-//               <Pagination
-//                 current={currentPage}
-//                 total={filteredData.length}
-//                 onChange={(page) => setCurrentPage(page)}
-//                 pageSize={12}
-//                 showSizeChanger={false}
-//               />
-//             </div>
-//     </div>
-//   );
-// };
-
-// export default BookField;
-
 'use client';
 import { useEffect, useState } from "react";
 import { Card, Tabs, Button, Collapse } from "antd";
@@ -158,15 +15,17 @@ import { getFootballFieldByIdSlice, getFootballFieldByIdUserSlice } from "@/feat
 import { addBreadcrumb, resetBreadcrumb, setBreadcrumb } from "@/features/breadcrumb.slice";
 import { FootballField } from "@/models/football_field";
 import { getListTimeSlotsByFootballFieldId } from "@/features/timeSlot.slice";
-import { getBookingsByFootballFieldAndDateSlice } from "@/features/booking.slice";
-import { Booking } from "@/models/booking";
+// Thay đổi import - sử dụng orders thay vì bookings
+import { getListOrdersSlice } from "@/features/order.slice";
+import { Order } from "@/models/payment";
 
 const { Panel } = Collapse
 
 const Detail = () => {
   const auth = useAppSelector((state) => state.auth)
   const timeslots = useAppSelector(state => state.timeSlot.value)
-  const bookings = useAppSelector(state => state.booking.value)
+  // Thay đổi từ bookings sang orders
+  const orders = useAppSelector(state => state.order.value)
   const footballField = useAppSelector(state => state.footballField.detail) as FootballField
 
 
@@ -181,7 +40,8 @@ const Detail = () => {
   if (!data) return <p className="text-center text-red-500">Không tìm thấy sân bóng</p>;
 
   dayjs.locale("vi"); // Thiết lập ngôn ngữ cho Dayjs
-  console.log("bookingsbookingsbookings", bookings);
+  // Thay đổi log từ bookings sang orders
+  console.log("orders", orders);
 
   // Hàm toggle mở / đóng sân
   const toggleField = (id: string) => {
@@ -235,18 +95,13 @@ const Detail = () => {
         if (!footballField._id) return;
 
         // Lấy danh sách sân và timeslots
-        const fieldsResponse = await getFieldsByIdFootball(footballField._id as string);   
+        const fieldsResponse = await getFieldsByIdFootball(footballField._id as string);
         setData(fieldsResponse.data);
         // Lấy danh sách khung giờ
         await dispatch(getListTimeSlotsByFootballFieldId(footballField._id as string));
 
-        // Lấy danh sách booking theo ngày
-        if (selectedDate) {
-          await dispatch(getBookingsByFootballFieldAndDateSlice({
-            id: footballField._id as string,
-            date: selectedDate.format('DD-MM-YYYY')
-          }));
-        }
+        // Thay đổi từ getBookingsByFootballFieldAndDateSlice sang getListOrdersSlice
+        await dispatch(getListOrdersSlice());
 
         // Thêm breadcrumb
         dispatch(setBreadcrumb([
@@ -259,14 +114,22 @@ const Detail = () => {
     };
 
     getData();
-  }, [auth.value, selectedDate]);
+  }, [auth.value]);
 
+  // Thêm useEffect mới để lấy orders khi selectedDate thay đổi
   useEffect(() => {
     const fetchData = async () => {
-      await dispatch(getBookingsByFootballFieldAndDateSlice({ id: footballField._id as string, date: selectedDate.format('DD-MM-YYYY') }));
+      // Nếu có API lấy orders theo ngày, sử dụng API đó
+      // await dispatch(getOrdersByFootballFieldAndDateSlice({ 
+      //   id: footballField._id as string, 
+      //   date: selectedDate.format('DD-MM-YYYY') 
+      // }));
+
+      // Nếu không có API cụ thể, lấy tất cả orders
+      await dispatch(getListOrdersSlice());
     };
-    if (selectedDate) fetchData();
-  }, [selectedDate])
+    if (selectedDate && footballField._id) fetchData();
+  }, [selectedDate, footballField._id])
 
   return (
     <div className="container mx-auto">
@@ -308,18 +171,19 @@ const Detail = () => {
                                     timeslots.map((slot: TimeSlot, idx) => (
                                       <Button
                                         key={idx}
-                                        disabled={bookings.length > 0 && bookings.some(
-                                          (b: Booking) =>
-                                            b.date === selectedDate.format('DD-MM-YYYY') &&
-                                            b.field === field.name &&
-                                            b.timeStart === slot.time &&
-                                            b.status === "Đã xác nhận"
+                                        // Thay đổi từ bookings.some sang orders.some
+                                        disabled={orders.length > 0 && orders.some(
+                                          (o: Order) =>
+                                            o.date === selectedDate.format('DD-MM-YYYY') &&
+                                            o.fieldName === field.name &&
+                                            o.timeStart === slot.time &&
+                                            o.paymentStatus === "success"
                                         )}
                                         className={`border p-2 rounded-md text-center cursor-pointer m-1 '
                                                                         }`}
                                       >
                                         <Link href={`/homepage/datSan/${field._id}/${slot._id}?date=${selectedDate.format("DD-MM-YYYY")}`}>
-                                          {slot.time}
+                                          {slot.time} 
                                         </Link>
                                       </Button>
                                     ))
@@ -379,7 +243,11 @@ const Detail = () => {
             <div className="space-y-2">
               <p><strong>Tổng số sân:</strong> {data?.length || 0}</p>
               <p><strong>Khung giờ có sẵn:</strong> {timeslots?.length || 0}</p>
-              <p><strong>Đã đặt hôm nay:</strong> {bookings.length > 0 && bookings?.filter((b: Booking) => b.date === dayjs().format('DD-MM-YYYY'))?.length || 0}</p>
+              {/* Thay đổi từ bookings sang orders */}
+              <p><strong>Đã đặt hôm nay:</strong> {orders.length > 0 && orders?.filter((o: Order) =>
+                o.date === dayjs().format('DD-MM-YYYY') &&
+                o.paymentStatus === "success"
+              )?.length || 0}</p>
             </div>
           </Card>
         </div>

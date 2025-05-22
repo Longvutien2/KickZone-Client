@@ -22,13 +22,13 @@ const QuanLiSanBong = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const user = useAppSelector((state) => state.auth?.value?.user);
     const footballField = useAppSelector((state) => state.footballField?.value);
-    const bookings = useAppSelector((state) => state.booking?.value) || [];
+    const bookings = useAppSelector((state) => state.order?.value) || [];
     const dispatch = useAppDispatch();
 
     dayjs.locale("vi"); // Chuyển Ant Design sang Tiếng Việt
 
     // Lấy danh sách các sân từ bookings
-    const fieldList = [...new Set(bookings.map((booking: any) => booking.field))];
+    const fieldList = [...new Set(bookings.map((booking: any) => booking.fieldName))];
 
     // Thêm state mới để theo dõi ngày đã chọn cho danh sách bên trái
     const [selectedListDate, setSelectedListDate] = useState(dayjs());
@@ -79,7 +79,7 @@ const QuanLiSanBong = () => {
         
         // Lọc theo sân nếu có chọn sân
         if (selectedField) {
-            filtered = filtered.filter((booking: any) => booking.field === selectedField);
+            filtered = filtered.filter((booking: any) => booking.fieldName === selectedField);
         }
         
         return filtered;
@@ -92,10 +92,10 @@ const QuanLiSanBong = () => {
         if (viewMode === 'day') {
             // Nhóm theo field khi xem theo ngày
             return filtered.reduce((acc: Record<string, any[]>, booking: any) => {
-                if (!acc[booking.field]) {
-                    acc[booking.field] = [];
+                if (!acc[booking.fieldName]) {
+                    acc[booking.fieldName] = [];
                 }
-                acc[booking.field].push(booking);
+                acc[booking.fieldName].push(booking);
                 return acc;
             }, {});
         } else {
@@ -125,15 +125,15 @@ const QuanLiSanBong = () => {
         
         // Lọc theo sân nếu có chọn sân
         if (selectedField) {
-            filtered = filtered.filter((booking: any) => booking.field === selectedField);
+            filtered = filtered.filter((booking: any) => booking.fieldName === selectedField);
         }
         
         // Nhóm theo field
         return filtered.reduce((acc: Record<string, any[]>, booking: any) => {
-            if (!acc[booking.field]) {
-                acc[booking.field] = [];
+            if (!acc[booking.fieldName]) {
+                acc[booking.fieldName] = [];
             }
-            acc[booking.field].push(booking);
+            acc[booking.fieldName].push(booking);
             return acc;
         }, {});
     };
@@ -218,7 +218,7 @@ const QuanLiSanBong = () => {
                                 {Object.entries(groupedBookings).map(([key, bookings]) => (
                                     <div key={key} className="border rounded-lg p-3 bg-white">
                                         <Text strong className="text-lg">
-                                            {viewMode === 'day' ? key : `Ngày ${key}`}
+                                            {viewMode === 'day' ? key : `${key}`}
                                         </Text>
                                         <Divider className="my-2" />
                                         <div className="space-y-3">
@@ -231,9 +231,9 @@ const QuanLiSanBong = () => {
                                                     <div className="flex items-center">
                                                         <Avatar icon={<UserOutlined />} className="mr-2" />
                                                         <div>
-                                                            <Text strong>{booking.username || "Không xác định"}</Text>
+                                                            <Text strong>{booking.teamName || "Không xác định"}</Text>
                                                             <div className="text-gray-500 text-sm">
-                                                                {viewMode !== 'day' && `${booking.field} - `}
+                                                                {viewMode !== 'day' && `${booking.fieldName} - `}
                                                                 {booking.timeStart || ""}
                                                             </div>
                                                         </div>
@@ -496,7 +496,7 @@ const QuanLiSanBong = () => {
                                                                             handleViewBooking(booking._id || booking.id);
                                                                         }}
                                                                     >
-                                                                        {booking.timeStart} - {booking.username}
+                                                                        {booking.timeStart} - {booking.teamName}
                                                                     </div>
                                                                 ))}
                                                             </div>
@@ -535,12 +535,12 @@ const QuanLiSanBong = () => {
                                                                 >
                                                                     <div className="flex justify-between items-center">
                                                                         <div className="font-medium">{booking.timeStart}</div>
-                                                                        <Tag color="blue">{booking.field}</Tag>
+                                                                        <Tag color="blue">{booking.fieldName}</Tag>
                                                                     </div>
                                                                     <div className="mt-1">
                                                                         <div className="flex items-center">
                                                                             <UserOutlined className="mr-2 text-gray-500" />
-                                                                            <span>{booking.username}</span>
+                                                                            <span>{booking.teamName}</span>
                                                                         </div>
                                                                         <div className="flex items-center mt-1">
                                                                             <PhoneOutlined className="mr-2 text-gray-500" />
@@ -647,12 +647,12 @@ const QuanLiSanBong = () => {
                                                                     >
                                                                         <div className="flex justify-between items-center">
                                                                             <div className="font-medium">{booking.timeStart}</div>
-                                                                            <Tag color="blue">{booking.field}</Tag>
+                                                                            <Tag color="blue">{booking.fieldName}</Tag>
                                                                         </div>
                                                                         <div className="mt-1">
                                                                             <div className="flex items-center">
                                                                                 <UserOutlined className="mr-2 text-gray-500" />
-                                                                                <span>{booking.username}</span>
+                                                                                <span>{booking.teamName}</span>
                                                                             </div>
                                                                             <div className="flex items-center mt-1">
                                                                                 <PhoneOutlined className="mr-2 text-gray-500" />
@@ -707,16 +707,16 @@ const QuanLiSanBong = () => {
                             <div className="ml-6 space-y-2">
                                 <div className="flex items-center">
                                     <Text className="min-w-32">Họ tên:</Text>
-                                    <Text strong>{selectedBooking.username || "Không có thông tin"}</Text>
+                                    <Text strong>{selectedBooking.teamName || "Không có thông tin"}</Text>
                                 </div>
                                 <div className="flex items-center">
                                     <Text className="min-w-32">Số điện thoại:</Text>
                                     <Text strong>{selectedBooking.phoneNumber || "Không có thông tin"}</Text>
                                 </div>
-                                <div className="flex items-center">
+                                {/* <div className="flex items-center">
                                     <Text className="min-w-32">Email:</Text>
                                     <Text strong>{selectedBooking.email || "Không có thông tin"}</Text>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                         
@@ -728,7 +728,7 @@ const QuanLiSanBong = () => {
                             <div className="ml-6 space-y-2">
                                 <div className="flex items-center">
                                     <Text className="min-w-32">Sân:</Text>
-                                    <Text strong>{selectedBooking.field || "Không có thông tin"}</Text>
+                                    <Text strong>{selectedBooking.fieldName || "Không có thông tin"}</Text>
                                 </div>
                                 <div className="flex items-center">
                                     <Text className="min-w-32">Ngày đặt:</Text>
@@ -740,7 +740,7 @@ const QuanLiSanBong = () => {
                                 </div>
                                 <div className="flex items-center">
                                     <Text className="min-w-32">Giá tiền:</Text>
-                                    <Text strong>{selectedBooking.price ? Intl.NumberFormat('vi-VN').format(selectedBooking.price) + " VND" : "Không có thông tin"}</Text>
+                                    <Text strong>{selectedBooking.amount ? Intl.NumberFormat('vi-VN').format(selectedBooking.amount) + " VND" : "Không có thông tin"}</Text>
                                 </div>
                             </div>
                         </div>

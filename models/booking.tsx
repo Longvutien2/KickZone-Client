@@ -14,6 +14,6 @@ export interface Booking {
   username: string;
   email: string;
   phoneNumber: string;
-  status?: "Chờ xác nhận" | "Đã xác nhận" | "Đã huỷ";
+  status?: "Chờ xác nhận" | "Đã xác nhận" | "Đã huỷ" | "Thất bại" | any;
   createdAt?: string;
 }
