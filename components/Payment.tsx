@@ -60,7 +60,7 @@ const PaymentQR: FC<PaymentQRProps> = ({
                 content: `Sân của bạn đã có người đặt vào thời lúc: ${fieldData.timeStart}, ngày ${fieldData.date}.`,
                 orderId: newOrder._id,
                 footballfield: fieldData.footballField,
-                targetUser: userId,
+                // targetUser: userId,
             };
             
             await dispatch(addNotificationSlice(managerNotification));

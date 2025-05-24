@@ -7,6 +7,7 @@ import { BellOutlined, CheckCircleOutlined, CloseCircleOutlined, TeamOutlined, S
 import { useAppDispatch, useAppSelector } from '@/store/hook';
 import { setBreadcrumb } from '@/features/breadcrumb.slice';
 import { getListNotificationSlice } from '@/features/notification.slice';
+import { io } from 'socket.io-client';
 
 const { Text, Title } = Typography;
 
@@ -19,6 +20,24 @@ const NotificationPage = () => {
     const user = useAppSelector(state => state.auth.value);
     const dispatch = useAppDispatch();
 
+    const socket = io("http://localhost:8000");
+    useEffect(() => {
+        socket.on('pushNotification', (data: any) => {
+            notifications.filter((item: any) => item.targetUser === data.targetUser).length > 0 && setFilteredNotifications((prev: any) => [...prev, data]);
+        });
+        socket.on('updateNotification', (data: any) => {
+            setFilteredNotifications((prev: any) =>
+                prev.map((item: any) =>
+                    item._id === data._id ? data : item
+                )
+            );
+        });
+        return () => {
+            socket.off('pushNotification');
+            socket.off('updateNotification');
+        };
+    }, []);
+
     useEffect(() => {
         const getData = async () => {
             await dispatch(getListNotificationSlice({ id: user.user._id as string, role: "user" }));
@@ -27,7 +46,7 @@ const NotificationPage = () => {
             if (notifications && notifications.length > 0) {
                 // Sử dụng dữ liệu thật từ Redux store
                 data = notifications
-                    .filter((item: Notification) => item.actor === "user")
+                    .filter((item: Notification) => item.actor === "user" && item.targetUser === user.user._id)
                     .filter((item: Notification) => {
                         if (filter === 'all') return true;
                         if (filter === 'unread') return item.read === false;

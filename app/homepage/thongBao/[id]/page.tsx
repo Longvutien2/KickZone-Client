@@ -1,7 +1,27 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { Typography, Button, Card, Divider, Tag, Row, Col, Skeleton } from 'antd';
-import { ArrowLeftOutlined, CheckCircleOutlined, EnvironmentOutlined, ClockCircleOutlined, DollarOutlined, CreditCardOutlined, UserOutlined, MailOutlined, PhoneOutlined, TeamOutlined, CloseCircleOutlined, ExclamationCircleOutlined, AppstoreOutlined, SearchOutlined, PlusCircleOutlined, CalendarOutlined } from '@ant-design/icons';
+import {
+    ArrowLeftOutlined,
+    CheckCircleOutlined,
+    EnvironmentOutlined,
+    ClockCircleOutlined,
+    DollarOutlined,
+    CreditCardOutlined,
+    UserOutlined,
+    MailOutlined,
+    PhoneOutlined,
+    TeamOutlined,
+    CloseCircleOutlined,
+    ExclamationCircleOutlined,
+    AppstoreOutlined,
+    SearchOutlined,
+    PlusCircleOutlined,
+    CalendarOutlined,
+    TrophyOutlined,
+    FileTextOutlined,
+    AimOutlined
+} from '@ant-design/icons';
 import { useParams, useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hook';
 import { updateNotificationSlice } from '@/features/notification.slice';
@@ -15,7 +35,7 @@ const NotificationDetailPage = () => {
     const [loading, setLoading] = useState(false); // Đặt false để hiển thị ngay lập tức
     const [notification, setNotification] = useState<any>(); // Sử dụng dữ liệu giả ngay từ đầu
     const notifications = useAppSelector(state => state.notification.value)
-    
+
     const router = useRouter();
     const dispatch = useAppDispatch();
     const { id } = useParams();
@@ -91,11 +111,11 @@ const NotificationDetailPage = () => {
                     </div>
 
                     <div className={`p-4 rounded-lg mb-6 ${notification.notificationType === 'field_booking_failed' ? 'bg-red-50' :
-                            notification.notificationType === 'posted_opponent' ? 'bg-orange-50' :
-                                notification.notificationType === 'field_booked' ? 'bg-green-50' :
-                                    notification.notificationType === 'opponent_found' ? 'bg-purple-50' :
-                                        notification.notificationType === 'field_created' ? 'bg-cyan-50' :
-                                            'bg-blue-50'
+                        notification.notificationType === 'posted_opponent' ? 'bg-orange-50' :
+                            notification.notificationType === 'field_booked' ? 'bg-green-50' :
+                                notification.notificationType === 'opponent_found' ? 'bg-purple-50' :
+                                    notification.notificationType === 'field_created' ? 'bg-cyan-50' :
+                                        'bg-blue-50'
                         }`}>
                         <Text className={
                             notification.notificationType === 'field_booking_failed' ? 'text-red-800' :
@@ -124,7 +144,7 @@ const NotificationDetailPage = () => {
                                 <Col span={24}>
                                     <div className="flex">
                                         <EnvironmentOutlined className="mr-2 text-gray-500" />
-                                        <Text strong className="w-28">Địa chỉ:</Text>
+                                        <Text strong className="w-26">Địa chỉ:</Text>
                                         <Text>
                                             {notification.footballfield?.address?.detail || ''}
                                             {notification.footballfield?.address?.ward ? `${notification.footballfield.address.detail ? ', ' : ''}${notification.footballfield.address.ward}` : ''}
@@ -137,7 +157,7 @@ const NotificationDetailPage = () => {
                                 <Col span={12}>
                                     <div className="flex">
                                         <AppstoreOutlined className="mr-2 text-gray-500" />
-                                        <Text strong className="w-24">Số sân:</Text>
+                                        <Text strong className="w-26">Số sân:</Text>
                                         <Tag color="blue">{notification.orderId.fieldName}</Tag>
                                     </div>
                                 </Col>
@@ -145,7 +165,7 @@ const NotificationDetailPage = () => {
                                 <Col span={12}>
                                     <div className="flex">
                                         <ClockCircleOutlined className="mr-2 text-gray-500" />
-                                        <Text strong className="w-20">Thời gian:</Text>
+                                        <Text strong className="w-26">Thời gian:</Text>
                                         <Text>{notification.orderId.timeStart}</Text>
                                     </div>
                                 </Col>
@@ -153,7 +173,7 @@ const NotificationDetailPage = () => {
                                 <Col span={12}>
                                     <div className="flex">
                                         <DollarOutlined className="mr-2 text-gray-500" />
-                                        <Text strong className="w-20">Giá:</Text>
+                                        <Text strong className="w-26">Giá:</Text>
                                         <Text className="text-red-600 font-medium">
                                             {notification.orderId.amount?.toLocaleString()} VND
                                         </Text>
@@ -163,7 +183,7 @@ const NotificationDetailPage = () => {
                                 <Col span={12}>
                                     <div className="flex">
                                         <CreditCardOutlined className="mr-2 text-gray-500" />
-                                        <Text strong className="w-20">Thanh toán:</Text>
+                                        <Text strong className="w-26">Thanh toán:</Text>
                                         <Text>{notification.orderId.gateway}</Text>
                                     </div>
                                 </Col>
@@ -203,8 +223,6 @@ const NotificationDetailPage = () => {
                     )}
                     {notification.notificationType === 'posted_opponent' && notification.footballfield && (
                         <>
-                            <Title level={5} className="mt-6 mb-3">Thông tin đăng tìm đối</Title>
-
                             {/* Thông tin đội bóng */}
                             <div className="bg-white p-4 shadow-md rounded-xl mb-4">
                                 <div className="grid grid-cols-3 items-center mb-2">
@@ -226,8 +244,14 @@ const NotificationDetailPage = () => {
                                             <div className='flex items-center space-x-3 text-sm mt-2 text-orange-500'>
                                                 <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{notification.club_A?.ageGroup}</span>
                                                 <span>⚡ 99</span>
-                                                <span>⭐ ?</span>
-                                                <span>👍 100</span>
+                                                <span>⭐ {notification.club_A?.rating || "?"}</span>
+                                                <span>👍 {notification.club_A?.likes || "100"}</span>
+                                            </div>
+                                            {/* Thêm thông tin liên hệ đội nhà */}
+                                            <div className="mt-2 text-xs text-gray-600">
+                                                <p><PhoneOutlined className="mr-1" /> Liên hệ: {notification.club_A?.contact || "Chưa có SĐT"}</p>
+                                                <p><TrophyOutlined className="mr-1" /> Trình độ: {notification.club_A?.level || "Trung bình yếu"}</p>
+                                                <p><FileTextOutlined className="mr-1" /> Ghi chú: {notification.club_A?.description || "(Mô tả)"}</p>
                                             </div>
                                         </div>
                                     )}
@@ -253,8 +277,13 @@ const NotificationDetailPage = () => {
                                             <div className='flex items-center justify-end space-x-3 text-sm mt-2 text-orange-500'>
                                                 <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{notification.club_B?.ageGroup}</span>
                                                 <span>⚡ 99</span>
-                                                <span>⭐ ?</span>
-                                                <span>👍 100</span>
+                                                <span>⭐ {notification.club_B?.rating || "?"}</span>
+                                                <span>👍 {notification.club_B?.likes || "100"}</span>
+                                            </div>
+                                            {/* Thêm thông tin liên hệ đội khách */}
+                                            <div className="mt-2 text-xs text-gray-600 text-right">
+                                                <p><PhoneOutlined className="mr-1" /> {notification.club_B?.contact || "Chưa có SĐT"}</p>
+                                                <p><EnvironmentOutlined className="mr-1" /> {notification.club_B?.location || "Chưa có địa chỉ"}</p>
                                             </div>
                                         </div>
                                     ) : (
@@ -267,82 +296,72 @@ const NotificationDetailPage = () => {
                                     )}
                                 </div>
                             </div>
+                            <Card className="mb-4">
+                                <Title level={5} className="mb-3">Thông tin trận đấu</Title>
+                                <Row gutter={[16, 12]}>
+                                    <Col span={24}>
+                                        <div className="flex">
+                                            <AimOutlined className="mr-2 text-gray-500" />
+                                            <Text strong className="w-24">Tên sân:</Text>
+                                            <Text>{notification.footballfield?.name}</Text>
+                                        </div>
+                                    </Col>
 
-                            <Row gutter={[16, 12]}>
-                                <Col span={24}>
-                                    <div className="flex">
-                                        <Text strong className="w-32">Tên sân:</Text>
-                                        <Text>{notification.footballfield?.name}</Text>
-                                    </div>
-                                </Col>
+                                    <Col span={24}>
+                                        <div className="flex">
+                                            <EnvironmentOutlined className="mr-2 text-gray-500" />
+                                            <Text strong className="w-24">Địa chỉ:</Text>
+                                            <Text>
+                                                {notification.footballfield?.address?.detail || ''}
+                                                {notification.footballfield?.address?.ward ? `${notification.footballfield.address.detail ? ', ' : ''}${notification.footballfield.address.ward}` : ''}
+                                                {notification.footballfield?.address?.district ? `${notification.footballfield.address.ward || notification.footballfield.address.detail ? ', ' : ''}${notification.footballfield.address.district}` : ''}
+                                                {notification.footballfield?.address?.province ? `${notification.footballfield.address.district || notification.footballfield.address.ward || notification.footballfield.address.detail ? ', ' : ''}${notification.footballfield.address.province}` : ''}
+                                            </Text>
+                                        </div>
+                                    </Col>
 
-                                <Col span={24}>
-                                    <div className="flex">
-                                        <EnvironmentOutlined className="mr-2 text-gray-500" />
-                                        <Text strong className="w-28">Địa chỉ:</Text>
-                                        <Text>
-                                            {notification.footballfield?.address?.detail || ''}
-                                            {notification.footballfield?.address?.ward ? `${notification.footballfield.address.detail ? ', ' : ''}${notification.footballfield.address.ward}` : ''}
-                                            {notification.footballfield?.address?.district ? `${notification.footballfield.address.ward || notification.footballfield.address.detail ? ', ' : ''}${notification.footballfield.address.district}` : ''}
-                                            {notification.footballfield?.address?.province ? `${notification.footballfield.address.district || notification.footballfield.address.ward || notification.footballfield.address.detail ? ', ' : ''}${notification.footballfield.address.province}` : ''}
-                                        </Text>
-                                    </div>
-                                </Col>
+                                    <Col span={24}>
+                                        <div className="flex">
+                                            <AppstoreOutlined className="mr-2 text-gray-500" />
+                                            <Text strong className="w-24">Số sân:</Text>
+                                            <Tag color="blue">{notification.orderId.fieldName}</Tag>
+                                        </div>
+                                    </Col>
 
-                                {notification.match && (
-                                    <>
-                                        <Col span={12}>
+                                    <Col span={24}>
+                                        <div className="flex">
+                                            <CalendarOutlined className="mr-2 text-gray-500" />
+                                            <Text strong className="w-24">Ngày Giờ:</Text>
+                                            <Text>{notification.orderId.timeStart} </Text>
+                                            <span className='ml-2'> / </span>
+                                            <Text className='ml-2'> {notification.orderId.date}</Text>
+                                        </div>
+                                    </Col>
+
+                                    {notification.match.contact && (
+                                        <Col span={24}>
                                             <div className="flex">
-                                                <CalendarOutlined className="mr-2 text-gray-500" />
-                                                <Text strong className="w-24">Ngày:</Text>
-                                                <Text>{moment(notification.match.date).format('DD/MM/YYYY')}</Text>
+                                                <PhoneOutlined className="mr-2 text-gray-500" />
+                                                <Text strong className="w-24">Liên hệ:</Text>
+                                                <Text>{notification.footballfield.phone}</Text>
                                             </div>
                                         </Col>
+                                    )}
+                                </Row>
 
-                                        <Col span={12}>
-                                            <div className="flex">
-                                                <ClockCircleOutlined className="mr-2 text-gray-500" />
-                                                <Text strong className="w-24">Giờ:</Text>
-                                                <Text>{notification.match.time}</Text>
-                                            </div>
-                                        </Col>
-
-                                        {notification.match.duration && (
-                                            <Col span={12}>
-                                                <div className="flex">
-                                                    <ClockCircleOutlined className="mr-2 text-gray-500" />
-                                                    <Text strong className="w-24">Thời lượng:</Text>
-                                                    <Text>{notification.match.duration} phút</Text>
-                                                </div>
-                                            </Col>
-                                        )}
-
-                                        {notification.match.contact && (
-                                            <Col span={24}>
-                                                <div className="flex">
-                                                    <PhoneOutlined className="mr-2 text-gray-500" />
-                                                    <Text strong className="w-24">Liên hệ:</Text>
-                                                    <Text>{notification.match.contact}</Text>
-                                                </div>
-                                            </Col>
-                                        )}
-                                    </>
-                                )}
-                            </Row>
-
-                            {/* Thêm nút liên hệ nếu có đối thủ */}
-                            {notification.club_B && (
-                                <div className="mt-6 flex justify-center">
+                                {/* Nút liên hệ và xem chi tiết */}
+                                <div className="mt-6 flex justify-between">
                                     <Button
-                                        type="primary"
                                         className="bg-orange-500"
-                                        icon={<PhoneOutlined />}
-                                        onClick={() => window.open(`tel:${notification.match?.contact || ''}`)}
+                                        type="primary"
+                                        icon={<CalendarOutlined />}
+                                        onClick={() => router.push(`/homepage/profile/`)}
                                     >
-                                        Liên hệ ngay
+                                        Xem chi tiết lịch thi đấu
                                     </Button>
                                 </div>
-                            )}
+                            </Card>
+
                         </>
                     )}
 
@@ -369,8 +388,14 @@ const NotificationDetailPage = () => {
                                             <div className='flex items-center space-x-3 text-sm mt-2 text-orange-500'>
                                                 <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{notification.club_A?.ageGroup}</span>
                                                 <span>⚡ 99</span>
-                                                <span>⭐ ?</span>
-                                                <span>👍 100</span>
+                                                <span>⭐ {notification.club_A?.rating || "?"}</span>
+                                                <span>👍 {notification.club_A?.likes || "100"}</span>
+                                            </div>
+                                            {/* Thêm thông tin liên hệ đội nhà */}
+                                            <div className="mt-2 text-xs text-gray-600">
+                                                <p><PhoneOutlined className="mr-1" /> Liên hệ: {notification.club_A?.contact || "Chưa có SĐT"}</p>
+                                                <p><TrophyOutlined className="mr-1" /> Trình độ: {notification.club_A?.level || "Trung bình yếu"}</p>
+                                                <p><FileTextOutlined className="mr-1" /> Ghi chú: {notification.club_A?.description || "(Mô tả)"}</p>
                                             </div>
                                         </div>
                                     )}
@@ -378,7 +403,7 @@ const NotificationDetailPage = () => {
                                     {/* VS */}
                                     <div className="text-center text-3xl font-bold">VS</div>
 
-                                    {/* Đội khách nếu có */}
+                                    {/* Đội khách */}
                                     {notification.club_B ? (
                                         <div>
                                             <div className="flex items-center justify-end space-x-3">
@@ -396,9 +421,15 @@ const NotificationDetailPage = () => {
                                             <div className='flex items-center justify-end space-x-3 text-sm mt-2 text-orange-500'>
                                                 <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{notification.club_B?.ageGroup}</span>
                                                 <span>⚡ 99</span>
-                                                <span>⭐ ?</span>
-                                                <span>👍 100</span>
+                                                <span>⭐ {notification.club_B?.rating || "?"}</span>
+                                                <span>👍 {notification.club_B?.likes || "100"}</span>
                                             </div>
+                                            {/* Thêm thông tin liên hệ đội khách */}
+                                            <div className="mt-2 text-xs text-gray-600 text-right">
+                                                <p><PhoneOutlined className="mr-1" /> {notification.club_B?.contact || "Chưa có SĐT"}</p>
+                                                <p><TrophyOutlined className="mr-1" /> Trình độ: {notification.club_B?.level || "Trung bình yếu"}</p>
+                                            </div>
+
                                         </div>
                                     ) : (
                                         <div className="flex flex-col items-end text-right">
@@ -409,6 +440,91 @@ const NotificationDetailPage = () => {
                                         </div>
                                     )}
                                 </div>
+                            </div>
+
+                            {/* Thông tin sân bóng và lịch thi đấu */}
+                            <Card className="mb-4">
+                                <Title level={5} className="mb-3">Thông tin trận đấu</Title>
+
+                                <Row gutter={[16, 12]}>
+                                    <Col span={24}>
+                                        <div className="flex">
+                                            <AimOutlined className="mr-2 text-gray-500" />
+                                            <Text strong className="w-24">Tên sân:</Text>
+                                            <Text>{notification.footballfield?.name}</Text>
+                                        </div>
+                                    </Col>
+
+                                    <Col span={24}>
+                                        <div className="flex">
+                                            <EnvironmentOutlined className="mr-2 text-gray-500" />
+                                            <Text strong className="w-24">Địa chỉ sân:</Text>
+                                            <Text>
+                                                {notification.footballfield?.address?.detail || ''}
+                                                {notification.footballfield?.address?.ward ? `${notification.footballfield.address.detail ? ', ' : ''}${notification.footballfield.address.ward}` : ''}
+                                                {notification.footballfield?.address?.district ? `${notification.footballfield.address.ward || notification.footballfield.address.detail ? ', ' : ''}${notification.footballfield.address.district}` : ''}
+                                                {notification.footballfield?.address?.province ? `${notification.footballfield.address.district || notification.footballfield.address.ward || notification.footballfield.address.detail ? ', ' : ''}${notification.footballfield.address.province}` : ''}
+                                            </Text>
+                                        </div>
+                                    </Col>
+
+                                    <Col span={24}>
+                                        <div className="flex">
+                                            <PhoneOutlined className="mr-2 text-gray-500" />
+                                            <Text strong className="w-24">Liên hệ sân:</Text>
+                                            <Text>{notification.footballfield?.phone || "Chưa có thông tin"}</Text>
+                                        </div>
+                                    </Col>
+
+                                    <Col span={24}>
+                                        <div className="flex">
+                                            <AppstoreOutlined className="mr-2 text-gray-500" />
+                                            <Text strong className="w-24">Số sân:</Text>
+                                            <Tag color="blue">{notification.orderId.fieldName}</Tag>
+                                        </div>
+                                    </Col>
+
+                                    <Col span={24}>
+                                        <div className="flex">
+                                            <CalendarOutlined className="mr-2 text-gray-500" />
+                                            <Text strong className="w-24">Ngày Giờ:</Text>
+                                            <Text>{notification?.orderId?.timeStart || notification?.match?.time} </Text>
+                                            <span className='ml-2'> / </span>
+                                            <Text className='ml-2'> {notification?.orderId?.date || (notification?.match?.date ? moment(notification.match.date).format('DD-MM-YYYY') : '')}</Text>
+                                        </div>
+                                    </Col>
+
+                                    {(notification.match?.duration || notification.orderId?.duration) && (
+                                        <Col span={12}>
+                                            <div className="flex">
+                                                <ClockCircleOutlined className="mr-2 text-gray-500" />
+                                                <Text strong className="w-24">Thời lượng:</Text>
+                                                <Text>{notification.match?.duration || notification.orderId?.duration || "90"} phút</Text>
+                                            </div>
+                                        </Col>
+                                    )}
+                                </Row>
+                            </Card>
+
+                            {/* Nút liên hệ và xem chi tiết */}
+                            <div className="mt-4 flex justify-between">
+                                <Button
+                                    type="primary"
+                                    className="bg-orange-500"
+                                    icon={<PhoneOutlined />}
+                                // onClick={() => window.open(`tel:${notification.match?.contact || notification.club_B?.contact || notification.club_A?.contact || ''}`)}
+                                >
+                                    Liên hệ ngay
+                                </Button>
+
+                                <Button
+                                    className="bg-orange-500"
+                                    type="primary"
+                                    icon={<CalendarOutlined />}
+                                    onClick={() => router.push(`/homepage/profile/`)}
+                                >
+                                    Xem chi tiết lịch thi đấu
+                                </Button>
                             </div>
                         </>
                     )}
@@ -429,7 +545,7 @@ const NotificationDetailPage = () => {
                                     <div className="flex">
                                         <EnvironmentOutlined className="mr-2 text-gray-500" />
                                         <Text strong className="w-28">Địa chỉ:</Text>
-                                         <Text>
+                                        <Text>
                                             {notification.footballfield?.address?.detail || ''}
                                             {notification.footballfield?.address?.ward ? `${notification.footballfield.address.detail ? ', ' : ''}${notification.footballfield.address.ward}` : ''}
                                             {notification.footballfield?.address?.district ? `${notification.footballfield.address.ward || notification.footballfield.address.detail ? ', ' : ''}${notification.footballfield.address.district}` : ''}
@@ -449,11 +565,11 @@ const NotificationDetailPage = () => {
                     )}
 
                     <div className={`p-4 rounded-lg text-center mt-6 ${notification.notificationType === 'field_booking_failed' ? 'bg-red-50' :
-                            notification.notificationType === 'posted_opponent' ? 'bg-orange-50' :
-                                notification.notificationType === 'field_booked' ? 'bg-green-50' :
-                                    notification.notificationType === 'opponent_found' ? ' bg-purple-50' :
-                                        notification.notificationType === 'field_created' ? ' bg-cyan-50' :
-                                            'text-blue-800'
+                        notification.notificationType === 'posted_opponent' ? 'bg-orange-50' :
+                            notification.notificationType === 'field_booked' ? 'bg-green-50' :
+                                notification.notificationType === 'opponent_found' ? ' bg-purple-50' :
+                                    notification.notificationType === 'field_created' ? ' bg-cyan-50' :
+                                        'text-blue-800'
                         }`}>
                         <Text className={
                             notification.notificationType === 'field_booking_failed' ? 'text-red-800 ' :

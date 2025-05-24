@@ -4,13 +4,14 @@ import { List, Badge, Typography, Tabs, Pagination, Empty, Avatar } from 'antd';
 import Link from 'next/link';
 import { Notification } from '@/models/notification';
 import { useAppSelector } from '@/store/hook';
-import { 
-    CheckCircleOutlined, 
-    CloseCircleOutlined, 
-    TeamOutlined, 
+import {
+    CheckCircleOutlined,
+    CloseCircleOutlined,
+    TeamOutlined,
     SearchOutlined,
     PlusCircleOutlined
 } from '@ant-design/icons';
+import { io } from 'socket.io-client';
 
 const { Text, Title } = Typography;
 
@@ -22,23 +23,41 @@ const NotificationManager = () => {
     const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
     const user = useAppSelector(state => state.auth.value);
     
+    const socket = io("http://localhost:8000");
+    useEffect(() => {
+        socket.on('pushNotification', (data: any) => {
+            data && setFilteredNotifications((prev: any) => [...prev, data]);
+        });
+        socket.on('updateNotification', (data: any) => {
+            setFilteredNotifications((prev: any) =>
+                prev.map((item: any) =>
+                    item._id === data._id ? data : item
+                )
+            );
+        });
+        return () => {
+            socket.off('pushNotification');
+            socket.off('updateNotification');
+        };
+    }, []);
+
     useEffect(() => {
         const getData = async () => {
             if (notifications && notifications.length > 0) {
                 const data: Notification[] = notifications
-                    .filter((item:Notification) => item.actor === "manager")
+                    .filter((item: Notification) => item.actor === "manager")
                     .filter((item: Notification) => {
                         if (filter === 'all') return true;
                         if (filter === 'unread') return item.read === false; // Lọc các thông báo chưa đọc
                     });
-                
+
                 // Sắp xếp theo ngày (mới nhất lên đầu)
                 const sortedData = data.sort((a, b) => {
                     const timeA = new Date(a.createdAt).getTime();
                     const timeB = new Date(b.createdAt).getTime();
                     return timeB - timeA;
                 });
-                
+
                 setFilteredNotifications(sortedData);
             }
         }
@@ -104,9 +123,9 @@ const NotificationManager = () => {
                                 label: (
                                     <span className="px-4 py-2 font-medium flex items-center">
                                         Chưa đọc
-                                        {notifications?.filter((n: Notification) => n.actor === "manager" && !n.read).length > 0 && (
+                                        {filteredNotifications?.filter((n: Notification) => n.actor === "manager" && !n.read).length > 0 && (
                                             <span className="ml-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                                                {notifications.filter((n: Notification) => n.actor === "manager" && !n.read).length}
+                                                {filteredNotifications.filter((n: Notification) => n.actor === "manager" && !n.read).length}
                                             </span>
                                         )}
                                     </span>
@@ -126,34 +145,34 @@ const NotificationManager = () => {
                                         onClick={() => handleNotificationClick(item._id as string)}
                                     >
                                         <div className="flex w-full p-4">
-                                        <div className="mr-4">
-                                            <Avatar
-                                                icon={getNotificationIcon(item)}
-                                                size={40}
-                                                className={`${!item.read ? 'bg-blue-100' : 'bg-gray-100'}`}
-                                            />
-                                        </div>
-                                        <div className="flex-grow">
-                                            <div className="flex justify-between items-start">
-                                                <div className={`text-base ${item.read === false ? 'font-semibold text-gray-900' : 'font-normal text-gray-500'}`}>
-                                                    {item.title}
-                                                    {!item.read && (
-                                                        <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">
-                                                            Mới
-                                                        </span>
-                                                    )}
+                                            <div className="mr-4">
+                                                <Avatar
+                                                    icon={getNotificationIcon(item)}
+                                                    size={40}
+                                                    className={`${!item.read ? 'bg-blue-100' : 'bg-gray-100'}`}
+                                                />
+                                            </div>
+                                            <div className="flex-grow">
+                                                <div className="flex justify-between items-start">
+                                                    <div className={`text-base ${item.read === false ? 'font-semibold text-gray-900' : 'font-normal text-gray-500'}`}>
+                                                        {item.title}
+                                                        {!item.read && (
+                                                            <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">
+                                                                Mới
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className={`text-xs whitespace-nowrap ml-4 ${item.read ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                        {convertTime(item?.createdAt).split(',')[0]}
+                                                        <br />
+                                                        {convertTime(item?.createdAt).split(',')[1]}
+                                                    </div>
                                                 </div>
-                                                <div className={`text-xs whitespace-nowrap ml-4 ${item.read ? 'text-gray-400' : 'text-gray-500'}`}>
-                                                    {convertTime(item?.createdAt).split(',')[0]}
-                                                    <br />
-                                                    {convertTime(item?.createdAt).split(',')[1]}
+                                                <div className={`mt-1 text-sm line-clamp-2 ${item.read ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                    {item.content}
                                                 </div>
                                             </div>
-                                            <div className={`mt-1 text-sm line-clamp-2 ${item.read ? 'text-gray-400' : 'text-gray-600'}`}>
-                                                {item.content}
-                                            </div>
                                         </div>
-                                    </div>
                                     </List.Item>
                                 </Link>
                             )}

@@ -16,9 +16,11 @@ import {
 } from '@ant-design/icons';
 import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
-import { getListNotificationSlice } from "@/features/notification.slice";
+import { useEffect, useState } from "react";
+import { getListNotificationManagerSlice, getListNotificationSlice } from "@/features/notification.slice";
 import { getListBookingsSlice } from "@/features/booking.slice";
+import { toast } from "react-toastify";
+import { io } from "socket.io-client";
 
 const { Header, Sider } = Layout;
 
@@ -28,6 +30,39 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
     const notifications = useAppSelector(state => state.notification.value);
     const bookings = useAppSelector(state => state.booking.value);
     const dispatch = useAppDispatch();
+    const [notification, setNotification] = useState<any>([]);
+
+    const socket = io("http://localhost:8000");
+    useEffect(() => {
+        socket.on('pushNotification', (data: any) => {
+            data && setNotification((prev: any) => [...prev, data]);
+        });
+
+        // Lắng nghe sự kiện cập nhật thông báo
+        socket.on('updateNotification', (data: any) => {
+            setNotification((prev: any) =>
+                prev.map((item: any) =>
+                    item._id === data._id ? data : item
+                )
+            );
+        });
+
+        return () => {
+            socket.off('pushNotification');
+            socket.off('updateNotification');
+        };
+    }, []);
+
+    useEffect(() => {
+        const getData = async () => {
+            if (user.isLoggedIn) {
+                const data = await dispatch(getListNotificationManagerSlice("manager"))
+                await dispatch(getListBookingsSlice())
+                setNotification(data.payload);
+            }
+        }
+        getData();
+    }, [user]);
 
     const items = [
         {
@@ -100,17 +135,17 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
                 <Link href="/manager/notification" className="flex items-center gap-2">
                     <BellOutlined />
                     <span>Thông báo</span>
-                    {notifications.filter((item: any) => 
-                        item.actor === "manager" && 
-                        !item.read 
+                    {notification?.filter((item: any) =>
+                        item.actor === "manager" &&
+                        !item.read
                     ).length > 0 && (
-                        <span className="ml-1 text-white bg-red-500 text-xs font-bold rounded-full px-2 py-0.5">
-                            {notifications.filter((item: any) => 
-                                item.actor === "manager" && 
-                                !item.read
-                            ).length}
-                        </span>
-                    )}
+                            <span className="ml-1 text-white bg-red-500 text-xs font-bold rounded-full px-2 py-0.5">
+                                {notification.filter((item: any) =>
+                                    item.actor === "manager" &&
+                                    !item.read
+                                ).length}
+                            </span>
+                        )}
                 </Link>
             ),
             path: "/manager/notification"
@@ -121,16 +156,6 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
             path: "/manager/doiCuaToi"
         },
     ];
-
-    useEffect(() => {
-        const getData = async () => {
-            if (user.isLoggedIn) {
-                await dispatch(getListNotificationSlice({ id: user.value.user._id as string, role: "manager" }))
-                await dispatch(getListBookingsSlice())
-            }
-        }
-        getData();
-    }, [user]);
 
     // Tìm key hiện tại dựa theo pathname
     const selectedKey = items.find(item => item.path === pathname || "")?.key;
@@ -145,7 +170,7 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
                     selectedKeys={[selectedKey || "/"]}
                     items={items}
                     className="border-r-0"
-                    style={{ 
+                    style={{
                         borderRight: 'none',
                     }}
                 />

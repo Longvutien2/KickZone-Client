@@ -111,6 +111,8 @@ const CreateMatchPage = () => {
         club_A: values.club_A,
         footballfield: footballField._id,
         targetUser: user.value.user._id,
+        match: data.payload._id,
+        orderId: values.orderId,
       }
       await dispatch(addNotificationSlice(userNotification));
 

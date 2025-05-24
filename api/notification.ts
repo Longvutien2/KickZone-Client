@@ -25,6 +25,10 @@ export const getNotificationByActor = (userId: string, role: string) => {
   return API_NodeJS.get<Notification[]>(`notification/${userId}/${role}`);
 };
 
+export const getNotificationByManager = (role: string) => {
+  return API_NodeJS.get<Notification[]>(`notification/role/manager/${role}`);
+};
+
 // 5. Xóa Notification theo ID
 export const deleteNotification = (id: string) => {
   return API_NodeJS.delete(`notification/${id}`);

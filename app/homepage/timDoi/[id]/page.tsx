@@ -67,7 +67,9 @@ const MatchDetail = () => {
                 footballfield: match.footballField,
                 club_A: match.club_A._id,
                 club_B: values.club_B,
-                targetUser: match.club_A.user || match.user, // ID của người tạo trận đấu
+                targetUser: match.user._id, // ID của người tạo trận đấu
+                match: match._id,
+                orderId: match.orderId
             }
             await dispatch(addNotificationSlice(ownerNotification));
 
@@ -81,9 +83,10 @@ const MatchDetail = () => {
                 club_A: match.club_A._id,
                 club_B: values.club_B,
                 targetUser: auth.value.user._id,
+                match: match._id,
+                orderId: match.orderId
             }
             await dispatch(addNotificationSlice(participantNotification));
-
             router.push("/homepage/timDoi");
         }
         setVisible(false); // Đóng modal sau khi gửi yêu cầu

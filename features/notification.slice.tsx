@@ -1,4 +1,4 @@
-import { createNotification, getNotificationByActor, updateNotification } from "@/api/notification"
+import { createNotification, getNotificationByActor, getNotificationByManager, updateNotification } from "@/api/notification"
 import { IUser } from "@/models/auth"
 import { Notification } from "@/models/notification"
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
@@ -27,6 +27,14 @@ export const getListNotificationSlice = createAsyncThunk(
     }
 )
 
+export const getListNotificationManagerSlice = createAsyncThunk(
+    "notification/getListNotificationManagerSlice",
+    async (role: string) => {
+        const { data } = await getNotificationByManager(role)
+        return data
+    }
+)
+
 
 const notificationSlice = createSlice({
     name: "notification",
@@ -38,6 +46,9 @@ const notificationSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder.addCase(getListNotificationSlice.fulfilled, (state: any, action) => {
+            state.value = action.payload
+        })
+        builder.addCase(getListNotificationManagerSlice.fulfilled, (state: any, action) => {
             state.value = action.payload
         })
         builder.addCase(addNotificationSlice.fulfilled, (state: any, action) => {

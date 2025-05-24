@@ -1,5 +1,6 @@
 import { Booking } from "./booking";
 import { FootballField } from "./football_field";
+import { Match } from "./match";
 import { Order } from "./payment";
 import { Team } from "./team";
 
@@ -13,6 +14,7 @@ export interface Notification {
     orderId?: Order | any;
     targetUser?: string | any; // ID của người nhận thông báo (nếu có)
     footballfield?: FootballField | any;
+    match?: Match | any;
     club_A?: Team | any;
     club_B?: Team | any;
     read?: boolean; // Trạng thái thông báo đã đọc hay chưa

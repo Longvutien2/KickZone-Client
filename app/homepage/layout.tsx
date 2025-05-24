@@ -13,6 +13,8 @@ import { Header } from 'antd/es/layout/layout';
 import CustomBreadcrumb from '@/components/Breadcrumb';
 import { useAppSelector } from '@/store/hook';
 import { getListBookingsSlice } from '@/features/booking.slice';
+import io from 'socket.io-client';
+import { toast } from 'react-toastify';
 
 const { Content, Sider } = Layout;
 
@@ -20,8 +22,7 @@ const { Content, Sider } = Layout;
 const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
   const user = useAppSelector(state => state.auth)
   const notifications = useSelector((state: RootStateType) => state.notification.value)
-  console.log("user", user);
-
+  const [notification, setNotification] = useState<any>([]);
   const [collapsed, setCollapsed] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
 
@@ -31,16 +32,35 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
     // Xử lý đăng xuất tại đây (xóa token, điều hướng, v.v.)
   };
 
+  const socket = io("http://localhost:8000");
+  useEffect(() => {
+    socket.on('pushNotification', (data: any) => {
+      notifications.filter((item: any) => item.targetUser === data.targetUser).length > 0 && setNotification((prev: any) => [...prev, data]);
+    });
+    socket.on('updateNotification', (data: any) => {
+      setNotification((prev: any) =>
+        prev.map((item: any) =>
+          item._id === data._id ? data : item
+        )
+      );
+    });
 
-    useEffect(() => {
-          const getData = async () => {
-              if (user.isLoggedIn) {
-                  await dispatch(getListNotificationSlice({ id: user.value.user._id as string, role: "user" }))
-                  await dispatch(getListBookingsSlice())
-              }
-          }
-          getData();
-      }, [user]);
+    return () => {
+      socket.off('pushNotification');
+      socket.off('updateNotification');
+    };
+  }, []);
+
+  useEffect(() => {
+    const getData = async () => {
+      if (user.isLoggedIn) {
+        const data = await dispatch(getListNotificationSlice({ id: user.value.user._id as string, role: "user" }))
+        await dispatch(getListBookingsSlice())
+        setNotification(data.payload);
+      }
+    }
+    getData();
+  }, [user]);
 
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -56,10 +76,10 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
         <span>
           Thông báo
         </span>
-        {notifications.length > 0 &&
+        {notification.length > 0 &&
           <div>
             <span className=" text-white bg-red-500 text-xs font-bold rounded-full px-2 py-1">
-              {notifications.filter((item: any) => !item.read).length}
+              {notification.filter((item: any) => !item.read).length}
             </span>
           </div>
         }
