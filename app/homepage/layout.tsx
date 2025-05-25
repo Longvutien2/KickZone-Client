@@ -1,7 +1,7 @@
 
 'use client';
 import React, { useEffect, useState } from 'react';
-import { AimOutlined, BellOutlined, HomeOutlined, LoginOutlined, LogoutOutlined, ThunderboltOutlined, TrophyOutlined, UserOutlined } from "@ant-design/icons";
+import { AimOutlined, BellOutlined, CalendarOutlined, HomeOutlined, LoginOutlined, LogoutOutlined, ThunderboltOutlined, TrophyOutlined, UserOutlined } from "@ant-design/icons";
 import { Breadcrumb, Dropdown, Layout, Menu, theme } from 'antd';
 import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
@@ -120,10 +120,10 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
       path: "/homepage/timDoi",
     },
     {
-      key: "ranking",
-      label: "Bảng xếp hạng",
-      icon: <TrophyOutlined />,
-      path: "/homepage/ranking",
+      key: "lichDatSan",
+      label: "Lịch đặt sân",
+      icon: <CalendarOutlined />,
+      path: "/homepage/lichDatSan",
     },
     {
       key: "datSan",
