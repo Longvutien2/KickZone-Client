@@ -14,6 +14,8 @@ export interface Order {
   phoneNumber: string;
   description?: string;
   fieldName?: string;
+  footballField?: string | any;
+  paymentMethod?: string;
   timeStart?: string;
   date?: string;
   createdAt?: string;

@@ -247,6 +247,15 @@ const MatchDetail = () => {
                                     }
                                 </span>
                                 {(() => {
+                                    // Kiểm tra xem match.orderId có tồn tại không
+                                    if (!match.orderId?.date) {
+                                        return (
+                                            <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
+                                                Không có thông tin ngày
+                                            </span>
+                                        );
+                                    }
+
                                     // Chuyển đổi ngày trận đấu sang định dạng chuẩn
                                     const matchDate = moment(match.orderId.date, "DD-MM-YYYY").startOf('day');
                                     // Lấy ngày hiện tại ở đầu ngày (00:00:00)
@@ -273,18 +282,31 @@ const MatchDetail = () => {
                                                 </span>
                                             );
                                         }
-                                    } else {
-                                        // Nếu là ngày khác, hiển thị số ngày còn lại
+                                    } else if (diffDays > 0) {
+                                        // Nếu là ngày trong tương lai
                                         return (
                                             <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
                                                 {diffDays} ngày nữa
                                             </span>
                                         );
+                                    } else {
+                                        // Nếu là ngày trong quá khứ
+                                        return (
+                                            <span className="bg-gray-100 text-gray-500 rounded-md px-2 text-xs">
+                                                Đã diễn ra
+                                            </span>
+                                        );
                                     }
                                 })()}
                             </div>
-                            <div>{match.footballField?.name},
-                                {match.footballField && (` ${match.footballField?.address?.detail ? `${match.footballField?.address?.detail}, ` : ""} ${match.footballField?.address?.ward}, ${match.footballField?.address?.district}, ${match.footballField?.address?.province}`)}
+                            <div>{match.footballField?.name || "Không có thông tin sân"},
+                                {match.footballField ?
+                                    (` ${match.footballField?.address?.detail ? `${match.footballField?.address?.detail}, ` : ""} 
+                                    ${match.footballField?.address?.ward || ""}, 
+                                    ${match.footballField?.address?.district || ""}, 
+                                    ${match.footballField?.address?.province || ""}`) :
+                                    "Không có thông tin địa chỉ"
+                                }
                             </div>
                         </div>
                     </div>
@@ -299,39 +321,54 @@ const MatchDetail = () => {
                             <div className="flex items-center space-x-3">
                                 <CalendarOutlined className="text-orange-500" />
                                 <span className="text-sm text-gray-700 capitalize">
-                                    <strong>Thời gian: </strong>:
-                                    {moment(match.date).format('dddd - DD/MM/YYYY')}
+                                    <strong>Thời gian: </strong>
+                                     {match.orderId?.timeStart} | {
+                                        match.orderId?.date ?
+                                            moment(match.orderId.date, "DD-MM-YYYY")
+                                                .locale('vi')
+                                                .format('dddd, DD-MM-YYYY')
+                                            : moment(match.date).format('dddd, DD/MM/YYYY')
+                                    }
                                 </span>
                             </div>
 
                             <div className="flex items-center space-x-3">
                                 <ClockCircleOutlined className="text-orange-500" />
                                 <span className="text-sm text-gray-700">
-                                    <strong>Giờ đá: </strong>: {match.time} - <strong>Thời lượng</strong>: {match.duration} phút
+                                    <strong>Giờ đá: </strong>: {match.orderId.timeStart || "Không có thông tin"}
                                 </span>
                             </div>
 
                             {/* Sân bóng */}
                             <div className="flex items-center space-x-3">
                                 <EnvironmentOutlined className="text-orange-500" />
-                                <span className="text-sm text-gray-700"><strong>Sân bóng: </strong>{match.footballField?.name}</span>
+                                <span className="text-sm text-gray-700"><strong>Sân bóng: </strong>{match.footballField?.name || "Không có thông tin"}</span>
                             </div>
 
                             {/* Địa điểm */}
                             <div className="flex items-center space-x-3">
                                 <EnvironmentOutlined className="text-orange-500" />
-                                <span className="text-sm text-gray-700"><strong>Địa chỉ: </strong>  {` ${match.footballField?.address.detail ? `${match.footballField?.address.detail}, ` : ""} ${match.footballField?.address.ward}, ${match.footballField?.address.district}, ${match.footballField?.address.province}`}</span>
+                                <span className="text-sm text-gray-700">
+                                    <strong>Địa chỉ: </strong>
+                                    {match.footballField?.address ?
+                                        (` ${match.footballField?.address.detail ? `${match.footballField?.address.detail}, ` : ""} 
+                                        ${match.footballField?.address.ward || ""}, 
+                                        ${match.footballField?.address.district || ""}, 
+                                        ${match.footballField?.address.province || ""}`) :
+                                        "Không có thông tin địa chỉ"
+                                    }
+                                </span>
                             </div>
 
                             {/* Liên hệ */}
                             <div className="flex items-center space-x-3">
                                 <EditOutlined className="text-orange-500" />
-                                <span className="text-sm text-gray-700"><strong>Liên hệ: </strong> {match.contact}</span>
+                                <span className="text-sm text-gray-700"><strong>Liên hệ: </strong> {match.contact || "Không có thông tin"}</span>
                             </div>
 
                             <div className="flex items-center space-x-3">
                                 <EditOutlined className="text-orange-500" />
-                                <span className="text-sm text-gray-700"><strong>Mô tả: </strong> {match?.description}</span>
+                                <span className="text-sm text-gray-700"><strong>Mô tả: </strong> {match?.description || "Không có mô tả"}</span>
                             </div>
                         </div>
                     </Card>

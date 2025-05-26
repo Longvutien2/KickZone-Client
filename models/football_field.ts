@@ -6,7 +6,7 @@ export interface FootballField {
     image: string;
     address: any;
     phone: string;
-    desc: string;
+    description?: string;
     userId: any;
     status?: string;
     timeSlot?: TimeSlot[];

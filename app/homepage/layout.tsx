@@ -94,9 +94,12 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
     },
     (user.value.user?.role === 1 || user.value.user?.role === 2) && {
       key: "manager",
-      label: "Quản lí sân bóng",
+      label: <div className='font-semibold text-red-500 flex items-center gap-2'>
+        Quản lý sân bóng
+      </div>,
       icon: <UserOutlined />,
       path: "/manager/quanLiSanBong",
+      className: 'bg-red-50 border-l-4 border-red-500 hover:bg-red-100'
     },
     // user.value.user?.role === 2 && {
     //   key: "admin",
@@ -153,7 +156,8 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
                   <span className="ml-2">{item.label}</span>
                 </Link>
               ),
-              icon: item.icon, // Lưu lại icon trong items
+              icon: item.icon,
+              className: item.className || '', // Thêm className nếu có
             }))}
           />
         </div>

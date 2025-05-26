@@ -28,7 +28,8 @@ export default function HomeProFile() {
     <div className="bg-white min-h-screen">
       {/* Header - time only */}
       <h1 className="text-2xl font-semibold mb-4">Hồ sơ</h1>
-      <Tabs
+      <MainContent />
+      {/* <Tabs
         defaultActiveKey="1"
         centered
         className="border-gray-200"
@@ -46,7 +47,7 @@ export default function HomeProFile() {
             children: <MyTeamTab />
           }
         ]}
-      />
+      /> */}
     </div>
   )
 }
@@ -96,11 +97,14 @@ const MainContent = () => {
 
         <div className="mt-6">
           <div className="flex items-center space-x-2 gap-4">
-            <Button type="primary" className="bg-orange-500 text-white" >
+            <Button type="primary" >
               <Link href={`/homepage/profile/${auth.user._id}`} >Chỉnh sửa cá nhân</Link>
             </Button>
-            <Button type="primary" className="bg-orange-500 text-white" >
+            <Button type="primary">
               <Link href={`/homepage/profile/changePassword/${auth.user._id}`} >Đổi mật khẩu</Link>
+            </Button>
+            <Button type="primary" className="bg-red-500 text-white " >
+              Đăng xuất
             </Button>
           </div>
         </div>

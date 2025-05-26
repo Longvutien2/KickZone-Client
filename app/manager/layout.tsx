@@ -12,7 +12,8 @@ import {
     TeamOutlined,
     FileSearchOutlined,
     EnvironmentOutlined,
-    UserOutlined
+    UserOutlined,
+    PieChartOutlined
 } from '@ant-design/icons';
 import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { usePathname } from "next/navigation";
@@ -69,6 +70,11 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
             key: "home",
             label: <Link href="/"><HomeOutlined /> Trang chủ</Link>,
             path: "/"
+        },
+        {
+            key: "statistics",
+            label: <Link href="/manager/statistics">< PieChartOutlined /> Thống kê</Link>,
+            path: "/manager/statistics"
         },
         {
             key: "listField",
@@ -150,11 +156,11 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
             ),
             path: "/manager/notification"
         },
-        {
-            key: "doiCuaToi",
-            label: <Link href="/manager/doiCuaToi"><TeamOutlined /> Quản lý nhân viên</Link>,
-            path: "/manager/doiCuaToi"
-        },
+        // {
+        //     key: "doiCuaToi",
+        //     label: <Link href="/manager/doiCuaToi"><TeamOutlined /> Quản lý nhân viên</Link>,
+        //     path: "/manager/doiCuaToi"
+        // },
     ];
 
     // Tìm key hiện tại dựa theo pathname

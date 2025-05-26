@@ -78,9 +78,7 @@ const footballFieldSlice = createSlice({
             state.value = [...state.value, action.payload]
         })
         builder.addCase(updateFootballFieldSlice.fulfilled, (state: any, action) => {
-            state.value = state.value.map((item: any) =>
-                item._id === action.payload._id ? action.payload : item
-            );
+            state.detail = action.payload
         });
     }
 }

@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from "react";
 import { Table, Button, Input, Space, Badge, Modal, Popconfirm, Form, Tabs, Card } from "antd";
-import { EyeOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { EyeOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from "@ant-design/icons";
 import { Field, TimeSlot } from "@/models/field";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -11,7 +11,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { getListFieldsSlice, removeFieldSlice } from "@/features/field.slice";
 import { addTimeSlotSlice, getListTimeSlotsByFootballFieldId, removeTimeSlot, removeTimeSlotByFieldId, updateTimeSlotSlice } from "@/features/timeSlot.slice";
 import { FootballField } from "@/models/football_field";
-
+import { ColumnsType } from 'antd/es/table';
 
 const ListField = () => {
     const footballField = useAppSelector((state) => state.footballField.detail) as FootballField
@@ -32,6 +32,11 @@ const ListField = () => {
         toast.success("Xóa thành công!");
     };
 
+      const handleDeleteField = (id: string) => {
+        dispath(removeFieldSlice(id));
+        toast.success("Xóa thành công!");
+    };
+
     useEffect(() => {
         if (!editingTimeSlot) {
             form.resetFields(); // Reset form khi không có TimeSlot
@@ -46,12 +51,78 @@ const ListField = () => {
         getData()
     }, [editingTimeSlot]);
 
-    const columns = [
-        { title: "#", dataIndex: "key", key: "key" },
-        { title: "Tên", dataIndex: "name", key: "name" },
-        { title: "Số người", dataIndex: "people", key: "people" },
-        { title: "Bắt đầu lúc", dataIndex: "start_time", key: "start_time" },
-        { title: "Kết thúc lúc", dataIndex: "end_time", key: "end_time" },
+    const columns: any = [
+        {
+            title: "#",
+            dataIndex: "key",
+            key: "key"
+        },
+        {
+            title: "Tên",
+            dataIndex: "name",
+            key: "name",
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }: any) => (
+                <div style={{ padding: 8 }}>
+                    <Input
+                        placeholder="Tìm kiếm tên"
+                        value={selectedKeys[0]}
+                        onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ width: 188, marginBottom: 8, display: 'block' }}
+                    />
+                    <Space>
+                        <Button
+                            type="primary"
+                            onClick={() => confirm()}
+                            size="small"
+                            style={{ width: 90 }}
+                        >
+                            Lọc
+                        </Button>
+                        <Button onClick={() => clearFilters?.()} size="small" style={{ width: 90 }}>
+                            Xóa
+                        </Button>
+                    </Space>
+                </div>
+            ),
+            onFilter: (value: string, record: Field) => record.name.toLowerCase().includes(value.toLowerCase()),
+            filterIcon: (filtered: boolean) => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+        },
+        {
+            title: "Số người",
+            dataIndex: "people",
+            key: "people",
+            filters: [
+                { text: '5 người', value: 5 },
+                { text: '6 người', value: 6 },
+                { text: '7 người', value: 7 },
+                { text: '11 người', value: 11 },
+            ],
+            onFilter: (value: number, record: Field) => record.people === value,
+            sorter: (a: Field, b: Field) => a.people - b.people,
+        },
+        {
+            title: "Bắt đầu lúc",
+            dataIndex: "start_time",
+            key: "start_time",
+            filters: [
+                { text: '7h', value: '7h' },
+                { text: '8h', value: '8h' },
+                { text: '9h', value: '9h' },
+            ],
+            onFilter: (value: string, record: Field) => record.start_time === value,
+        },
+        {
+            title: "Kết thúc lúc",
+            dataIndex: "end_time",
+            key: "end_time",
+            filters: [
+                { text: '22h', value: '22h' },
+                { text: '23h', value: '23h' },
+                { text: '24h', value: '24h' },
+            ],
+            onFilter: (value: string, record: Field) => record.end_time === value,
+        },
         {
             title: "Tình trạng",
             dataIndex: "status",
@@ -59,6 +130,11 @@ const ListField = () => {
             render: (status: string) => (
                 <Badge status="success" text={status} />
             ),
+            filters: [
+                { text: 'Hoạt động', value: 'Hoạt động' },
+                { text: 'Bảo trì', value: 'Bảo trì' },
+            ],
+            onFilter: (value: string, record: Field) => record.status === value,
         },
         {
             title: "Hành động",
@@ -69,7 +145,7 @@ const ListField = () => {
                     <Popconfirm
                         title="Bạn có chắc muốn xóa?"
                         description="Hành động này không thể hoàn tác."
-                        // onConfirm={() => handleDelete(record, record._id, "field")}
+                        onConfirm={() => handleDeleteField(record._id)}
                         okText="Xác nhận"
                         cancelText="Hủy"
                     >
@@ -81,9 +157,73 @@ const ListField = () => {
     ];
     console.log("footballFieldfootballField", footballField);
 
-    const subColumns = [
-        { title: "Ca ", dataIndex: "time", key: "time" },
-        { title: "Gía tiền", dataIndex: "price", key: "price" },
+    const subColumns: ColumnsType<TimeSlot> = [
+        {
+            title: "Ca",
+            dataIndex: "time",
+            key: "time",
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 8 }}>
+                    <Input
+                        placeholder="Tìm kiếm ca giờ"
+                        value={selectedKeys[0]}
+                        onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ width: 188, marginBottom: 8, display: 'block' }}
+                    />
+                    <Space>
+                        <Button
+                            type="primary"
+                            onClick={() => confirm()}
+                            size="small"
+                            style={{ width: 90 }}
+                        >
+                            Lọc
+                        </Button>
+                        <Button onClick={() => clearFilters?.()} size="small" style={{ width: 90 }}>
+                            Xóa
+                        </Button>
+                    </Space>
+                </div>
+            ),
+            onFilter: (value, record) => record.time.toLowerCase().includes(value.toString().toLowerCase()),
+            filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+        },
+        {
+            title: "Giá tiền",
+            dataIndex: "price",
+            key: "price",
+            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+                <div style={{ padding: 8 }}>
+                    <Input
+                        placeholder="Tìm kiếm giá tiền"
+                        value={selectedKeys[0]}
+                        onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                        onPressEnter={() => confirm()}
+                        style={{ width: 188, marginBottom: 8, display: 'block' }}
+                    />
+                    <Space>
+                        <Button
+                            type="primary"
+                            onClick={() => confirm()}
+                            size="small"
+                            style={{ width: 90 }}
+                        >
+                            Lọc
+                        </Button>
+                        <Button onClick={() => clearFilters?.()} size="small" style={{ width: 90 }}>
+                            Xóa
+                        </Button>
+                    </Space>
+                </div>
+            ),
+            onFilter: (value, record) => record.price.toString().includes(value.toString()),
+            filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
+            sorter: (a: any, b: any) => a.price - b.price,
+            render: (price) => {
+                return `${Number(price).toLocaleString('vi-VN')} VNĐ`
+            }
+        },
         {
             title: "Hành động",
             key: "action",
@@ -127,11 +267,6 @@ const ListField = () => {
                                             <Button type="primary" className="bg-green-500">
                                                 <Link href={`/manager/field/add`}>Thêm sân bóng</Link>
                                             </Button>
-                                            <Input
-                                                placeholder="Tìm kiếm..."
-                                                onChange={(e) => setSearchText(e.target.value)}
-                                                className="w-64"
-                                            />
                                         </div>
                                         <Table
                                             className="border border-gray-200"
@@ -151,11 +286,6 @@ const ListField = () => {
                                             <Button type="primary" className="bg-green-500">
                                                 <Link href={`/manager/field/addTimeSlot`}>Thêm khung giờ</Link>
                                             </Button>
-                                            <Input
-                                                placeholder="Tìm kiếm..."
-                                                onChange={(e) => setSearchText(e.target.value)}
-                                                className="w-64"
-                                            />
                                         </div>
                                         <Table
                                             className="border border-gray-200 mb-2"
