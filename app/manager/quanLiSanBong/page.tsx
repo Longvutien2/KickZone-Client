@@ -27,8 +27,11 @@ const QuanLiSanBong = () => {
 
     dayjs.locale("vi"); // Chuyển Ant Design sang Tiếng Việt
 
-    // Lấy danh sách các sân từ bookings
-    const fieldList = [...new Set(bookings.map((booking: any) => booking.fieldName))];
+    // Lấy danh sách các sân từ bookings (chỉ những booking có paymentStatus === "success")
+    const fieldList = [...new Set(bookings
+        .filter((booking: any) => booking.paymentStatus === "success")
+        .map((booking: any) => booking.fieldName)
+    )];
 
     // Thêm state mới để theo dõi ngày đã chọn cho danh sách bên trái
     const [selectedListDate, setSelectedListDate] = useState(dayjs());
@@ -51,10 +54,13 @@ const QuanLiSanBong = () => {
     // Lọc bookings theo chế độ xem và sân đã chọn
     const getFilteredBookings = () => {
         let filtered = [...bookings];
-        
+
+        // Lọc chỉ những order có paymentStatus === "success"
+        filtered = filtered.filter((booking: any) => booking.paymentStatus === "success");
+
         // Chuyển đổi định dạng ngày để so sánh với bookings
         const apiDateFormat = selectedDate.format('DD-MM-YYYY');
-        
+
         if (viewMode === 'day') {
             // Lọc theo ngày đã chọn
             filtered = filtered.filter((booking: any) => booking.date === apiDateFormat);
@@ -62,33 +68,33 @@ const QuanLiSanBong = () => {
             // Lọc theo tuần của ngày đã chọn
             const startOfWeek = selectedDate.startOf('week');
             const endOfWeek = selectedDate.endOf('week');
-            
+
             filtered = filtered.filter((booking: any) => {
                 const bookingDate = dayjs(booking.date.split('-').reverse().join('-'));
-                return bookingDate.isAfter(startOfWeek, 'day') || bookingDate.isSame(startOfWeek, 'day') && 
+                return bookingDate.isAfter(startOfWeek, 'day') || bookingDate.isSame(startOfWeek, 'day') &&
                        (bookingDate.isBefore(endOfWeek, 'day') || bookingDate.isSame(endOfWeek, 'day'));
             });
         } else if (viewMode === 'month') {
             // Lọc theo tháng của ngày đã chọn
             filtered = filtered.filter((booking: any) => {
                 const bookingDate = dayjs(booking.date.split('-').reverse().join('-'));
-                return bookingDate.month() === selectedDate.month() && 
+                return bookingDate.month() === selectedDate.month() &&
                        bookingDate.year() === selectedDate.year();
             });
         }
-        
+
         // Lọc theo sân nếu có chọn sân
         if (selectedField) {
             filtered = filtered.filter((booking: any) => booking.fieldName === selectedField);
         }
-        
+
         return filtered;
     };
 
     // Nhóm bookings theo field hoặc ngày tùy thuộc vào chế độ xem
     const groupBookings = () => {
         const filtered = getFilteredBookings();
-        
+
         if (viewMode === 'day') {
             // Nhóm theo field khi xem theo ngày
             return filtered.reduce((acc: Record<string, any[]>, booking: any) => {
@@ -118,16 +124,19 @@ const QuanLiSanBong = () => {
     // Sửa lại hàm lọc bookings cho danh sách bên trái
     const getListBookings = () => {
         let filtered = [...bookings];
-        
+
+        // Lọc chỉ những order có paymentStatus === "success"
+        filtered = filtered.filter((booking: any) => booking.paymentStatus === "success");
+
         // Lọc theo ngày đã chọn cho danh sách
         const apiDateFormat = selectedListDate.format('DD-MM-YYYY');
         filtered = filtered.filter((booking: any) => booking.date === apiDateFormat);
-        
+
         // Lọc theo sân nếu có chọn sân
         if (selectedField) {
             filtered = filtered.filter((booking: any) => booking.fieldName === selectedField);
         }
-        
+
         // Nhóm theo field
         return filtered.reduce((acc: Record<string, any[]>, booking: any) => {
             if (!acc[booking.fieldName]) {
@@ -142,14 +151,16 @@ const QuanLiSanBong = () => {
     const fullCellRender = (date: Dayjs) => {
         const formattedDate = date.format("YYYY-MM-DD");
         const apiDateFormat = `${formattedDate.split('-')[2]}-${formattedDate.split('-')[1]}-${formattedDate.split('-')[0]}`;
-        
-        const totalBookings = bookings.filter((booking: any) => booking.date === apiDateFormat).length;
+
+        const totalBookings = bookings.filter((booking: any) =>
+            booking.date === apiDateFormat && booking.paymentStatus === "success"
+        ).length;
         const isToday = date.isSame(dayjs(), 'day');
         const isSelected = date.format('YYYY-MM-DD') === selectedDate.format('YYYY-MM-DD');
         const isCurrentMonth = date.month() === dayjs(selectedDate).month();
 
         return (
-            <div 
+            <div
                 className={`
                     h-full p-2 rounded-lg cursor-pointer transition-all duration-300
                     ${isSelected ? 'bg-blue-500 text-white shadow-md' : ''}
@@ -172,7 +183,7 @@ const QuanLiSanBong = () => {
                         </div>
                     )}
                 </div>
-                
+
                 {totalBookings > 0 && (
                     <div className={`text-xs mt-1 ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
                         {totalBookings} lượt đặt
@@ -190,13 +201,13 @@ const QuanLiSanBong = () => {
             <div className="mb-6">
                 <Title level={3}>Quản lý lịch đặt sân</Title>
             </div>
-            
+
             <div className="flex flex-col lg:flex-row gap-6">
                 {/* Bộ lọc và danh sách đặt sân */}
                 <Card className="lg:w-1/3 shadow-sm">
                     <div className="mb-4">
                         <Title level={4} className="mb-4">{getListTitle()}</Title>
-                        
+
                         <div className="mb-4">
                             <Text strong>Lọc theo sân:</Text>
                             <Select
@@ -210,9 +221,9 @@ const QuanLiSanBong = () => {
                                 ))}
                             </Select>
                         </div>
-                        
+
                         <Divider className="my-4" />
-                        
+
                         {Object.keys(groupedBookings).length > 0 ? (
                             <div className="space-y-4">
                                 {Object.entries(groupedBookings).map(([key, bookings]) => (
@@ -223,8 +234,8 @@ const QuanLiSanBong = () => {
                                         <Divider className="my-2" />
                                         <div className="space-y-3">
                                             {bookings.map((booking: any) => (
-                                                <div 
-                                                    key={booking._id || booking.id} 
+                                                <div
+                                                    key={booking._id || booking.id}
                                                     className="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer"
                                                     onClick={() => handleViewBooking(booking._id || booking.id)}
                                                 >
@@ -249,19 +260,19 @@ const QuanLiSanBong = () => {
                             <div className="text-center py-8 text-gray-500">
                                 <CalendarOutlined style={{ fontSize: '32px' }} />
                                 <p className="mt-2">Không có ca đá nào trong {
-                                    viewMode === 'day' ? 'ngày' : 
-                                    viewMode === 'week' ? 'tuần' : 
+                                    viewMode === 'day' ? 'ngày' :
+                                    viewMode === 'week' ? 'tuần' :
                                     viewMode === 'month' ? 'tháng' : 'thời gian'
                                 } này</p>
                             </div>
                         )}
                     </div>
                 </Card>
-                
+
                 {/* Lịch */}
                 <Card className="lg:w-2/3 shadow-sm rounded-xl overflow-hidden">
                     <div >
-                        <ConfigProvider 
+                        <ConfigProvider
                             locale={viVN}
                             theme={{
                                 components: {
@@ -278,17 +289,17 @@ const QuanLiSanBong = () => {
                             <div className="">
                                 <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100">
                                     <div className="flex items-center space-x-3">
-                                        <Button 
-                                            type="default" 
+                                        <Button
+                                            type="default"
                                             className="rounded-full"
                                             onClick={() => handleDateChange(dayjs())}
                                         >
                                             Hôm nay
                                         </Button>
-                                        <Button 
-                                            type="text" 
+                                        <Button
+                                            type="text"
                                             onClick={() => {
-                                                const newDate = viewMode === 'day' 
+                                                const newDate = viewMode === 'day'
                                                     ? dayjs(selectedDate).subtract(1, 'day')
                                                     : viewMode === 'week'
                                                         ? dayjs(selectedDate).subtract(1, 'week')
@@ -300,10 +311,10 @@ const QuanLiSanBong = () => {
                                             icon={<LeftOutlined />}
                                             className="flex items-center justify-center w-8 h-8 hover:bg-gray-100 rounded-full"
                                         />
-                                        <Button 
-                                            type="text" 
+                                        <Button
+                                            type="text"
                                             onClick={() => {
-                                                const newDate = viewMode === 'day' 
+                                                const newDate = viewMode === 'day'
                                                     ? dayjs(selectedDate).add(1, 'day')
                                                     : viewMode === 'week'
                                                         ? dayjs(selectedDate).add(1, 'week')
@@ -316,7 +327,7 @@ const QuanLiSanBong = () => {
                                             className="flex items-center justify-center w-8 h-8 hover:bg-gray-100 rounded-full"
                                         />
                                         <span className="font-medium text-lg">
-                                            {viewMode === 'day' 
+                                            {viewMode === 'day'
                                                 ? dayjs(selectedDate).format('DD MMMM YYYY')
                                                 : viewMode === 'week'
                                                     ? `Tuần ${dayjs(selectedDate).week()}, ${dayjs(selectedDate).year()}`
@@ -326,10 +337,10 @@ const QuanLiSanBong = () => {
                                             }
                                         </span>
                                     </div>
-                                    
+
                                     <div className="flex items-center space-x-2">
                                         <div className="relative">
-                                            <Button 
+                                            <Button
                                                 className="flex items-center space-x-1"
                                                 onClick={() => setShowDropdown(!showDropdown)}
                                             >
@@ -341,13 +352,13 @@ const QuanLiSanBong = () => {
                                                 }</span>
                                                 <span>▼</span>
                                             </Button>
-                                            
+
                                             {showDropdown && (
                                                 <div className="absolute right-0 top-full mt-1 bg-white shadow-lg rounded-md z-10 w-64">
                                                     <div className="p-2">
                                                         <div className="grid grid-cols-2 gap-1">
-                                                            <Button 
-                                                                type={viewMode === 'day' ? 'primary' : 'text'} 
+                                                            <Button
+                                                                type={viewMode === 'day' ? 'primary' : 'text'}
                                                                 className="text-left flex items-center justify-between"
                                                                 onClick={() => {
                                                                     setViewMode('day');
@@ -357,8 +368,8 @@ const QuanLiSanBong = () => {
                                                                 <span>Ngày</span>
                                                                 <span className="text-gray-400">D</span>
                                                             </Button>
-                                                            <Button 
-                                                                type={viewMode === 'week' ? 'primary' : 'text'} 
+                                                            <Button
+                                                                type={viewMode === 'week' ? 'primary' : 'text'}
                                                                 className="text-left flex items-center justify-between"
                                                                 onClick={() => {
                                                                     setViewMode('week');
@@ -368,8 +379,8 @@ const QuanLiSanBong = () => {
                                                                 <span>Tuần</span>
                                                                 <span className="text-gray-400">W</span>
                                                             </Button>
-                                                            <Button 
-                                                                type={viewMode === 'month' ? 'primary' : 'text'} 
+                                                            <Button
+                                                                type={viewMode === 'month' ? 'primary' : 'text'}
                                                                 className="text-left flex items-center justify-between"
                                                                 onClick={() => {
                                                                     setViewMode('month');
@@ -379,8 +390,8 @@ const QuanLiSanBong = () => {
                                                                 <span>Tháng</span>
                                                                 <span className="text-gray-400">M</span>
                                                             </Button>
-                                                            <Button 
-                                                                type={viewMode === 'year' ? 'primary' : 'text'} 
+                                                            <Button
+                                                                type={viewMode === 'year' ? 'primary' : 'text'}
                                                                 className="text-left flex items-center justify-between"
                                                                 onClick={() => {
                                                                     setViewMode('year');
@@ -390,8 +401,8 @@ const QuanLiSanBong = () => {
                                                                 <span>Năm</span>
                                                                 <span className="text-gray-400">Y</span>
                                                             </Button>
-                                                            <Button 
-                                                                type={viewMode === 'schedule' ? 'primary' : 'text'} 
+                                                            <Button
+                                                                type={viewMode === 'schedule' ? 'primary' : 'text'}
                                                                 className="text-left flex items-center justify-between col-span-2"
                                                                 onClick={() => {
                                                                     setViewMode('schedule');
@@ -402,9 +413,9 @@ const QuanLiSanBong = () => {
                                                                 <span className="text-gray-400">A</span>
                                                             </Button>
                                                         </div>
-                                                            
+
                                                         <Divider className="my-2" />
-                                                            
+
                                                         <div className="space-y-2">
                                                             <div className="flex items-center">
                                                                 <Checkbox defaultChecked />
@@ -427,30 +438,30 @@ const QuanLiSanBong = () => {
                                                 </div>
                                             )}
                                         </div>
-                                            
+
                                         <div className="flex border rounded-md">
-                                            <Button 
-                                                type="text" 
+                                            <Button
+                                                type="text"
                                                 icon={<CalendarOutlined />}
                                                 className="border-0 rounded-l-md"
                                             />
-                                            <Button 
-                                                type="text" 
+                                            <Button
+                                                type="text"
                                                 icon={<AppstoreOutlined />}
                                                 className="border-0 border-l rounded-r-md"
                                             />
                                         </div>
-                                            
-                                        <Button 
-                                            type="text" 
+
+                                        <Button
+                                            type="text"
                                             icon={<SettingOutlined />}
                                             className="rounded-full"
                                         />
                                     </div>
                                 </div>
-                                    
+
                                 {viewMode === 'month' && (
-                                    <Calendar 
+                                    <Calendar
                                         fullscreen={false}
                                         fullCellRender={fullCellRender}
                                         onSelect={handleDateChange}
@@ -460,7 +471,7 @@ const QuanLiSanBong = () => {
                                         headerRender={() => null} // Ẩn header mặc định
                                     />
                                 )}
-                                    
+
                                 {viewMode === 'week' && (
                                     <div className="p-4">
                                         <div className="grid grid-cols-7 gap-1">
@@ -472,23 +483,25 @@ const QuanLiSanBong = () => {
                                                     </div>
                                                 </div>
                                             ))}
-                                                
+
                                             {Array.from({ length: 7 }).map((_, index) => {
                                                 const currentDate = dayjs(selectedDate).startOf('week').add(index, 'day');
                                                 const formattedDate = currentDate.format("YYYY-MM-DD");
                                                 const apiDateFormat = `${formattedDate.split('-')[2]}-${formattedDate.split('-')[1]}-${formattedDate.split('-')[0]}`;
-                                                const dayBookings = bookings.filter((booking: any) => booking.date === apiDateFormat);
-                                                    
+                                                const dayBookings = bookings.filter((booking: any) =>
+                                                    booking.date === apiDateFormat && booking.paymentStatus === "success"
+                                                );
+
                                                 return (
-                                                    <div 
-                                                        key={index} 
+                                                    <div
+                                                        key={index}
                                                         className="min-h-40 border p-2 hover:bg-blue-50 cursor-pointer"
                                                         onClick={() => handleDateChange(currentDate)}
                                                     >
                                                         {dayBookings.length > 0 ? (
                                                             <div className="space-y-1">
                                                                 {dayBookings.map((booking: any, idx: number) => (
-                                                                    <div 
+                                                                    <div
                                                                         key={idx}
                                                                         className="bg-blue-100 text-blue-800 p-1 rounded text-xs"
                                                                         onClick={(e) => {
@@ -511,24 +524,26 @@ const QuanLiSanBong = () => {
                                         </div>
                                     </div>
                                 )}
-                                    
+
                                 {viewMode === 'day' && (
                                     <div className="p-4">
                                         <div className="flex flex-col">
                                             <div className="text-center font-medium py-2 bg-gray-50">
                                                 {dayjs(selectedDate).format('dddd, DD/MM/YYYY')}
                                             </div>
-                                                
+
                                             <div className="border rounded-md mt-2 p-4">
                                                 {(() => {
                                                     const formattedDate = dayjs(selectedDate).format("YYYY-MM-DD");
                                                     const apiDateFormat = `${formattedDate.split('-')[2]}-${formattedDate.split('-')[1]}-${formattedDate.split('-')[0]}`;
-                                                    const dayBookings = bookings.filter((booking: any) => booking.date === apiDateFormat);
-                                                        
+                                                    const dayBookings = bookings.filter((booking: any) =>
+                                                        booking.date === apiDateFormat && booking.paymentStatus === "success"
+                                                    );
+
                                                     return dayBookings.length > 0 ? (
                                                         <div className="space-y-2">
                                                             {dayBookings.map((booking: any, idx: number) => (
-                                                                <div 
+                                                                <div
                                                                     key={idx}
                                                                     className="bg-white border border-blue-200 p-3 rounded-md hover:shadow-md cursor-pointer"
                                                                     onClick={() => handleViewBooking(booking._id || booking.id)}
@@ -561,23 +576,25 @@ const QuanLiSanBong = () => {
                                         </div>
                                     </div>
                                 )}
-                                    
+
                                 {viewMode === 'year' && (
                                     <div className="p-4">
                                         <div className="grid grid-cols-3 gap-4">
                                             {Array.from({ length: 12 }).map((_, index) => {
                                                 const currentMonth = dayjs(selectedDate).month(index);
                                                 const monthName = currentMonth.format('MMMM');
-                                                    
+
                                                 // Đếm số lượng booking trong tháng
                                                 const monthBookings = bookings.filter((booking: any) => {
                                                     const bookingDate = dayjs(booking.date.split('-').reverse().join('-'));
-                                                    return bookingDate.month() === index && bookingDate.year() === dayjs(selectedDate).year();
+                                                    return bookingDate.month() === index &&
+                                                           bookingDate.year() === dayjs(selectedDate).year() &&
+                                                           booking.paymentStatus === "success";
                                                 });
-                                                    
+
                                                 return (
-                                                    <div 
-                                                        key={index} 
+                                                    <div
+                                                        key={index}
                                                         className="border rounded-md p-2 hover:bg-blue-50 cursor-pointer"
                                                         onClick={() => {
                                                             handleDateChange(currentMonth);
@@ -589,11 +606,11 @@ const QuanLiSanBong = () => {
                                                             {['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'].map((day) => (
                                                                 <div key={day} className="text-center text-gray-500">{day}</div>
                                                             ))}
-                                                                
+
                                                             {Array.from({ length: currentMonth.daysInMonth() + currentMonth.startOf('month').day() }).map((_, idx) => {
                                                                 const dayOfMonth = idx - currentMonth.startOf('month').day() + 1;
                                                                 if (dayOfMonth <= 0) return <div key={idx} />;
-                                                                    
+
                                                                 return (
                                                                     <div key={idx} className="text-center">
                                                                         {dayOfMonth}
@@ -601,7 +618,7 @@ const QuanLiSanBong = () => {
                                                                 );
                                                             })}
                                                         </div>
-                                                            
+
                                                         <div className="text-center mt-2">
                                                             <Tag color="blue">{monthBookings.length} lịch đặt</Tag>
                                                         </div>
@@ -611,27 +628,29 @@ const QuanLiSanBong = () => {
                                         </div>
                                     </div>
                                 )}
-                                    
+
                                 {viewMode === 'schedule' && (
                                     <div className="p-4">
                                         <div className="space-y-4">
                                             {(() => {
-                                                // Nhóm các booking theo ngày
+                                                // Nhóm các booking theo ngày (chỉ những booking có paymentStatus === "success")
                                                 const groupedByDate: Record<string, any[]> = {};
                                                 bookings.forEach((booking: any) => {
-                                                    if (!groupedByDate[booking.date]) {
-                                                        groupedByDate[booking.date] = [];
+                                                    if (booking.paymentStatus === "success") {
+                                                        if (!groupedByDate[booking.date]) {
+                                                            groupedByDate[booking.date] = [];
+                                                        }
+                                                        groupedByDate[booking.date].push(booking);
                                                     }
-                                                    groupedByDate[booking.date].push(booking);
                                                 });
-                                                    
+
                                                 // Sắp xếp các ngày theo thứ tự tăng dần
                                                 const sortedDates = Object.keys(groupedByDate).sort((a, b) => {
                                                     const dateA = dayjs(a.split('-').reverse().join('-'));
                                                     const dateB = dayjs(b.split('-').reverse().join('-'));
                                                     return dateA.diff(dateB);
                                                 });
-                                                    
+
                                                 return sortedDates.length > 0 ? (
                                                     sortedDates.map((date) => (
                                                         <div key={date} className="border rounded-md overflow-hidden">
@@ -640,7 +659,7 @@ const QuanLiSanBong = () => {
                                                             </div>
                                                             <div className="p-3 space-y-2">
                                                                 {groupedByDate[date].map((booking: any, idx: number) => (
-                                                                    <div 
+                                                                    <div
                                                                         key={idx}
                                                                         className="bg-white border border-blue-200 p-3 rounded-md hover:shadow-md cursor-pointer"
                                                                         onClick={() => handleViewBooking(booking._id || booking.id)}
@@ -679,7 +698,7 @@ const QuanLiSanBong = () => {
                     </div>
                 </Card>
             </div>
-            
+
             {/* Modal hiển thị chi tiết đặt sân */}
             <Modal
                 title={
@@ -719,7 +738,7 @@ const QuanLiSanBong = () => {
                                 </div> */}
                             </div>
                         </div>
-                        
+
                         <div className="bg-green-50 p-4 rounded-lg">
                             <div className="flex items-center mb-2">
                                 <CalendarOutlined className="mr-2 text-green-500" />
@@ -744,7 +763,7 @@ const QuanLiSanBong = () => {
                                 </div>
                             </div>
                         </div>
-                        
+
                         {selectedBooking.note && (
                             <div className="bg-yellow-50 p-4 rounded-lg">
                                 <div className="flex items-center mb-2">

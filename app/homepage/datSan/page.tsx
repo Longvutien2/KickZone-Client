@@ -1,21 +1,17 @@
 'use client';
 import { useEffect, useState } from "react";
-import { Card, Tabs, Button, Collapse } from "antd";
-import { EnvironmentOutlined, PhoneOutlined } from '@ant-design/icons';
+import { Card, Button, Collapse, Tag } from "antd";
+import { EnvironmentOutlined, PhoneOutlined, FilterOutlined, CalendarOutlined, RightOutlined } from '@ant-design/icons';
 import dayjs, { Dayjs } from "dayjs";
 import "dayjs/locale/vi"; // Import tiếng Việt cho Day.js
 import Link from "next/link";
-import { useSelector } from "react-redux";
 import { Field, TimeSlot } from "@/models/field";
-import { RootStateType } from "@/models/type";
 import { getFieldsByIdFootball } from "@/api/field";
-import { useParams } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { getFootballFieldByIdSlice, getFootballFieldByIdUserSlice } from "@/features/footballField.slice";
 import { addBreadcrumb, resetBreadcrumb, setBreadcrumb } from "@/features/breadcrumb.slice";
 import { FootballField } from "@/models/football_field";
 import { getListTimeSlotsByFootballFieldId } from "@/features/timeSlot.slice";
-// Thay đổi import - sử dụng orders thay vì bookings
 import { getListOrdersSlice } from "@/features/order.slice";
 import { Order } from "@/models/payment";
 
@@ -31,10 +27,14 @@ const Detail = () => {
 
 
   const [data, setData] = useState<Field[]>([]); // Dữ liệu lọc the
+  const [filteredData, setFilteredData] = useState<Field[]>([]); // Dữ liệu sau khi lọc
   // const { id } = useParams();
   const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs()); // Ngày đang chọn
   const [activeField, setActiveField] = useState<string | null>(null); // Sân nào đang mở
   const [selectedDate2, setSelectedDate2] = useState(dayjs().format("D/M"));
+  const [selectedFieldType, setSelectedFieldType] = useState<string>("all"); // Bộ lọc loại sân
+  const [showCalendar, setShowCalendar] = useState(false); // Hiển thị calendar inline
+  const [tempSelectedDate, setTempSelectedDate] = useState<Dayjs>(dayjs()); // Ngày tạm chọn trong calendar
   const dispatch = useAppDispatch();
 
   if (!data) return <p className="text-center text-red-500">Không tìm thấy sân bóng</p>;
@@ -70,15 +70,31 @@ const Detail = () => {
     return `Th ${dayNumber + 1}`; // Thứ 2 -> Thứ 7
   };
 
-  // Tạo danh sách 7 ngày tiếp theo
+  // Hàm lọc sân theo loại
+  const filterFieldsByType = (fields: Field[], type: string) => {
+    if (type === "all") return fields;
+    return fields.filter(field => field.people.toString() === type);
+  };
+
+  // Lọc dữ liệu khi selectedFieldType thay đổi
+  const getFilteredFields = () => {
+    return filterFieldsByType(data, selectedFieldType);
+  };
+
+  // Tạo danh sách 30 ngày tiếp theo với style giống Moveek
   const dates = Array.from({ length: 30 }, (_, index) => {
     const date = dayjs().add(index, "day");
+    const isSelected = date.format("D/M/YYYY") === selectedDate.format("D/M/YYYY");
+
     return {
-      key: date.format("D/M/YYYY"), //2025-03-04
+      key: date.format("D/M/YYYY"),
       label: (
-        <div className="flex flex-col items-center w-full">
-          <div className="text-lg">{date.format("D/M")}</div>
-          <div className="text-sm text-gray-500">
+        <div className={`flex flex-col items-center justify-center py-3 transition-all flex-shrink-0 ${isSelected
+          ? 'bg-blue-400 text-white shadow-md'
+          : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+          } w-[120px] h-[90px]`}>
+          <div className="text-lg font-medium">{date.format("D/M")}</div>
+          <div className={`text-md ${isSelected ? 'text-white' : 'text-g  ray-500'}`}>
             {getVietnameseDay(date.day())}
           </div>
         </div>
@@ -119,12 +135,6 @@ const Detail = () => {
   // Thêm useEffect mới để lấy orders khi selectedDate thay đổi
   useEffect(() => {
     const fetchData = async () => {
-      // Nếu có API lấy orders theo ngày, sử dụng API đó
-      // await dispatch(getOrdersByFootballFieldAndDateSlice({ 
-      //   id: footballField._id as string, 
-      //   date: selectedDate.format('DD-MM-YYYY') 
-      // }));
-
       // Nếu không có API cụ thể, lấy tất cả orders
       await dispatch(getListOrdersSlice());
     };
@@ -136,26 +146,217 @@ const Detail = () => {
       <div className="flex flex-row gap-6">
         {/* Phần bên trái - Chọn ngày và danh sách sân */}
         <div className="w-2/3">
-          {/* Chọn ngày */}
-          <div className="p-2 bg-blue-50 px-12 rounded-lg w-full">
-            <Tabs
-              defaultActiveKey={selectedDate.format("YYYY-MM-DD")}
-              onChange={(item) => handleDateChange(item)}
-              centered
-              items={dates}
-              className=""
-              tabBarStyle={{ display: "flex", justifyContent: "space-between" }}
-              moreIcon={null}
-            />
+          {/* Chọn ngày - Style giống Moveek */}
+          <div>
+            <div className="flex justify-between items-center gap-1">
+              {/* Hiển thị 7 ngày đầu */}
+              <div className="flex rounded-lg border overflow-hidden border-gray-200">
+                {dates.slice(0, 7).map((date) => (
+                  <div
+                    key={date.key}
+                    onClick={() => handleDateChange(date.key)}
+                    className="cursor-pointer flex-shrink-0"
+                  >
+                    {date.label}
+                  </div>
+                ))}
+              </div>
+
+              {/* Nút toggle calendar */}
+              <div
+                onClick={() => {
+                  setTempSelectedDate(selectedDate); // Set ngày hiện tại vào temp
+                  setShowCalendar(!showCalendar);
+                }}
+                className={`cursor-pointer flex-shrink-0 flex flex-col items-center justify-center py-3 px-2 transition-all duration-200 w-[140px] min-w-[80px] h-[90px] rounded-lg border-2 border-dashed ${showCalendar
+                  ? 'bg-blue-100 text-blue-600 border-blue-400'
+                  : 'bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-600 border-gray-300 hover:border-blue-400'
+                  }`}
+              >
+                <CalendarOutlined className="text-xl mb-1" />
+                <div className="text-xs">Khác</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Calendar inline khi click "Khác" */}
+          {showCalendar && (
+            <div className="mt-4 p-4 bg-white rounded-xl shadow-lg border border-gray-200">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-800">📅 Chọn ngày đặt sân</h3>
+                <Button
+                  type="text"
+                  onClick={() => {
+                    setShowCalendar(false);
+                    setTempSelectedDate(selectedDate); // Reset về ngày đã chọn
+                  }}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ✕
+                </Button>
+              </div>
+              {/* Custom Calendar Grid */}
+              <div className="bg-white">
+                {/* Header */}
+                <div className="flex justify-between items-center mb-4 px-2">
+                  <div className="text-lg font-semibold">
+                    {tempSelectedDate.format('MMMM YYYY')}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    Chọn ngày từ hôm nay đến {dayjs().add(30, 'day').format('DD/MM')}
+                  </div>
+                </div>
+
+                {/* Days of week header */}
+                <div className="grid grid-cols-7 gap-1 mb-2">
+                  {['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'].map((day) => (
+                    <div key={day} className="text-center text-sm font-medium text-gray-500 py-2">
+                      {day}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Calendar Grid */}
+                <div className="grid grid-cols-7 gap-1">
+                  {(() => {
+                    const today = dayjs();
+
+                    // Logic để quyết định hiển thị tháng nào:
+                    // - Nếu tempSelectedDate là tháng hiện tại: hiển thị từ tuần chứa ngày hôm nay
+                    // - Nếu tempSelectedDate là tháng khác: hiển thị từ đầu tháng đó
+                    let startDate;
+                    if (tempSelectedDate.isSame(today, 'month')) {
+                      // Cùng tháng với hôm nay: bắt đầu từ tuần chứa ngày hôm nay
+                      startDate = today.startOf('week');
+                    } else {
+                      // Tháng khác: bắt đầu từ đầu tuần đầu tiên của tháng đó
+                      startDate = tempSelectedDate.startOf('month').startOf('week');
+                    }
+
+                    const dates = [];
+
+                    // Tạo 6 tuần (42 ngày) để hiển thị đầy đủ calendar
+                    for (let i = 0; i < 42; i++) {
+                      const currentDate = startDate.add(i, 'day');
+                      const isToday = currentDate.isSame(today, 'day');
+                      const isSelected = currentDate.isSame(tempSelectedDate, 'day');
+                      const isDisabled = currentDate.isBefore(today, 'day') || currentDate.isAfter(today.add(30, 'day'), 'day');
+                      const isCurrentMonth = currentDate.isSame(tempSelectedDate, 'month');
+
+                      dates.push(
+                        <div
+                          key={i}
+                          onClick={() => {
+                            if (!isDisabled) {
+                              setTempSelectedDate(currentDate);
+                            }
+                          }}
+                          className={`
+                            h-10 flex items-center justify-center text-sm cursor-pointer rounded-lg transition-all
+                            ${isSelected ? 'bg-blue-500 text-white font-semibold' : ''}
+                            ${isToday && !isSelected ? 'bg-blue-100 text-blue-600 font-semibold border-2 border-blue-300' : ''}
+                            ${isDisabled ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-blue-50'}
+                            ${!isCurrentMonth && !isDisabled ? 'text-gray-400' : ''}
+                            ${!isSelected && !isToday && !isDisabled && isCurrentMonth ? 'text-gray-700' : ''}
+                          `}
+                        >
+                          {currentDate.date()}
+                        </div>
+                      );
+                    }
+
+                    return dates;
+                  })()}
+                </div>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex justify-end gap-3 mt-4">
+                <Button
+                  onClick={() => {
+                    setShowCalendar(false);
+                    setTempSelectedDate(selectedDate); // Reset về ngày đã chọn
+                  }}
+                >
+                  Hủy
+                </Button>
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    setSelectedDate(tempSelectedDate);
+                    setShowCalendar(false);
+                  }}
+                >
+                  Chọn ngày này
+                </Button>
+              </div>
+
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                <div className="text-sm text-blue-700 font-medium">
+                  📋 Quy định đặt sân:
+                </div>
+                <div className="text-sm text-blue-600 mt-1">
+                  • Chỉ có thể đặt sân từ hôm nay đến tối đa 30 ngày tới (<strong>{dayjs().add(30, 'day').format('DD/MM/YYYY')}</strong>)
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Bộ lọc loại sân */}
+          <div className="mt-6 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex items-center gap-2">
+                <FilterOutlined className="text-blue-500" />
+                <span className="font-medium text-gray-700">Lọc theo loại sân:</span>
+              </div>
+              <div className="flex gap-3 flex-wrap">
+                <Tag
+                  color={selectedFieldType === "all" ? "blue" : "default"}
+                  className="cursor-pointer px-4 py-2 text-sm font-medium hover:scale-105 transition-transform"
+                  onClick={() => setSelectedFieldType("all")}
+                >
+                  Tất cả
+                </Tag>
+                <Tag
+                  color={selectedFieldType === "5v5" ? "green" : "default"}
+                  className="cursor-pointer px-4 py-2 text-sm font-medium hover:scale-105 transition-transform"
+                  onClick={() => setSelectedFieldType("5v5")}
+                >
+                  Sân 5
+                </Tag>
+                <Tag
+                  color={selectedFieldType === "7v7" ? "orange" : "default"}
+                  className="cursor-pointer px-4 py-2 text-sm font-medium hover:scale-105 transition-transform"
+                  onClick={() => setSelectedFieldType("7v7")}
+                >
+                  Sân 7
+                </Tag>
+                <Tag
+                  color={selectedFieldType === "22" ? "red" : "default"}
+                  className="cursor-pointer px-4 py-2 text-sm font-medium hover:scale-105 transition-transform"
+                  onClick={() => setSelectedFieldType("22")}
+                >
+                  Sân 11
+                </Tag>
+              </div>
+            </div>
           </div>
 
           {/* Danh sách sân */}
-          <div className="mt-10 border-t border-gray-300">
+          <div className="mt-6">
             <div className="text-center">
-              <h2 className="text-2xl font-bold my-4">Danh sách sân ({selectedDate.format("DD/MM/YYYY")})</h2>
+              <h2 className="text-2xl font-bold my-4">
+                Danh sách sân ({selectedDate.format("DD/MM/YYYY")})
+                {selectedFieldType !== "all" && (
+                  <span className="text-blue-500 text-lg ml-2">
+                    - {selectedFieldType === "10" ? "Sân 5 người" :
+                      selectedFieldType === "14" ? "Sân 7 người" : "Sân 11 người"}
+                  </span>
+                )}
+              </h2>
               {data &&
                 <div className="space-y-4">
-                  {data.map((field: Field, index: number) => (
+                  {getFilteredFields().map((field: Field, index: number) => (
                     <div key={index + 1}>
                       <Collapse
                         items={[
@@ -183,7 +384,7 @@ const Detail = () => {
                                                                         }`}
                                       >
                                         <Link href={`/homepage/datSan/${field._id}/${slot._id}?date=${selectedDate.format("DD-MM-YYYY")}`}>
-                                          {slot.time} 
+                                          {slot.time}
                                         </Link>
                                       </Button>
                                     ))
@@ -242,6 +443,7 @@ const Detail = () => {
           <Card title="Thống kê">
             <div className="space-y-2">
               <p><strong>Tổng số sân:</strong> {data?.length || 0}</p>
+              <p><strong>Sân hiển thị:</strong> {getFilteredFields()?.length || 0}</p>
               <p><strong>Khung giờ có sẵn:</strong> {timeslots?.length || 0}</p>
               {/* Thay đổi từ bookings sang orders */}
               <p><strong>Đã đặt hôm nay:</strong> {orders.length > 0 && orders?.filter((o: Order) =>
@@ -257,4 +459,4 @@ const Detail = () => {
 };
 
 
-export default Detail;   
+export default Detail;

@@ -20,20 +20,101 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Mobile-first responsive gradient background */
 .gradient-bg1 {
   background: radial-gradient(circle, #2DA1EE 10%, white 80%);
   border-radius: 50%;
-  padding: 10px;
+  padding: 8px;
   display: inline-block;
   position: relative;
-  box-shadow: 0 0 50px 10px rgba(45, 161, 238, 0.6);
+  box-shadow: 0 0 30px 8px rgba(45, 161, 238, 0.4);
   overflow: visible;
+  transition: box-shadow 0.3s ease;
 }
 
+/* Responsive shadow effects */
+@media (min-width: 640px) {
+  .gradient-bg1 {
+    padding: 10px;
+    box-shadow: 0 0 40px 10px rgba(45, 161, 238, 0.5);
+  }
+}
 
-.gradient-bg1  img {
-  object-fit: cover; /* Ensure the image fits properly within the div */
-  width: 160%; /* Increase the size to make the image extend outside */
-  height: 160%; /* Increase the size to make the image extend outside */
-  object-position: center; /* Keep the image centered */
+@media (min-width: 1024px) {
+  .gradient-bg1 {
+    padding: 12px;
+    box-shadow: 0 0 50px 12px rgba(45, 161, 238, 0.6);
+  }
+}
+
+.gradient-bg1 img {
+  object-fit: cover;
+  width: 160%;
+  height: 160%;
+  object-position: center;
+  transition: transform 0.3s ease;
+}
+
+.gradient-bg1:hover img {
+  transform: scale(1.05);
+}
+
+/* Mobile touch improvements */
+@media (max-width: 1023px) {
+  /* Ensure touch targets are at least 44px */
+  button, .ant-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Improve text readability on mobile */
+  body {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* Smooth scrolling for mobile */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Prevent horizontal scroll on mobile */
+  body {
+    overflow-x: hidden;
+  }
+}
+
+/* Custom scrollbar for better mobile experience */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2DA1EE;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2590d1;
+}
+
+/* Focus styles for accessibility */
+button:focus,
+a:focus,
+.ant-btn:focus {
+  outline: 2px solid #2DA1EE;
+  outline-offset: 2px;
+}
+
+/* Mobile-specific animations */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

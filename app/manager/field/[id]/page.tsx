@@ -1,5 +1,5 @@
 'use client';
-import { Form, Input, InputNumber, Select, Button } from "antd";
+import { Form, Input, Select, Button } from "antd";
 import { Field } from "@/models/field";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
@@ -7,6 +7,7 @@ import { RootStateType } from "@/models/type";
 import { useAppDispatch } from "@/store/hook";
 import { useParams, useRouter } from "next/navigation";
 import { updateFieldSlice } from "@/features/field.slice";
+import { useState, useEffect } from "react";
 
 const { Option } = Select;
 
@@ -16,30 +17,76 @@ const EditFieldPage = () => {
     const dispatch = useAppDispatch();
     const { id } = useParams();
     const router = useRouter();
-    const oldField = fieldData.find((item) => item._id == id)
+    const [loading, setLoading] = useState(false);
+
+    const oldField = fieldData.find((item) => item._id == id);
+
+    // Set initial values khi component mount
+    useEffect(() => {
+        if (oldField) {
+            // Map dữ liệu cũ sang format mới (chỉ 4 trường cần thiết)
+            const oldFieldAny = oldField as any;
+            const initialValues = {
+                _id: oldField._id,
+                name: oldField.name,
+                people: oldFieldAny.people, // Default nếu chưa có
+                surface: oldFieldAny.surface,
+                status: oldField.status
+            };
+            form.setFieldsValue(initialValues);
+        }
+    }, [oldField, form]);
 
     // Gửi dữ liệu lên server
-    const handleSubmit = async (values: Field) => {
+    const handleSubmit = async (values: any) => {
+        setLoading(true);
         console.log("values", values);
 
-        const data = await dispatch(updateFieldSlice(values));
-        console.log("data", data);
+        try {
+            // Chuẩn bị dữ liệu để gửi (chỉ 4 trường cần thiết)
+            const fieldData_submit: Partial<Field> = {
+                _id: oldField?._id,
+                name: values.name,
+                people: values.people, // Giữ nguyên people cũ
+                status: values.status,
+                surface: values.surface,
+                foolballFieldId: oldField?.foolballFieldId,
+            };
 
-        if (data.payload) {
-            toast.success("Sửa sân bóng thành công!");
-            router.replace("/manager/field"); // Chuyển hướng về trang danh sách sân
-        } else {
-            toast.success("Sửa sân bóng thất bại, vui lòng thử lại!");
+            const data = await dispatch(updateFieldSlice(fieldData_submit as Field));
+            console.log("data", data);
+
+            if (data.payload) {
+                toast.success("Sửa sân bóng thành công!");
+                router.replace("/manager/field");
+            } else {
+                toast.error("Sửa sân bóng thất bại, vui lòng thử lại!");
+            }
+        } catch (error) {
+            console.error("Error updating field:", error);
+            toast.error("Có lỗi xảy ra khi cập nhật sân bóng!");
+        } finally {
+            setLoading(false);
         }
-
     };
+
+    // Hiển thị loading nếu chưa có dữ liệu
+    if (!oldField) {
+        return (
+            <div className="p-6 bg-gray-100 min-h-screen">
+                <div className="bg-white p-6 rounded-lg shadow">
+                    <div className="text-center">Đang tải dữ liệu...</div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="p-6 bg-gray-100 min-h-screen">
-            <div className=" bg-white p-6 rounded-lg shadow ">
+            <div className="bg-white p-6 rounded-lg shadow">
                 <h2 className="text-xl font-medium mb-4">Sửa sân bóng</h2>
-                <Form form={form} initialValues={oldField} layout="vertical" onFinish={handleSubmit}>
 
+                <Form form={form} layout="vertical" onFinish={handleSubmit}>
                     <Form.Item name="_id" hidden>
                         <Input />
                     </Form.Item>
@@ -50,34 +97,33 @@ const EditFieldPage = () => {
                         label="Tên sân"
                         rules={[{ required: true, message: "Vui lòng nhập tên sân!" }]}
                     >
-                        <Input placeholder="Nhập tên sân..." />
+                        <Input placeholder="Sân 1, Sân 2..." />
                     </Form.Item>
 
-                    {/* Số người tối đa */}
+                    {/* Loại sân */}
                     <Form.Item
                         name="people"
-                        label="Số người"
-                        rules={[{ required: true, message: "Vui lòng nhập số người!" }]}
+                        label="Loại sân"
+                        rules={[{ required: true, message: "Vui lòng chọn loại sân!" }]}
                     >
-                        <InputNumber min={1} max={20} style={{ width: "100%" }} />
+                        <Select placeholder="Chọn loại sân">
+                            <Option value="5v5">Sân 5 người</Option>
+                            <Option value="7v7">Sân 7 người</Option>
+                            <Option value="11v11">Sân 11 người</Option>
+                        </Select>
                     </Form.Item>
 
-                    {/* Giờ mở cửa */}
+                    {/* Loại mặt sân */}
                     <Form.Item
-                        name="start_time"
-                        label="Bắt đầu lúc"
-                        rules={[{ required: true, message: "Vui lòng nhập giờ mở cửa!" }]}
+                        name="surface"
+                        label="Loại mặt sân"
+                        rules={[{ required: true, message: "Vui lòng chọn loại mặt sân!" }]}
                     >
-                        <Input placeholder="Nhập giờ mở cửa (ví dụ: 7h)" />
-                    </Form.Item>
-
-                    {/* Giờ đóng cửa */}
-                    <Form.Item
-                        name="end_time"
-                        label="Kết thúc lúc"
-                        rules={[{ required: true, message: "Vui lòng nhập giờ đóng cửa!" }]}
-                    >
-                        <Input placeholder="Nhập giờ đóng cửa (ví dụ: 22h)" />
+                        <Select placeholder="Chọn loại mặt sân">
+                            <Option value="Cỏ tự nhiên">Cỏ tự nhiên</Option>
+                            <Option value="Cỏ nhân tạo">Cỏ nhân tạo</Option>
+                            <Option value="Sân trong nhà">Sân trong nhà</Option>
+                        </Select>
                     </Form.Item>
 
                     {/* Tình trạng sân */}
@@ -92,9 +138,22 @@ const EditFieldPage = () => {
                         </Select>
                     </Form.Item>
 
-                    <Button type="primary" htmlType="submit" block>
-                        Sửa sân bóng
-                    </Button>
+                    <div className="flex gap-4">
+                        <Button
+                            type="primary"
+                            htmlType="submit"
+                            loading={loading}
+                        >
+                            Cập nhật sân bóng
+                        </Button>
+
+                        <Button
+                            type="default"
+                            onClick={() => router.back()}
+                        >
+                            Hủy
+                        </Button>
+                    </div>
                 </Form>
             </div>
         </div>

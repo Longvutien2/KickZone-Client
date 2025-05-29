@@ -19,8 +19,9 @@ import { useAppSelector } from "@/store/hook";
 import { BankOutlined, CheckCircleOutlined, CreditCardOutlined, InfoCircleOutlined, LockOutlined, MailOutlined, MobileOutlined, PhoneOutlined, QrcodeOutlined, UserOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import { toast } from 'react-toastify';
 import PaymentQR from "@/components/Payment";
-import { createOrder } from "@/api/payment";
+import { createOrder, getOrdersByUserId, updatePendingOrder } from "@/api/payment";
 import { Order } from "@/models/payment";
+import { useOrderCleanup } from "@/utils/orderCleanup";
 
 const paymentMethods = [
     { id: "bank", name: "Chuyển khoản / Internet Banking" },
@@ -78,6 +79,26 @@ const BookingPage = () => {
         }
     }, [selectedPayment, fieldData]);
 
+    // Function to check existing pending order
+    const checkExistingPendingOrder = async (userId: string, fieldName: string, date: string, timeStart: string) => {
+        try {
+            const { data: userOrders } = await getOrdersByUserId(userId);
+
+            // Tìm order pending cho cùng sân, ngày, giờ
+            const existingPendingOrder = userOrders.find((order: any) =>
+                order.paymentStatus === "pending" &&
+                order.fieldName === fieldName &&
+                order.date === date &&
+                order.timeStart === timeStart
+            );
+
+            return existingPendingOrder;
+        } catch (error) {
+            console.error("Lỗi khi kiểm tra order pending:", error);
+            return null;
+        }
+    };
+
     // Function to generate QR code
     const generateQRCode = () => {
         if (fieldData) {
@@ -107,30 +128,58 @@ const BookingPage = () => {
             generateQRCode();
         }
 
-        // Nếu chọn thanh toán QR, tạo đơn hàng ngay khi hiển thị modal
+        // Nếu chọn thanh toán QR, kiểm tra và tạo/cập nhật đơn hàng
         if (selectedPayment === "qr" && orderId && user.value.user._id && fieldData) {
             try {
-                console.log("đã tạo order");
-                const { data } = await createOrder({
-                    sepayId: orderId,
-                    userId: user.value.user._id,
-                    teamName: values.teamName,
-                    phoneNumber: values.phone,
-                    description: values.note,
-                    fieldName: fieldData.field,
-                    timeStart: fieldData.timeStart,
-                    date: fieldData.date,
-                    gateway: "MBBank",
-                    accountNumber: "29777777729",
-                    amount: fieldData.price as number,
-                    content: `${fieldData.field} ${fieldData.date} ${fieldData.timeStart}`,
-                    paymentStatus: "pending",
-                });
-                setOrderCreated(true);
-                data && setNewOrder(data);
+                // Kiểm tra xem đã có order pending cho cùng sân/thời gian chưa
+                const existingOrder = await checkExistingPendingOrder(
+                    user.value.user._id,
+                    fieldData.field,
+                    fieldData.date,
+                    fieldData.timeStart
+                );
+
+                if (existingOrder) {
+                    // Nếu đã có order pending, cập nhật thông tin mới
+                    console.log("Cập nhật order pending:", existingOrder);
+                    try {
+                        const { data: updatedOrder } = await updatePendingOrder(existingOrder._id!, {
+                            teamName: values.teamName,
+                            phoneNumber: values.phone,
+                            description: values.note,
+                            content: `${fieldData.field} ${fieldData.date} ${fieldData.timeStart}`,
+                        });
+                        setNewOrder(updatedOrder);
+                        setOrderCreated(true);
+                    } catch (updateError) {
+                        console.error("Lỗi khi cập nhật order:", updateError);
+                        // Nếu cập nhật thất bại, sử dụng order cũ
+                        setNewOrder(existingOrder);
+                        setOrderCreated(true);
+                    }
+                } else {
+                    // Nếu chưa có, tạo order mới
+                    const { data } = await createOrder({
+                        sepayId: orderId,
+                        userId: user.value.user._id,
+                        teamName: values.teamName,
+                        phoneNumber: values.phone,
+                        description: values.note,
+                        fieldName: fieldData.field,
+                        timeStart: fieldData.timeStart,
+                        date: fieldData.date,
+                        gateway: "MBBank",
+                        accountNumber: "29777777729",
+                        amount: fieldData.price as number,
+                        content: `${fieldData.field} ${fieldData.date} ${fieldData.timeStart}`,
+                        paymentStatus: "pending",
+                    });
+                    setOrderCreated(true);
+                    data && setNewOrder(data);
+                }
             } catch (error) {
-                console.error("Lỗi khi tạo đơn hàng:", error);
-                toast.error("Có lỗi xảy ra khi tạo đơn hàng. Vui lòng thử lại!");
+                console.error("Lỗi khi xử lý đơn hàng:", error);
+                toast.error("Có lỗi xảy ra khi xử lý đơn hàng. Vui lòng thử lại!");
             }
         }
 
@@ -155,6 +204,9 @@ const BookingPage = () => {
     //         setIsSuccess(true);
     //     }
     // }
+
+    // Auto cleanup orders pending khi component mount
+    useOrderCleanup(true);
 
     // Giả lập dữ liệu sân từ server
     useEffect(() => {

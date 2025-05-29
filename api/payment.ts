@@ -1,8 +1,8 @@
-import { 
-  CreateOrderRequest, 
-  CreateOrderResponse, 
-  CheckPaymentResponse, 
-  WebhooksResponse, 
+import {
+  CreateOrderRequest,
+  CreateOrderResponse,
+  CheckPaymentResponse,
+  WebhooksResponse,
   Order
 } from '../models/payment';
 import { API_NodeJS } from "./utils/axios";
@@ -34,5 +34,15 @@ export const getListOrders = () => {
 
 export const getOrdersByUserId = (userId: string) => {
   return API_NodeJS.get<Order[]>(`paymentSepay/userId/${userId}`);
+};
+
+// Xóa các orders pending quá 10 phút
+export const cleanupPendingOrders = () => {
+  return API_NodeJS.delete('paymentSepay/cleanup-pending-orders');
+};
+
+// Cập nhật order pending thay vì tạo mới
+export const updatePendingOrder = (orderId: string, orderData: Order) => {
+  return API_NodeJS.put(`paymentSepay/update-pending-order/${orderId}`, orderData);
 };
 

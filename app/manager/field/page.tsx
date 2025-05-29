@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from "react";
-import { Table, Button, Input, Space, Badge, Modal, Popconfirm, Form, Tabs, Card } from "antd";
+import { Table, Button, Input, Space, Badge, Modal, Popconfirm, Form, Tabs, Card, Tag } from "antd";
 import { EyeOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from "@ant-design/icons";
 import { Field, TimeSlot } from "@/models/field";
 import { useSelector } from "react-redux";
@@ -12,6 +12,12 @@ import { getListFieldsSlice, removeFieldSlice } from "@/features/field.slice";
 import { addTimeSlotSlice, getListTimeSlotsByFootballFieldId, removeTimeSlot, removeTimeSlotByFieldId, updateTimeSlotSlice } from "@/features/timeSlot.slice";
 import { FootballField } from "@/models/football_field";
 import { ColumnsType } from 'antd/es/table';
+
+const statusMap: Record<string, { text: string, status: string }> = {
+    'Bảo trì': { text: 'Bảo trì', status: 'warning' },
+    'Hoạt động': { text: 'Hoạt động', status: 'success' },
+    'failed': { text: 'failed', status: 'error' },
+};
 
 const ListField = () => {
     const footballField = useAppSelector((state) => state.footballField.detail) as FootballField
@@ -32,7 +38,7 @@ const ListField = () => {
         toast.success("Xóa thành công!");
     };
 
-      const handleDeleteField = (id: string) => {
+    const handleDeleteField = (id: string) => {
         dispath(removeFieldSlice(id));
         toast.success("Xóa thành công!");
     };
@@ -93,43 +99,35 @@ const ListField = () => {
             dataIndex: "people",
             key: "people",
             filters: [
-                { text: '5 người', value: 5 },
-                { text: '6 người', value: 6 },
-                { text: '7 người', value: 7 },
-                { text: '11 người', value: 11 },
+                { text: '5 người', value: "5v5" },
+                { text: '7 người', value: "7v7" },
+                { text: '9 người', value: "9v9" },
+                { text: '11 người', value: "11v11" },
             ],
             onFilter: (value: number, record: Field) => record.people === value,
             sorter: (a: Field, b: Field) => a.people - b.people,
         },
         {
-            title: "Bắt đầu lúc",
-            dataIndex: "start_time",
-            key: "start_time",
+            title: "Loại mặt sân",
+            dataIndex: "surface",
+            key: "surface",
             filters: [
-                { text: '7h', value: '7h' },
-                { text: '8h', value: '8h' },
-                { text: '9h', value: '9h' },
+                { text: 'Cỏ tự nhiên', value: "Cỏ tự nhiên" },
+                { text: 'Cỏ nhân tạo', value: "Cỏ nhân tạo" },
+                { text: 'Sân trong nhà', value: "Sân trong nhà" },
             ],
-            onFilter: (value: string, record: Field) => record.start_time === value,
-        },
-        {
-            title: "Kết thúc lúc",
-            dataIndex: "end_time",
-            key: "end_time",
-            filters: [
-                { text: '22h', value: '22h' },
-                { text: '23h', value: '23h' },
-                { text: '24h', value: '24h' },
-            ],
-            onFilter: (value: string, record: Field) => record.end_time === value,
+            onFilter: (value: string, record: Field) => record.surface === value,
         },
         {
             title: "Tình trạng",
             dataIndex: "status",
             key: "status",
-            render: (status: string) => (
-                <Badge status="success" text={status} />
-            ),
+            render: (status: string) => {
+                const badge = statusMap[status];
+                return <Tag color={badge?.status || 'default'}>
+                    {badge?.text || status}
+                </Tag>
+            },
             filters: [
                 { text: 'Hoạt động', value: 'Hoạt động' },
                 { text: 'Bảo trì', value: 'Bảo trì' },
@@ -159,7 +157,7 @@ const ListField = () => {
 
     const subColumns: ColumnsType<TimeSlot> = [
         {
-            title: "Ca",
+            title: "Khung giờ",
             dataIndex: "time",
             key: "time",
             filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (

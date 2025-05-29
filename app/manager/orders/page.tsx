@@ -1,13 +1,15 @@
 'use client';
 import React, { useEffect, useState } from "react";
 import { Table, Button, Input, Space, Badge, Modal, Popconfirm, Form, Tabs, Card, Tag, Divider, Typography, Descriptions } from "antd";
-import { EyeOutlined, EditOutlined, DeleteOutlined, SearchOutlined, CalendarOutlined } from "@ant-design/icons";
+import { EyeOutlined, EditOutlined, DeleteOutlined, SearchOutlined, CalendarOutlined, ClearOutlined } from "@ant-design/icons";
 import { Field, TimeSlot } from "@/models/field";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { getListOrdersSlice } from "@/features/order.slice";
 import { Order } from "@/models/payment";
 import { ColumnsType } from "antd/es/table";
 import { FootballField } from "@/models/football_field";
+import { performOrderCleanup } from "@/utils/orderCleanup";
+import { toast } from 'react-toastify';
 
 const statusMap: Record<string, { text: string, status: string }> = {
     'pending': { text: 'pending', status: 'processing' },
@@ -40,6 +42,19 @@ const ListOrder = () => {
     // Hàm đóng modal
     const handleCloseModal = () => {
         setIsModalVisible(false);
+    };
+
+    // Hàm xử lý cleanup orders pending
+    const handleCleanupPendingOrders = async () => {
+        try {
+            const result = await performOrderCleanup();
+            toast.success(`Đã xóa ${result.deletedCount} orders pending cũ!`);
+            // Refresh lại danh sách orders
+            await dispath(getListOrdersSlice());
+        } catch (error) {
+            console.error("Lỗi khi cleanup orders:", error);
+            toast.error("Có lỗi xảy ra khi cleanup orders!");
+        }
     };
 
     // Sắp xếp orders theo thời gian tạo, mới nhất lên đầu
@@ -262,7 +277,25 @@ const ListOrder = () => {
     return (
         <div className="p-6 bg-gray-100 min-h-screen">
             <div className="bg-white p-6 rounded-lg shadow">
-                <h1 className="text-xl font-semibold mb-4">Quản lý đơn hàng</h1>
+                <div className="flex justify-between items-center mb-4">
+                    <h1 className="text-xl font-semibold">Quản lý đơn hàng</h1>
+                    <Popconfirm
+                        title="Xóa orders pending cũ"
+                        description="Bạn có chắc muốn xóa tất cả orders pending quá 10 phút?"
+                        onConfirm={handleCleanupPendingOrders}
+                        okText="Xác nhận"
+                        cancelText="Hủy"
+                    >
+                        <Button
+                            type="primary"
+                            danger
+                            icon={<ClearOutlined />}
+                            className="flex items-center"
+                        >
+                            Cleanup Orders Pending
+                        </Button>
+                    </Popconfirm>
+                </div>
                 <div>
                     <div className="text-left mt-8">
                         {/* <div className="flex justify-between mb-4 ">
