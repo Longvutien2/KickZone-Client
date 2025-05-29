@@ -112,12 +112,20 @@ const MatchDetail = () => {
 
     return (
         match && (
-            <div className="bg-white mx-auto">
+            <div className="bg-white mx-auto px-4 sm:px-0">
                 {/* Header */}
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-semibold ">Trận Đấu</h2>
-                    <div className="flex items-center space-x-2">
-                        <Button type="primary" className="bg-orange-500 text-white" onClick={handleOpenModal}>Gửi yêu cầu</Button>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 sm:mb-4 gap-3 sm:gap-0">
+                    <h2 className="text-xl sm:text-2xl font-semibold">Trận Đấu</h2>
+                    <div className="flex items-center space-x-2 w-full sm:w-auto">
+                        <Button
+                            type="primary"
+                            className="bg-orange-500 text-white w-full sm:w-auto"
+                            onClick={handleOpenModal}
+                            size="large"
+                        >
+                            <span className="hidden sm:inline">Gửi yêu cầu</span>
+                            <span className="sm:hidden">Gửi yêu cầu tham gia</span>
+                        </Button>
                     </div>
                 </div>
                 <Modal
@@ -174,10 +182,71 @@ const MatchDetail = () => {
                 </Modal>
 
                 {/* Match list */}
-                <Card className="mt-8 space-y-4 mb-10 shadow">
+                <Card className="mt-6 sm:mt-8 space-y-4 mb-6 sm:mb-10 shadow rounded-lg sm:rounded-xl">
                     <div key={match._id} className="bg-white">
-                        {/* 3 phần: Đội A - VS - Đội B */}
-                        <div className="grid grid-cols-3 items-center mb-2">
+                        {/* Mobile Layout */}
+                        <div className="block sm:hidden">
+                            {/* Đội A */}
+                            <div className="mb-4">
+                                <div className="flex items-center space-x-3">
+                                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0">
+                                        <Image
+                                            src={match?.club_A?.teamImage || "/images/default-team.png"}
+                                            className="rounded-full object-cover"
+                                            layout="fill"
+                                            alt="bg"
+                                        />
+                                    </div>
+                                    <div>
+                                        <div className="font-semibold text-base">{match.club_A?.teamName}</div>
+                                        <div className='flex items-center flex-wrap gap-2 text-sm mt-1 text-orange-500'>
+                                            <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{match.club_A?.ageGroup}</span>
+                                            <span>⚡ 99</span>
+                                            <span>⭐ ?</span>
+                                            <span>👍 100</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* VS */}
+                            <div className="text-center text-2xl font-bold my-4">VS</div>
+
+                            {/* Đội B */}
+                            {match.club_B ? (
+                                <div className="mb-4">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0">
+                                            <Image
+                                                src={match.club_B?.teamImage}
+                                                className="rounded-full object-cover"
+                                                layout="fill"
+                                                alt="bg"
+                                            />
+                                        </div>
+                                        <div>
+                                            <div className="font-semibold text-base">{match.club_B?.teamName}</div>
+                                            <div className='flex items-center flex-wrap gap-2 text-sm mt-1 text-orange-500'>
+                                                <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{match.club_B?.ageGroup}</span>
+                                                <span>⚡ 99</span>
+                                                <span>⭐ ?</span>
+                                                <span>👍 100</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center text-center mb-4">
+                                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gray-100 flex items-center justify-center text-lg text-gray-500">
+                                        ?
+                                    </div>
+                                    <div className="text-xs text-gray-400 mt-1">Chưa có đối thủ</div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Desktop Layout */}
+                        <div className="hidden sm:grid sm:grid-cols-3 items-center mb-2">
                             {/* Đội A */}
                             <div>
                                 <div className="flex items-center space-x-3">
@@ -185,7 +254,7 @@ const MatchDetail = () => {
                                         <Image
                                             src={match?.club_A?.teamImage || "/images/default-team.png"}
                                             className="rounded-full object-cover"
-                                            layout="fill"  // Lấp đầy toàn bộ container
+                                            layout="fill"
                                             alt="bg"
                                         />
                                     </div>
@@ -211,7 +280,7 @@ const MatchDetail = () => {
                                             <Image
                                                 src={match.club_B?.teamImage}
                                                 className="rounded-full object-cover"
-                                                layout="fill"  // Lấp đầy toàn bộ container
+                                                layout="fill"
                                                 alt="bg"
                                             />
                                         </div>
@@ -223,7 +292,6 @@ const MatchDetail = () => {
                                         <span>👍 100</span>
                                     </div>
                                 </div>
-
                             ) : (
                                 <div className="flex flex-col items-end text-right">
                                     <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center text-lg text-gray-500">
@@ -235,9 +303,9 @@ const MatchDetail = () => {
                         </div>
 
                         {/* Time + location */}
-                        <div className="mt-3 text-sm text-gray-700">
-                            <div className="flex items-center justify-between">
-                                <span className='capitalize'>
+                        <div className="mt-3 text-xs sm:text-sm text-gray-700">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+                                <span className='capitalize text-sm sm:text-base font-medium'>
                                     {match.orderId?.timeStart} | {
                                         match.orderId?.date ?
                                             moment(match.orderId.date, "DD-MM-YYYY")
@@ -250,7 +318,7 @@ const MatchDetail = () => {
                                     // Kiểm tra xem match.orderId có tồn tại không
                                     if (!match.orderId?.date) {
                                         return (
-                                            <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
+                                            <span className="bg-orange-100 text-orange-500 rounded-md px-2 py-1 text-xs self-start sm:self-center">
                                                 Không có thông tin ngày
                                             </span>
                                         );
@@ -269,43 +337,46 @@ const MatchDetail = () => {
                                         // Nếu là ngày hôm nay và chưa có đối thủ
                                         if (!match.club_B) {
                                             return (
-                                                <span className="bg-red-100 text-red-600 rounded-md px-2 py-1 text-xs font-bold flex items-center">
+                                                <span className="bg-red-100 text-red-600 rounded-md px-2 py-1 text-xs font-bold flex items-center self-start sm:self-center">
                                                     <ClockCircleOutlined className="mr-1" />
-                                                    Hôm nay,  {match.orderId?.timeStart || match.time}
+                                                    <span className="hidden sm:inline">Hôm nay, {match.orderId?.timeStart || match.time}</span>
+                                                    <span className="sm:hidden">Hôm nay</span>
                                                 </span>
                                             );
                                         } else {
                                             // Nếu là ngày hôm nay nhưng đã có đối thủ
                                             return (
-                                                <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
-                                                    Hôm nay, {match.orderId?.timeStart || match.time}
+                                                <span className="bg-orange-100 text-orange-500 rounded-md px-2 py-1 text-xs self-start sm:self-center">
+                                                    <span className="hidden sm:inline">Hôm nay, {match.orderId?.timeStart || match.time}</span>
+                                                    <span className="sm:hidden">Hôm nay</span>
                                                 </span>
                                             );
                                         }
                                     } else if (diffDays > 0) {
                                         // Nếu là ngày trong tương lai
                                         return (
-                                            <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
+                                            <span className="bg-orange-100 text-orange-500 rounded-md px-2 py-1 text-xs self-start sm:self-center">
                                                 {diffDays} ngày nữa
                                             </span>
                                         );
                                     } else {
                                         // Nếu là ngày trong quá khứ
                                         return (
-                                            <span className="bg-gray-100 text-gray-500 rounded-md px-2 text-xs">
+                                            <span className="bg-gray-100 text-gray-500 rounded-md px-2 py-1 text-xs self-start sm:self-center">
                                                 Đã diễn ra
                                             </span>
                                         );
                                     }
                                 })()}
                             </div>
-                            <div>{match.footballField?.name || "Không có thông tin sân"},
+                            <div className="mt-2 text-xs sm:text-sm text-gray-600 break-words">
+                                {match.footballField?.name || "Không có thông tin sân"}
                                 {match.footballField ?
-                                    (` ${match.footballField?.address?.detail ? `${match.footballField?.address?.detail}, ` : ""} 
-                                    ${match.footballField?.address?.ward || ""}, 
-                                    ${match.footballField?.address?.district || ""}, 
+                                    (`, ${match.footballField?.address?.detail ? `${match.footballField?.address?.detail}, ` : ""}
+                                    ${match.footballField?.address?.ward || ""},
+                                    ${match.footballField?.address?.district || ""},
                                     ${match.footballField?.address?.province || ""}`) :
-                                    "Không có thông tin địa chỉ"
+                                    ", Không có thông tin địa chỉ"
                                 }
                             </div>
                         </div>
@@ -314,13 +385,13 @@ const MatchDetail = () => {
 
                 {/* Mô tả*/}
                 <div className="bg-white mx-auto">
-                    <Card className="text-left">
-                        <h3 className="text-xl font-bold mb-3">Thông tin</h3>
-                        <div className="space-y-4">
+                    <Card className="text-left rounded-lg sm:rounded-xl">
+                        <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Thông tin</h3>
+                        <div className="space-y-3 sm:space-y-4">
                             {/* Ngày và Thời gian */}
-                            <div className="flex items-center space-x-3">
-                                <CalendarOutlined className="text-orange-500" />
-                                <span className="text-sm text-gray-700 capitalize">
+                            <div className="flex items-start sm:items-center space-x-3">
+                                <CalendarOutlined className="text-orange-500 mt-0.5 sm:mt-0 flex-shrink-0" />
+                                <span className="text-xs sm:text-sm text-gray-700 capitalize break-words">
                                     <strong>Thời gian: </strong>
                                      {match.orderId?.timeStart} | {
                                         match.orderId?.date ?
@@ -332,28 +403,30 @@ const MatchDetail = () => {
                                 </span>
                             </div>
 
-                            <div className="flex items-center space-x-3">
-                                <ClockCircleOutlined className="text-orange-500" />
-                                <span className="text-sm text-gray-700">
-                                    <strong>Giờ đá: </strong>: {match.orderId.timeStart || "Không có thông tin"}
+                            <div className="flex items-start sm:items-center space-x-3">
+                                <ClockCircleOutlined className="text-orange-500 mt-0.5 sm:mt-0 flex-shrink-0" />
+                                <span className="text-xs sm:text-sm text-gray-700 break-words">
+                                    <strong>Giờ đá: </strong>{match.orderId?.timeStart || "Không có thông tin"}
                                 </span>
                             </div>
 
                             {/* Sân bóng */}
-                            <div className="flex items-center space-x-3">
-                                <EnvironmentOutlined className="text-orange-500" />
-                                <span className="text-sm text-gray-700"><strong>Sân bóng: </strong>{match.footballField?.name || "Không có thông tin"}</span>
+                            <div className="flex items-start sm:items-center space-x-3">
+                                <EnvironmentOutlined className="text-orange-500 mt-0.5 sm:mt-0 flex-shrink-0" />
+                                <span className="text-xs sm:text-sm text-gray-700 break-words">
+                                    <strong>Sân bóng: </strong>{match.footballField?.name || "Không có thông tin"}
+                                </span>
                             </div>
 
                             {/* Địa điểm */}
-                            <div className="flex items-center space-x-3">
-                                <EnvironmentOutlined className="text-orange-500" />
-                                <span className="text-sm text-gray-700">
+                            <div className="flex items-start sm:items-center space-x-3">
+                                <EnvironmentOutlined className="text-orange-500 mt-0.5 sm:mt-0 flex-shrink-0" />
+                                <span className="text-xs sm:text-sm text-gray-700 break-words">
                                     <strong>Địa chỉ: </strong>
                                     {match.footballField?.address ?
-                                        (` ${match.footballField?.address.detail ? `${match.footballField?.address.detail}, ` : ""} 
-                                        ${match.footballField?.address.ward || ""}, 
-                                        ${match.footballField?.address.district || ""}, 
+                                        (`${match.footballField?.address.detail ? `${match.footballField?.address.detail}, ` : ""}
+                                        ${match.footballField?.address.ward || ""},
+                                        ${match.footballField?.address.district || ""},
                                         ${match.footballField?.address.province || ""}`) :
                                         "Không có thông tin địa chỉ"
                                     }
@@ -361,14 +434,18 @@ const MatchDetail = () => {
                             </div>
 
                             {/* Liên hệ */}
-                            <div className="flex items-center space-x-3">
-                                <EditOutlined className="text-orange-500" />
-                                <span className="text-sm text-gray-700"><strong>Liên hệ: </strong> {match.contact || "Không có thông tin"}</span>
+                            <div className="flex items-start sm:items-center space-x-3">
+                                <EditOutlined className="text-orange-500 mt-0.5 sm:mt-0 flex-shrink-0" />
+                                <span className="text-xs sm:text-sm text-gray-700 break-words">
+                                    <strong>Liên hệ: </strong> {match.contact || "Không có thông tin"}
+                                </span>
                             </div>
 
-                            <div className="flex items-center space-x-3">
-                                <EditOutlined className="text-orange-500" />
-                                <span className="text-sm text-gray-700"><strong>Mô tả: </strong> {match?.description || "Không có mô tả"}</span>
+                            <div className="flex items-start sm:items-center space-x-3">
+                                <EditOutlined className="text-orange-500 mt-0.5 sm:mt-0 flex-shrink-0" />
+                                <span className="text-xs sm:text-sm text-gray-700 break-words">
+                                    <strong>Mô tả: </strong> {match?.description || "Không có mô tả"}
+                                </span>
                             </div>
                         </div>
                     </Card>

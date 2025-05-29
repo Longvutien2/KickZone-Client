@@ -217,30 +217,33 @@ const BookingHistoryPage = () => {
 
     return (
         <div className="flex flex-col min-h-screen">
-            <div className="bg-white rounded-xl">
-                <Title level={3} className="mb-6">
+            <div className="bg-white rounded-none sm:rounded-xl p-4 sm:p-6">
+                <Title level={3} className="mb-4 sm:mb-6 text-xl sm:text-2xl">
                     Lịch đặt sân
                 </Title>
 
                 <Tabs
                     activeKey={bookingFilter}
                     onChange={setBookingFilter}
-                    className="mb-6"
+                    className="mb-4 sm:mb-6"
+                    size="large"
                 >
                     <TabPane
                         tab={
-                            <span className="flex items-center">
-                                <ClockCircleOutlined className="mr-2" />
-                                Sắp tới
+                            <span className="flex items-center text-sm sm:text-base">
+                                <ClockCircleOutlined className="mr-1 sm:mr-2" />
+                                <span className="hidden sm:inline">Sắp tới</span>
+                                <span className="sm:hidden">Sắp tới</span>
                             </span>
                         }
                         key="upcoming"
                     />
                     <TabPane
                         tab={
-                            <span className="flex items-center">
-                                <HistoryOutlined className="mr-2" />
-                                Lịch sử
+                            <span className="flex items-center text-sm sm:text-base">
+                                <HistoryOutlined className="mr-1 sm:mr-2" />
+                                <span className="hidden sm:inline">Lịch sử</span>
+                                <span className="sm:hidden">Lịch sử</span>
                             </span>
                         }
                         key="history"
@@ -252,58 +255,66 @@ const BookingHistoryPage = () => {
                         <Spin size="large" tip="Đang tải dữ liệu..." />
                     </div>
                 ) : filteredOrders.length > 0 ? (
-                    <div className="space-y-4">
+                    <div className="space-y-3 sm:space-y-4">
                         {filteredOrders.slice((currentPage - 1) * 5, currentPage * 5).map((order: any) => (
                             <div
                                 key={order._id}
-                                className="border border-gray-200 rounded-lg p-4 transition-all duration-300 hover:shadow-lg hover:border-blue-300 cursor-pointer"
+                                className="border border-gray-200 rounded-lg p-3 sm:p-4 transition-all duration-300 hover:shadow-lg hover:border-blue-300 cursor-pointer"
                                 onClick={() => handleOrderClick(order)}
                             >
-                                <div className="flex items-center mb-2">
-                                    <CalendarOutlined className="mr-2 text-blue-500" />
-                                    <Text strong className="text-lg">{order.date} - {order.timeStart}</Text>
-                                    {bookingFilter === 'upcoming' && (
-                                        <Tag color="blue" className="ml-2">Sắp tới</Tag>
-                                    )}
-                                    {bookingFilter === 'history' && (
-                                        <Tag color="gray" className="ml-2">Đã qua</Tag>
-                                    )}
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 sm:mb-2">
+                                    <div className="flex items-center mb-2 sm:mb-0">
+                                        <CalendarOutlined className="mr-2 text-blue-500 text-base sm:text-lg" />
+                                        <Text strong className="text-base sm:text-lg">{order.date} - {order.timeStart}</Text>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        {bookingFilter === 'upcoming' && (
+                                            <Tag color="blue" className="text-xs sm:text-sm">Sắp tới</Tag>
+                                        )}
+                                        {bookingFilter === 'history' && (
+                                            <Tag color="gray" className="text-xs sm:text-sm">Đã qua</Tag>
+                                        )}
+                                    </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="flex flex-col lg:grid lg:grid-cols-2 gap-3 lg:gap-4">
                                     <div className="space-y-2">
-                                        <div className="flex items-center">
-                                            <TeamOutlined className="mr-2" />
-                                            <Text>Số sân: {order.fieldName || 'Chưa có thông tin'}</Text>
+                                        <div className="flex items-center text-sm sm:text-base">
+                                            <TeamOutlined className="mr-2 text-gray-500 flex-shrink-0" />
+                                            <Text className="truncate">Số sân: {order.fieldName || 'Chưa có thông tin'}</Text>
                                         </div>
-                                        <div className="flex items-center">
-                                            <PhoneOutlined className="mr-2" />
-                                            <Text>Liên hệ: {order.phoneNumber || 'Chưa có thông tin'}</Text>
+                                        <div className="flex items-center text-sm sm:text-base">
+                                            <PhoneOutlined className="mr-2 text-gray-500 flex-shrink-0" />
+                                            <Text className="truncate">Liên hệ: {order.phoneNumber || 'Chưa có thông tin'}</Text>
                                         </div>
-                                        <div className="flex items-center">
-                                            <FileTextOutlined className="mr-2" />
-                                            <Text>Ghi chú: {order.description || "Không có ghi chú"} </Text>
+                                        <div className="flex items-start text-sm sm:text-base">
+                                            <FileTextOutlined className="mr-2 text-gray-500 flex-shrink-0 mt-0.5" />
+                                            <Text className="line-clamp-2">Ghi chú: {order.description || "Không có ghi chú"}</Text>
                                         </div>
                                     </div>
 
-                                    <div className="text-right">
-                                        <Tag color={getStatusColor(order.paymentStatus)}>
-                                            {order.paymentStatus === 'success' ? 'Đã thanh toán' :
-                                                order.paymentStatus === 'pending' ? 'Chờ thanh toán' : 'Thất bại'}
-                                        </Tag>
-                                        <div className="mt-2 text-lg font-semibold text-red-500">
-                                            {order.amount?.toLocaleString()} VNĐ
+                                    <div className="flex flex-row lg:flex-col justify-between lg:justify-start items-center lg:items-end text-right">
+                                        <div className="flex flex-col lg:order-1">
+                                            <Tag color={getStatusColor(order.paymentStatus)} className="mb-2 text-xs sm:text-sm">
+                                                {order.paymentStatus === 'success' ? 'Đã thanh toán' :
+                                                    order.paymentStatus === 'pending' ? 'Chờ thanh toán' : 'Thất bại'}
+                                            </Tag>
+                                            <div className="text-base sm:text-lg font-semibold text-red-500">
+                                                {order.amount?.toLocaleString()} VNĐ
+                                            </div>
                                         </div>
                                         <Button
                                             type="link"
                                             icon={<InfoCircleOutlined />}
-                                            className="mt-1 text-blue-500"
+                                            className="text-blue-500 text-xs sm:text-sm lg:mt-2 lg:order-2"
+                                            size="small"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 handleOrderClick(order);
                                             }}
                                         >
-                                            Xem chi tiết
+                                            <span className="hidden sm:inline">Xem chi tiết</span>
+                                            <span className="sm:hidden">Chi tiết</span>
                                         </Button>
                                     </div>
                                 </div>
@@ -324,13 +335,17 @@ const BookingHistoryPage = () => {
                 )}
 
                 {filteredOrders.length > 5 && (
-                    <div className="flex justify-center mt-6">
+                    <div className="flex justify-center mt-4 sm:mt-6">
                         <Pagination
                             current={currentPage}
                             total={filteredOrders.length}
                             pageSize={5}
                             onChange={handlePageChange}
                             className="custom-pagination"
+                            size="small"
+                            showSizeChanger={false}
+                            showQuickJumper={false}
+                            responsive={true}
                         />
                     </div>
                 )}
@@ -341,34 +356,51 @@ const BookingHistoryPage = () => {
                 title={
                     <div className="flex items-center">
                         <CalendarOutlined className="mr-2 text-blue-500" />
-                        <span className="text-lg font-semibold">Chi tiết đặt sân</span>
+                        <span className="text-base sm:text-lg font-semibold">Chi tiết đặt sân</span>
                     </div>
                 }
                 open={isModalVisible}
                 onCancel={handleCloseModal}
                 footer={[
-                    <Button key="close" onClick={handleCloseModal}>
+                    <Button key="close" onClick={handleCloseModal} className="w-full sm:w-auto">
                         Đóng
                     </Button>
                 ]}
-                width={700}
+                width="90%"
+                style={{ maxWidth: 700 }}
+                centered
             >
                 {selectedOrder && (
-                    <div className="py-4">
-                        <Card className="mb-4 bg-gray-50">
-                            <div className="flex justify-between items-center mb-4">
+                    <div className="py-2 sm:py-4 px-1 sm:px-0">
+                        <Card className="mb-4 bg-gray-50 mx-0">
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
                                 <div className="flex items-center">
-                                    <CalendarOutlined className="text-blue-500 mr-2" />
-                                    <Text strong className="text-lg">{selectedOrder.date} - {selectedOrder.timeStart}</Text>
+                                    <CalendarOutlined className="text-blue-500 mr-2 flex-shrink-0" />
+                                    <Text strong className="text-base sm:text-lg break-words">{selectedOrder.date} - {selectedOrder.timeStart}</Text>
                                 </div>
-                                <Tag color={getStatusColor(selectedOrder.paymentStatus)} className="text-sm px-3 py-1">
+                                <Tag color={getStatusColor(selectedOrder.paymentStatus)} className="text-xs sm:text-sm px-2 sm:px-3 py-1 self-start sm:self-center">
                                     {selectedOrder.paymentStatus === 'success' ? 'Đã thanh toán' :
                                         selectedOrder.paymentStatus === 'pending' ? 'Chờ thanh toán' : 'Thất bại'}
                                 </Tag>
                             </div>
 
-                            <Descriptions bordered column={1} size="small">
-                                <Descriptions.Item label="Mã đơn hàng">{selectedOrder.sepayId || selectedOrder._id}</Descriptions.Item>
+                            <Descriptions
+                                bordered
+                                column={1}
+                                size="small"
+                                labelStyle={{
+                                    width: '35%',
+                                    fontSize: '14px',
+                                    padding: '8px 12px'
+                                }}
+                                contentStyle={{
+                                    fontSize: '14px',
+                                    padding: '8px 12px'
+                                }}
+                            >
+                                <Descriptions.Item label="Mã đơn hàng">
+                                    <span className="break-all text-xs sm:text-sm">{selectedOrder.sepayId || selectedOrder._id}</span>
+                                </Descriptions.Item>
                                 <Descriptions.Item label="Tên sân bóng">{footballField.name || "Không có thông tin"}</Descriptions.Item>
                                 <Descriptions.Item label="Số sân">{selectedOrder.fieldName || "Không có thông tin"}</Descriptions.Item>
                                 <Descriptions.Item label="Ngày đặt">{selectedOrder.date}</Descriptions.Item>
@@ -380,39 +412,39 @@ const BookingHistoryPage = () => {
                             </Descriptions>
                         </Card>
 
-                        <Divider orientation="left">Thông tin thanh toán</Divider>
-                        <div className="bg-white p-4 rounded-lg border border-gray-200">
-                            <div className="flex justify-between mb-2">
-                                <Text>Tên đội:</Text>
-                                <Text strong>{selectedOrder.teamName || ""}</Text>
+                        <Divider orientation="left" className="text-sm sm:text-base">Thông tin thanh toán</Divider>
+                        <div className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200 mx-0">
+                            <div className="flex flex-col sm:flex-row sm:justify-between mb-3 gap-1 sm:gap-0">
+                                <Text className="text-sm sm:text-base">Tên đội:</Text>
+                                <Text strong className="text-sm sm:text-base break-words">{selectedOrder.teamName || ""}</Text>
                             </div>
-                               <div className="flex justify-between mb-2">
-                                <Text>Liên hệ:</Text>
-                                <Text strong>{selectedOrder.phoneNumber || ""}</Text>
+                            <div className="flex flex-col sm:flex-row sm:justify-between mb-3 gap-1 sm:gap-0">
+                                <Text className="text-sm sm:text-base">Liên hệ:</Text>
+                                <Text strong className="text-sm sm:text-base break-words">{selectedOrder.phoneNumber || ""}</Text>
                             </div>
-                            <div className="flex justify-between mb-2">
-                                <Text>Phương thức thanh toán:</Text>
-                                <Text strong>{selectedOrder.paymentMethod || "Thanh toán online"}</Text>
+                            <div className="flex flex-col sm:flex-row sm:justify-between mb-3 gap-1 sm:gap-0">
+                                <Text className="text-sm sm:text-base">Phương thức thanh toán:</Text>
+                                <Text strong className="text-sm sm:text-base">{selectedOrder.paymentMethod || "Thanh toán online"}</Text>
                             </div>
-                            <div className="flex justify-between mb-2">
-                                <Text>Ghi chú:</Text>
-                                <Text strong>{selectedOrder.description || "Không có ghi chú"}</Text>
+                            <div className="flex flex-col sm:flex-row sm:justify-between mb-3 gap-1 sm:gap-0">
+                                <Text className="text-sm sm:text-base">Ghi chú:</Text>
+                                <Text strong className="text-sm sm:text-base break-words text-right sm:text-left">{selectedOrder.description || "Không có ghi chú"}</Text>
                             </div>
-                            <div className="flex justify-between mb-2">
-                                <Text>Thời gian thanh toán:</Text>
-                                <Text strong>{selectedOrder.transactionDate || "Không có thông tin"}</Text>
+                            <div className="flex flex-col sm:flex-row sm:justify-between mb-3 gap-1 sm:gap-0">
+                                <Text className="text-sm sm:text-base">Thời gian thanh toán:</Text>
+                                <Text strong className="text-xs sm:text-sm break-words">{selectedOrder.transactionDate || "Không có thông tin"}</Text>
                             </div>
-                            <div className="flex justify-between mb-2">
-                                <Text>Trạng thái:</Text>
-                                <Tag color={getStatusColor(selectedOrder.paymentStatus)}>
+                            <div className="flex flex-col sm:flex-row sm:justify-between mb-3 gap-1 sm:gap-0">
+                                <Text className="text-sm sm:text-base">Trạng thái:</Text>
+                                <Tag color={getStatusColor(selectedOrder.paymentStatus)} className="self-start sm:self-center">
                                     {selectedOrder.paymentStatus === 'success' ? 'Đã thanh toán' :
                                         selectedOrder.paymentStatus === 'pending' ? 'Chờ thanh toán' : 'Thất bại'}
                                 </Tag>
                             </div>
-                            <Divider className="my-2" />
-                            <div className="flex justify-between">
-                                <Text strong>Tổng tiền:</Text>
-                                <Text strong className="text-xl text-red-500">{selectedOrder.amount?.toLocaleString()} VNĐ</Text>
+                            <Divider className="my-3" />
+                            <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-2 sm:gap-0">
+                                <Text strong className="text-base sm:text-lg">Tổng tiền:</Text>
+                                <Text strong className="text-lg sm:text-xl text-red-500">{selectedOrder.amount?.toLocaleString()} VNĐ</Text>
                             </div>
                         </div>
                     </div>

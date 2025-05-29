@@ -1,8 +1,8 @@
 
 'use client';
 import React, { useEffect, useState } from 'react';
-import { AimOutlined, BellOutlined, CalendarOutlined, HomeOutlined, LoginOutlined, LogoutOutlined, ThunderboltOutlined, TrophyOutlined, UserOutlined } from "@ant-design/icons";
-import { Breadcrumb, Dropdown, Layout, Menu, theme } from 'antd';
+import { AimOutlined, BellOutlined, CalendarOutlined, HomeOutlined, LoginOutlined, LogoutOutlined, ThunderboltOutlined, TrophyOutlined, UserOutlined, MenuOutlined, CloseOutlined } from "@ant-design/icons";
+import { Breadcrumb, Dropdown, Layout, Menu, theme, Drawer, Button } from 'antd';
 import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
 import { signout } from '@/features/auth.slice';
@@ -24,6 +24,7 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
   const notifications = useSelector((state: RootStateType) => state.notification.value)
   const [notification, setNotification] = useState<any>([]);
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
 
   const handleLogout = () => {
@@ -140,9 +141,19 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider width={"15%"} collapsible collapsed={collapsed} onCollapse={setCollapsed} style={{ backgroundColor: "white" }} className="bg-white">
-        <div className="flex items-center  gap-2 py-4 px-6">
-          <Link href={`/`}>  <img src="/newPts.png" alt="" className="h-12" /></Link>
+      {/* Desktop Sidebar */}
+      <Sider
+        width={"15%"}
+        collapsible
+        collapsed={collapsed}
+        onCollapse={setCollapsed}
+        style={{ backgroundColor: "white" }}
+        className="bg-white hidden lg:block"
+      >
+        <div className="flex items-center gap-2 py-4 px-6">
+          <Link href={`/`}>
+            <img src="/newPts.png" alt="" className="h-12" />
+          </Link>
         </div>
         <div className="flex flex-col h-full">
           <Menu
@@ -157,41 +168,121 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
                 </Link>
               ),
               icon: item.icon,
-              className: item.className || '', // Thêm className nếu có
+              className: item.className || '',
             }))}
           />
         </div>
       </Sider>
 
+      {/* Mobile Drawer */}
+      <Drawer
+        title={
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <img src="/newPts.png" alt="" className="h-8" />
+            </div>
+          </div>
+        }
+        placement="left"
+        onClose={() => setMobileMenuOpen(false)}
+        open={mobileMenuOpen}
+        width={280}
+        className="lg:hidden"
+        bodyStyle={{ padding: 0 }}
+      >
+        <div className="flex flex-col h-full">
+          <Menu
+            theme="light"
+            defaultSelectedKeys={["home"]}
+            mode="inline"
+            items={items.map((item: any) => ({
+              key: item.key,
+              label: (
+                <Link
+                  href={item.path}
+                  className="flex items-center"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span className="ml-2">{item.label}</span>
+                </Link>
+              ),
+              icon: item.icon,
+              className: item.className || '',
+            }))}
+            style={{ border: 'none' }}
+          />
+
+          {/* User section in mobile menu */}
+          {user.isLoggedIn && (
+            <div className="mt-auto p-4 border-t border-gray-200">
+              <div
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <Link href={`/homepage/profile`} className="flex items-center gap-3 mb-4">
+                  <UserOutlined className="text-lg" />
+                  <span className="font-medium">{user?.value.user?.name}</span>
+                </Link>
+              </div>
+
+              {/* <Button
+                type="primary"
+                danger
+                block
+                onClick={() => {
+                  handleLogout();
+                  setMobileMenuOpen(false);
+                }}
+              >
+                Đăng xuất
+              </Button> */}
+            </div>
+          )}
+        </div>
+      </Drawer>
+
       <Layout>
-        <Header className="bg-white  px-8 ">
-          <div>
-            {
-              user.isLoggedIn ?
-                <div className="my-auto  text-right text-[16px] ">
-                  <Link href={`/homepage/profile`}>
-                    <UserOutlined /> {user?.value.user?.name}
-                  </Link>
-                  {/* </Dropdown> */}
-                </div>
-                :
-                <div className="my-auto  text-right text-[16px]  font-semibold hover:text-blue-500 hover:cursor-pointer">
-                  <Link href={`/auth/login`} className='gap-2' >
-                    <LoginOutlined className="" />
-                    <span> Đăng nhập</span>
-                  </Link>
-                </div>
-            }
+        <Header className="bg-white px-4 lg:px-8 flex items-center justify-between">
+          {/* Mobile Menu Button */}
+          <Button
+            type="text"
+            icon={<MenuOutlined />}
+            onClick={() => setMobileMenuOpen(true)}
+            className="lg:hidden text-lg"
+          />
+
+          {/* Logo for mobile */}
+          <div className="lg:hidden flex items-center gap-2">
+            <img src="/newPts.png" alt="" className="h-8" />
+          </div>
+
+          {/* User section */}
+          <div className="ml-auto">
+            {user.isLoggedIn ? (
+              <div className="hidden lg:block text-right text-[16px]">
+                <Link href={`/homepage/profile`}>
+                  <UserOutlined /> {user?.value.user?.name}
+                </Link>
+              </div>
+            ) : (
+              <div className="text-right text-[16px] font-semibold hover:text-blue-500 hover:cursor-pointer">
+                <Link href={`/auth/login`} className="gap-2">
+                  <LoginOutlined className="" />
+                  <span className="hidden sm:inline"> Đăng nhập</span>
+                </Link>
+              </div>
+            )}
           </div>
         </Header>
-        <Content style={{ margin: '20px' }}>
-          <CustomBreadcrumb />
+        <Content className="m-0 sm:m-4 lg:m-5">
+          <div className="hidden sm:block">
+            <CustomBreadcrumb />
+          </div>
           <div
+            className="p-2 sm:p-4 lg:p-6 min-h-[360px] bg-white rounded-none sm:rounded-lg"
             style={{
-              padding: 24,
-              minHeight: 360,
               background: colorBgContainer,
-              borderRadius: borderRadiusLG,
             }}
           >
             <div>{children}</div>

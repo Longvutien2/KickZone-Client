@@ -55,7 +55,7 @@ const ChangePassword = () => {
   };
 
   return (
-    <div>
+    <div className='p-6 sm:p-0'>
       <h1 className="text-2xl font-semibold mb-8">Đổi mật khẩu</h1>
       <Form
         // initialValues={auth.user}

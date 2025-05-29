@@ -2,10 +2,12 @@
 'use client'
 import { getTeamByUserId } from '@/api/team'
 import { setBreadcrumb } from '@/features/breadcrumb.slice'
+import { signout } from '@/features/auth.slice'
 import { Team } from '@/models/team'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { CalendarOutlined, ClockCircleOutlined, DownOutlined, EditOutlined, EnvironmentOutlined, FilterOutlined, PlusOutlined } from '@ant-design/icons'
-import { Tabs, Select, Button, Pagination, Card } from 'antd'
+import { Tabs, Select, Button, Pagination, Card, Modal } from 'antd'
+import { ExclamationCircleOutlined } from '@ant-design/icons'
 import 'antd/dist/reset.css'
 import moment from 'moment'
 import Image from 'next/image'
@@ -24,10 +26,11 @@ export default function HomeProFile() {
     ]));
   }, [])
 
+
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-white min-h-screen px-4 sm:px-0">
       {/* Header - time only */}
-      <h1 className="text-2xl font-semibold mb-4">Hồ sơ</h1>
+      <h1 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4">Hồ sơ</h1>
       <MainContent />
       {/* <Tabs
         defaultActiveKey="1"
@@ -56,59 +59,117 @@ const { Option } = Select;
 
 const MainContent = () => {
   const auth = useAppSelector(state => state.auth.value)
+  const dispatch = useAppDispatch()
+  const router = useRouter()
+  const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false)
 
+  const handleLogout = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    console.log('handleLogout called') // Debug log
+    setIsLogoutModalVisible(true)
+  }
+
+  const confirmLogout = () => {
+    console.log('Đăng xuất thành công')
+    dispatch(signout())
+    router.push('/')
+    setIsLogoutModalVisible(false)
+  }
+
+  const cancelLogout = () => {
+    console.log('Hủy đăng xuất')
+    setIsLogoutModalVisible(false)
+  }
   return (
     <>
       <div className="bg-white mx-auto">
-        <Card className="text-left mt-8">
-          <h3 className="text-xl font-bold mb-3">Thông tin</h3>
-          <div className='space-y-2'>
-            <div className="flex items-center space-x-3">
-              <CalendarOutlined className="text-orange-500" />
-              <span className="text-sm text-gray-700 capitalize">
+        <Card className="text-left mt-6 sm:mt-8 rounded-lg sm:rounded-xl">
+          <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Thông tin</h3>
+          <div className='space-y-3 sm:space-y-4'>
+            <div className="flex items-start sm:items-center space-x-3">
+              <CalendarOutlined className="text-orange-500 mt-0.5 sm:mt-0 flex-shrink-0" />
+              <span className="text-xs sm:text-sm text-gray-700 capitalize break-words">
                 <strong>Họ tên: </strong>
                 {auth.user.name}
               </span>
             </div>
 
-            <div className="flex items-center space-x-3">
-              <ClockCircleOutlined className="text-orange-500" />
-              <span className="text-sm text-gray-700">
+            <div className="flex items-start sm:items-center space-x-3">
+              <ClockCircleOutlined className="text-orange-500 mt-0.5 sm:mt-0 flex-shrink-0" />
+              <span className="text-xs sm:text-sm text-gray-700 break-words">
                 <strong>Email: </strong>{auth.user.email}
               </span>
             </div>
 
-            <div className="flex items-center space-x-3">
-              <EditOutlined className="text-orange-500" />
-              <span className="text-sm text-gray-700"><strong>Liên hệ: </strong> {auth.user?.contact}</span>
+            <div className="flex items-start sm:items-center space-x-3">
+              <EditOutlined className="text-orange-500 mt-0.5 sm:mt-0 flex-shrink-0" />
+              <span className="text-xs sm:text-sm text-gray-700 break-words">
+                <strong>Liên hệ: </strong> {auth.user?.contact}
+              </span>
             </div>
 
-            <div >
+            <div className="flex justify-center sm:justify-start">
               <img
                 src={auth.user?.image || 'https://picsum.photos/200'}
                 alt="avatar"
                 width={150}
                 height={150}
-                className='rounded-xl object-cover w-[100px] h-[100px] shadow-md'
+                className='rounded-xl object-cover w-20 h-20 sm:w-[100px] sm:h-[100px] shadow-md'
               />
             </div>
           </div>
         </Card>
 
-        <div className="mt-6">
-          <div className="flex items-center space-x-2 gap-4">
-            <Button type="primary" >
-              <Link href={`/homepage/profile/${auth.user._id}`} >Chỉnh sửa cá nhân</Link>
+        <div className="mt-4 sm:mt-6">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <Button
+              type="primary"
+              className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600"
+              size="large"
+            >
+              <Link href={`/homepage/profile/${auth.user._id}`} className="block w-full">
+                <span className="hidden sm:inline">Chỉnh sửa cá nhân</span>
+                <span className="sm:hidden">Chỉnh sửa</span>
+              </Link>
             </Button>
-            <Button type="primary">
-              <Link href={`/homepage/profile/changePassword/${auth.user._id}`} >Đổi mật khẩu</Link>
+            <Button
+              type="primary"
+              className="w-full sm:w-auto bg-green-500 hover:bg-green-600"
+              size="large"
+            >
+              <Link href={`/homepage/profile/changePassword/${auth.user._id}`} className="block w-full">
+                <span>Đổi mật khẩu</span>
+              </Link>
             </Button>
-            <Button type="primary" className="bg-red-500 text-white " >
+            <Button
+              type="primary"
+              className="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white"
+              size="large"
+              onClick={handleLogout}
+            >
               Đăng xuất
             </Button>
           </div>
         </div>
       </div>
+
+      {/* Logout Confirmation Modal */}
+      <Modal
+        title="Xác nhận đăng xuất"
+        open={isLogoutModalVisible}
+        onOk={confirmLogout}
+        onCancel={cancelLogout}
+        okText="Đăng xuất"
+        cancelText="Hủy"
+        okType="danger"
+        centered
+      >
+        <div className="flex items-center space-x-3">
+          <ExclamationCircleOutlined className="text-orange-500 text-xl" />
+          <span>Bạn có chắc chắn muốn đăng xuất khỏi tài khoản?</span>
+        </div>
+      </Modal>
     </>
   )
 }

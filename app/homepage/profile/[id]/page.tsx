@@ -31,7 +31,7 @@ const ChangeProfile = () => {
     };
 
     return (
-        <div>
+        <div className='p-6 sm:p-0'>
             <h1 className="text-2xl font-semibold mb-8">Chỉnh sửa cá nhân</h1>
             <Form form={form}
                 initialValues={auth.user}

@@ -104,28 +104,30 @@ const NotificationPage = () => {
     };
 
     return (
-        <div className="flex flex-col min-h-screen ">
-            <div className="bg-white rounded-xl  ">
-                <Title level={3} className="mb-6 flex items-center">
+        <div className="flex flex-col min-h-screen">
+            <div className="bg-white rounded-none sm:rounded-xl p-4 sm:p-0">
+                <Title level={3} className="mb-4 sm:mb-6 flex items-center text-xl sm:text-2xl">
                     Thông báo
                 </Title>
 
                 <Tabs
                     activeKey={filter}
                     onChange={setFilter}
-                    className="custom-tabs"
+                    className="custom-tabs mb-4 sm:mb-6"
+                    size="large"
                     items={[
                         {
                             key: 'all',
-                            label: <span className="px-4 py-2 font-medium">Tất cả</span>,
+                            label: <span className="px-2 sm:px-4 py-1 sm:py-2 font-medium text-sm sm:text-base">Tất cả</span>,
                         },
                         {
                             key: 'unread',
                             label: (
-                                <span className="px-4 py-2 font-medium flex items-center">
-                                    Chưa đọc
+                                <span className="px-2 sm:px-4 py-1 sm:py-2 font-medium flex items-center text-sm sm:text-base">
+                                    <span className="hidden sm:inline">Chưa đọc</span>
+                                    <span className="sm:hidden">Chưa đọc</span>
                                     {notifications?.filter((n: Notification) => !n.read).length > 0 && (
-                                        <span className="ml-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                        <span className="ml-1 sm:ml-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center">
                                             {notifications.filter((n: Notification) => !n.read).length}
                                         </span>
                                     )}
@@ -135,7 +137,7 @@ const NotificationPage = () => {
                     ]}
                 />
 
-                <div className="mt-6 bg-white rounded-xl overflow-hidden border border-gray-100">
+                <div className="mt-4 sm:mt-6 bg-white rounded-lg sm:rounded-xl overflow-hidden border border-gray-100">
                     <List
                         itemLayout="horizontal"
                         dataSource={filteredNotifications.slice((currentPage - 1) * 10, currentPage * 10)}
@@ -146,32 +148,39 @@ const NotificationPage = () => {
                                         }`}
                                     onClick={() => handleNotificationClick(item._id as string)}
                                 >
-                                    <div className="flex w-full p-4">
-                                        <div className="mr-4">
+                                    <div className="flex w-full p-3 sm:p-4">
+                                        <div className="mr-3 sm:mr-4 flex-shrink-0">
                                             <Avatar
                                                 icon={getNotificationIcon(item)}
-                                                size={40}
-                                                className={`${!item.read ? 'bg-blue-100' : 'bg-gray-100'}`}
+                                                size={32}
+                                                className={`sm:w-10 sm:h-10 ${!item.read ? 'bg-blue-100' : 'bg-gray-100'}`}
                                             />
                                         </div>
-                                        <div className="flex-grow">
-                                            <div className="flex justify-between items-start">
-                                                <div className={`text-base ${item.read === false ? 'font-semibold text-gray-900' : 'font-normal text-gray-500'}`}>
-                                                    {item.title}
-                                                    {!item.read && (
-                                                        <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">
-                                                            Mới
-                                                        </span>
-                                                    )}
+                                        <div className="flex-grow min-w-0">
+                                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-4">
+                                                <div className="flex-grow min-w-0">
+                                                    <div className={`text-sm sm:text-base leading-tight ${item.read === false ? 'font-semibold text-gray-900' : 'font-normal text-gray-500'}`}>
+                                                        <span className="break-words">{item.title}</span>
+                                                        {!item.read && (
+                                                            <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full whitespace-nowrap">
+                                                                Mới
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className={`mt-1 text-xs sm:text-sm line-clamp-2 ${item.read ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                        {item.content}
+                                                    </div>
                                                 </div>
-                                                <div className={`text-xs whitespace-nowrap ml-4 ${item.read ? 'text-gray-400' : 'text-gray-500'}`}>
-                                                    {convertTime(item?.createdAt).split(',')[0]}
-                                                    <br />
-                                                    {convertTime(item?.createdAt).split(',')[1]}
+                                                <div className={`text-xs whitespace-nowrap flex-shrink-0 text-right sm:text-left ${item.read ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                    <div className="sm:hidden">
+                                                        {convertTime(item?.createdAt).split(',')[0]}
+                                                    </div>
+                                                    <div className="hidden sm:block">
+                                                        {convertTime(item?.createdAt).split(',')[0]}
+                                                        <br />
+                                                        {convertTime(item?.createdAt).split(',')[1]}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div className={`mt-1 text-sm line-clamp-2 ${item.read ? 'text-gray-400' : 'text-gray-600'}`}>
-                                                {item.content}
                                             </div>
                                         </div>
                                     </div>
@@ -183,9 +192,9 @@ const NotificationPage = () => {
                                 <Empty
                                     image={Empty.PRESENTED_IMAGE_SIMPLE}
                                     description={
-                                        <span className="text-gray-500">Không có thông báo nào</span>
+                                        <span className="text-gray-500 text-sm sm:text-base">Không có thông báo nào</span>
                                     }
-                                    className="py-12"
+                                    className="py-8 sm:py-12"
                                 />
                             )
                         }}
@@ -193,13 +202,17 @@ const NotificationPage = () => {
                 </div>
 
                 {filteredNotifications.length > 0 && (
-                    <div className="flex justify-center mt-6">
+                    <div className="flex justify-center mt-4 sm:mt-6">
                         <Pagination
                             current={currentPage}
                             total={filteredNotifications.length}
                             pageSize={10}
                             onChange={handlePageChange}
                             className="custom-pagination"
+                            size="small"
+                            showSizeChanger={false}
+                            showQuickJumper={false}
+                            responsive={true}
                         />
                     </div>
                 )}

@@ -84,23 +84,6 @@ body {
   }
 }
 
-/* Custom scrollbar for better mobile experience */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #2DA1EE;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #2590d1;
-}
 
 /* Focus styles for accessibility */
 button:focus,
@@ -108,6 +91,43 @@ a:focus,
 .ant-btn:focus {
   outline: 2px solid #2DA1EE;
   outline-offset: 2px;
+}
+
+/* Remove all borders and outlines from slider images */
+.slick-slider img,
+.slick-slide img,
+.slick-track img {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.slick-slider *:focus,
+.slick-slide *:focus,
+.slick-track *:focus {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove focus outline from slider containers */
+.slick-slider,
+.slick-slide,
+.slick-track,
+.slick-list {
+  outline: none !important;
+  border: none !important;
+}
+
+/* Remove any default browser focus styles */
+img:focus {
+  outline: none !important;
+  border: none !important;
+}
+
+div:focus {
+  outline: none !important;
+  border: none !important;
 }
 
 /* Mobile-specific animations */

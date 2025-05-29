@@ -13,10 +13,10 @@ import { motion, useInView } from 'framer-motion';
 import CountUp from 'react-countup';
 import Link from 'next/link';
 const stats = [
-  { value: 51743, label: 'Người chơi trên nền tảng' },
-  { value: 6976, label: 'Trận đấu diễn ra' },
-  { value: 6146, label: 'Câu lạc bộ' },
-  { value: 2544, label: 'Địa điểm' },
+  { value: 150, label: 'Khách hàng đã đặt sân' },
+  { value: 89, label: 'Trận đấu diễn ra' },
+  { value: 12, label: 'Đội bóng thường xuyên' },
+  { value: 4, label: 'Sân con trong khu vực' },
 ];
 
 const images = [
@@ -43,28 +43,28 @@ const HomePage = () => {
   };
 
   const navigationItems = [
-    { href: "/community", label: "Cộng đồng" },
-    { href: "/book-field", label: "Đặt sân" },
-    { href: "/field-owner", label: "Dành cho chủ sân" },
-    { href: "/ranking", label: "Bảng xếp hạng" },
-    { href: "/blog", label: "Blog" },
+    { href: "/about", label: "Giới thiệu sân" },
+    { href: "/homepage", label: "Đặt sân" },
+    { href: "/find-team", label: "Tìm đối" },
+    { href: "/contact", label: "Liên hệ" },
   ];
 
   return (
     <div className="bg-white">
-      <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col min-h-screen">
+      <section className="w-full max-w-10/12 mx-auto px-4 sm:px-6 lg:px-8 flex flex-col min-h-screen">
         {/* Header */}
         <header className="flex justify-between items-center py-4 lg:py-6">
           {/* Logo */}
           <div className="flex items-center">
-            <Image
-              src="/222.png"
-              alt="KickZone Logo"
-              width={120}
-              height={120}
-              className="w-24 h-24 sm:w-32 sm:h-32 lg:w-36 lg:h-36"
-              priority
-            />
+            <div className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+              {/* <div>
+                <span className="text-3xl">⚽</span>
+                <span className="text-[#2DA1EE]">Kick</span><span className="text-gray-800">Zone</span>
+              </div> */}
+              <div>
+                <img src="../222.png" alt="" width={150} />
+              </div>
+            </div>
           </div>
 
           {/* Desktop Navigation */}
@@ -79,10 +79,10 @@ const HomePage = () => {
               </Link>
             ))}
             <Button
-              className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-6 py-2 h-auto border-none font-semibold transition-colors duration-200"
+              className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl px-6 py-2 h-auto border-none font-semibold transition-colors duration-200 mr-3"
               onClick={() => router.push('/homepage')}
             >
-              Đặt sân
+              Đặt sân ngay
             </Button>
           </nav>
 
@@ -120,88 +120,107 @@ const HomePage = () => {
                 {item.label}
               </Link>
             ))}
-            <Button
-              className="mt-4 bg-orange-500 hover:bg-orange-600 text-white rounded-full h-12 text-lg font-semibold border-none"
-              onClick={() => {
-                router.push('/homepage');
-                setMobileMenuOpen(false);
-              }}
-              block
-            >
-              Đặt sân ngay
-            </Button>
+            <div className="mt-4 space-y-3">
+              <Button
+                className="bg-orange-500 hover:bg-orange-600 text-white rounded-full h-12 text-lg font-semibold border-none"
+                onClick={() => {
+                  router.push('/homepage');
+                  setMobileMenuOpen(false);
+                }}
+                block
+              >
+                Đặt sân ngay
+              </Button>
+              <Button
+                className="bg-green-600 hover:bg-green-700 text-white rounded-full h-12 text-lg font-semibold border-none"
+                onClick={() => {
+                  router.push('/manager');
+                  setMobileMenuOpen(false);
+                }}
+                block
+              >
+                Quản lý sân
+              </Button>
+            </div>
           </nav>
         </Drawer>
         {/* Hero Section */}
-        <main className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 py-8 sm:py-12 lg:py-24 items-center">
+        <main className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 py-6 sm:py-8 lg:py-16 items-center">
           {/* Content */}
-          <div className="order-2 lg:order-1 space-y-6 text-center lg:text-left">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 leading-tight">
-              Nền tảng #1 cho người chơi bóng đá
+          <div className="order-2 lg:order-1 space-y-4 text-center lg:text-left">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 leading-tight">
+              Sân bóng KickZone - Nơi đam mê bùng cháy
             </h1>
-            <p className="text-lg sm:text-xl lg:text-xl text-gray-600 leading-relaxed">
-              Lập đội tìm đối thủ, kết nối cộng đồng. Tranh hạng dễ dàng, nhận quà hấp dẫn!
+            <p className="text-base sm:text-lg lg:text-lg text-gray-600 leading-relaxed">
+              Đặt sân dễ dàng, tìm đối nhanh chóng. Cùng nhau tạo nên những trận đấu đáng nhớ!
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-4 justify-center lg:justify-start">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-3 justify-center lg:justify-start">
               <Button
                 type="primary"
                 size="large"
-                className="h-12 sm:h-14 px-8 text-base sm:text-lg font-semibold bg-[#2DA1EE] border-[#2DA1EE] hover:bg-[#2590d1] hover:border-[#2590d1] rounded-full"
+                className="h-10 sm:h-12 px-6 text-sm sm:text-base font-semibold bg-orange-500 border-orange-500 hover:bg-orange-600 hover:border-orange-600 rounded-xl"
                 onClick={() => router.push('/homepage')}
               >
-                Tham gia ngay
+                Đặt sân ngay
               </Button>
               <Button
                 size="large"
-                className="h-12 sm:h-14 px-8 text-base sm:text-lg font-semibold border-2 border-gray-300 hover:border-[#2DA1EE] hover:text-[#2DA1EE] rounded-full"
-                onClick={() => router.push('/learn-more')}
+                className="h-10 sm:h-12 px-6 text-sm sm:text-base font-semibold bg-green-600 border-green-600 hover:bg-green-700 hover:border-green-700 text-white rounded-xl"
+                onClick={() => router.push('/find-team')}
               >
-                Tìm hiểu thêm
+                Tìm đối thủ
               </Button>
             </div>
           </div>
 
           {/* Hero Image */}
           <div className="order-1 lg:order-2 flex justify-center items-center">
-            <div className="w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 xl:w-[480px] xl:h-[480px] flex justify-center items-center">
-              <div className="gradient-bg1 w-full h-full p-4 sm:p-6">
-                <Slider {...settings}>
-                  <div>
-                    <img
-                      src="https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/FVR-1-1.png"
-                      alt="Soccer Player 4"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <div>
-                    <img
-                      src="https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/fooooot-1.png"
-                      alt="Soccer Player 1"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <div>
-                    <img
-                      src="https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/fooooot-bal-1.png"
-                      alt="Soccer Player 2"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <div>
-                    <img
-                      src="https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/football-Recoveredf-2-1.png"
-                      alt="Soccer Player 3"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <div>
-                    <img
-                      src="https://i.postimg.cc/mD8cv6c1/img-2.png"
-                      alt="Soccer Player 5"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                </Slider>
+            <div className="w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 xl:w-96 xl:h-96 flex justify-center items-center">
+              <div className="gradient-bg1 w-full h-full p-4 sm:p-4 overflow-hidden ">
+                <div className="w-full h-full rounded-full ">
+                  <Slider {...settings}>
+                    <div className="w-full h-full flex items-center justify-center outline-none focus:outline-none">
+                      <img
+                        src="https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/FVR-1-1.png"
+                        alt="Soccer Player 4"
+                        className="w-full h-full object-contain outline-none focus:outline-none border-none"
+                        style={{ outline: 'none', border: 'none' }}
+                      />
+                    </div>
+                    <div className="w-full h-full flex items-center justify-center outline-none focus:outline-none">
+                      <img
+                        src="https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/fooooot-1.png"
+                        alt="Soccer Player 1"
+                        className="w-full h-full object-contain outline-none focus:outline-none border-none"
+                        style={{ outline: 'none', border: 'none' }}
+                      />
+                    </div>
+                    <div className="w-full h-full flex items-center justify-center outline-none focus:outline-none">
+                      <img
+                        src="https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/fooooot-bal-1.png"
+                        alt="Soccer Player 2"
+                        className="w-full h-full object-contain outline-none focus:outline-none border-none"
+                        style={{ outline: 'none', border: 'none' }}
+                      />
+                    </div>
+                    <div className="w-full h-full flex items-center justify-center outline-none focus:outline-none">
+                      <img
+                        src="https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/football-Recoveredf-2-1.png"
+                        alt="Soccer Player 3"
+                        className="w-full h-full object-contain outline-none focus:outline-none border-none"
+                        style={{ outline: 'none', border: 'none' }}
+                      />
+                    </div>
+                    <div className="w-full h-full flex items-center justify-center outline-none focus:outline-none">
+                      <img
+                        src="https://i.postimg.cc/mD8cv6c1/img-2.png"
+                        alt="Soccer Player 5"
+                        className="w-full h-full object-contain outline-none focus:outline-none border-none"
+                        style={{ outline: 'none', border: 'none' }}
+                      />
+                    </div>
+                  </Slider>
+                </div>
               </div>
             </div>
           </div>
@@ -209,7 +228,7 @@ const HomePage = () => {
       </section>
 
       {/* Community Section */}
-      <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 bg-white">
+      <section className="w-full max-w-10/12 mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 bg-white">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Image Section */}
           <motion.div
@@ -240,39 +259,39 @@ const HomePage = () => {
             className="order-1 lg:order-2 text-center lg:text-left"
           >
             <div className="space-y-6">
-              <p className="text-[#2DA1EE] text-lg font-semibold">Chơi bóng đá vui hơn</p>
+              <p className="text-[#2DA1EE] text-lg font-semibold">Sân bóng chất lượng cao</p>
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800">
-                Một cộng đồng uy tín
+                Trải nghiệm tuyệt vời tại KickZone
               </h2>
               <p className="text-gray-600 text-base sm:text-lg leading-relaxed">
-                Kết nối với cộng đồng người chơi bóng, sân bóng quanh bạn chưa bao giờ dễ dàng và an toàn đến thế
+                Sân cỏ nhân tạo chất lượng cao, hệ thống đèn chiếu sáng hiện đại, phòng thay đồ tiện nghi
               </p>
 
               <ul className="space-y-4 sm:space-y-6">
                 <li className="flex items-start space-x-3 text-left">
                   <TeamOutlined className="text-[#2DA1EE] text-xl mt-1 flex-shrink-0" />
                   <div>
-                    <strong className="text-gray-800 text-base sm:text-lg">Trang câu lạc bộ</strong>
+                    <strong className="text-gray-800 text-base sm:text-lg">4 sân con chất lượng</strong>
                     <p className="text-gray-600 text-sm sm:text-base mt-1">
-                      Logo, độ tuổi, xếp hạng, đánh giá uy tín cùng thống kê thành tích rõ ràng.
+                      Sân 5v5, 7v7 với cỏ nhân tạo cao cấp, đảm bảo trải nghiệm tốt nhất.
                     </p>
                   </div>
                 </li>
                 <li className="flex items-start space-x-3 text-left">
                   <LockOutlined className="text-[#2DA1EE] text-xl mt-1 flex-shrink-0" />
                   <div>
-                    <strong className="text-gray-800 text-base sm:text-lg">Cập nhật diễn biến trận đấu</strong>
+                    <strong className="text-gray-800 text-base sm:text-lg">Đặt sân online 24/7</strong>
                     <p className="text-gray-600 text-sm sm:text-base mt-1">
-                      Ghi bàn, kiến tạo, phạm lỗi...
+                      Hệ thống đặt sân trực tuyến tiện lợi, thanh toán an toàn.
                     </p>
                   </div>
                 </li>
                 <li className="flex items-start space-x-3 text-left">
                   <TrophyOutlined className="text-[#2DA1EE] text-xl mt-1 flex-shrink-0" />
                   <div>
-                    <strong className="text-gray-800 text-base sm:text-lg">Giải đấu cộng đồng</strong>
+                    <strong className="text-gray-800 text-base sm:text-lg">Tìm đối thủ dễ dàng</strong>
                     <p className="text-gray-600 text-sm sm:text-base mt-1">
-                      Tổ chức thường xuyên, vì cộng đồng!
+                      Kết nối với các đội bóng khác, tạo nên những trận đấu hấp dẫn.
                     </p>
                   </div>
                 </li>
@@ -281,9 +300,10 @@ const HomePage = () => {
               <Button
                 type="primary"
                 size="large"
-                className="h-12 sm:h-14 px-8 text-base sm:text-lg font-semibold bg-[#2DA1EE] border-[#2DA1EE] hover:bg-[#2590d1] hover:border-[#2590d1] rounded-full mt-8"
+                className="h-12 sm:h-14 px-8 text-base sm:text-lg font-semibold bg-orange-500 border-orange-500 hover:bg-orange-600 hover:border-orange-600 rounded-full mt-8"
+                onClick={() => router.push('/homepage')}
               >
-                Kết nối với anh em
+                Đặt sân ngay
               </Button>
             </div>
           </motion.div>
@@ -291,12 +311,12 @@ const HomePage = () => {
       </section>
 
       {/* Statistics Section */}
-      <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 bg-white text-center">
+      <section className="w-full max-w-10/12 mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 bg-white text-center">
         <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-          Tin dùng bởi người dùng khắp cả nước
+          Sân bóng KickZone trong con số
         </h2>
         <p className="text-gray-500 text-base sm:text-lg lg:text-xl mb-8 sm:mb-12 max-w-2xl mx-auto">
-          Hàng chục ngàn người chơi đang chờ bạn góp vui
+          Những con số ấn tượng từ sân bóng của chúng tôi
         </p>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -325,13 +345,13 @@ const HomePage = () => {
       </section>
 
       {/* Gallery Section */}
-      <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 text-center">
+      <section className="w-full max-w-10/12 mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 text-center">
         <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-          Những Khoảnh Khắc Tuyệt Vời
+          Hình ảnh sân bóng KickZone
         </h2>
         <p className="text-gray-500 text-base sm:text-lg lg:text-xl max-w-3xl mx-auto mb-8 sm:mb-12 leading-relaxed">
-          Những khoảnh khắc đáng nhớ từ cộng đồng bóng đá KickZone.
-          Hãy cùng nhau tạo nên những ký ức tuyệt vời trên sân cỏ.
+          Khám phá không gian sân bóng hiện đại với cơ sở vật chất đầy đủ.
+          Nơi lý tưởng để bạn thỏa sức đam mê bóng đá.
         </p>
 
         <motion.div
@@ -339,7 +359,7 @@ const HomePage = () => {
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
           viewport={{ once: true, amount: 0.4 }}
-          className="mb-6 sm:mb-8"
+          className="mb-6 sm:mb-8 "
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             <div className="group">
@@ -393,7 +413,7 @@ const HomePage = () => {
 
       {/* Footer */}
       <footer className="w-full bg-white border-t border-gray-200 mt-12 sm:mt-16 lg:mt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="max-w-10/12 mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
           <div className="text-center space-y-6 sm:space-y-8">
             {/* Navigation Links */}
             <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-8 lg:gap-12">

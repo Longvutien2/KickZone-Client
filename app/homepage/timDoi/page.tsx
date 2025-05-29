@@ -31,24 +31,24 @@ export default function Home() {
     }, [dispatch])
 
     return (
-        <div className="bg-white min-h-screen">
+        <div className="bg-white min-h-screen px-4 sm:px-0">
             {/* Header - time only */}
-            <h1 className="text-2xl font-semibold mb-4">Tìm đối</h1>
+            <h1 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4">Tìm đối</h1>
             <Tabs
                 defaultActiveKey="1"
                 centered
                 className="border-gray-200"
-                tabBarGutter={48}
+                tabBarGutter={24}
                 tabBarStyle={{ marginBottom: 0 }}
                 items={[
                     {
                         key: "1",
-                        label: <span className="text-base font-medium">Cộng Đồng</span>,
+                        label: <span className="text-sm sm:text-base font-medium">Cộng Đồng</span>,
                         children: <MainContent />
                     },
                     {
                         key: "2",
-                        label: <span className="text-base font-medium">Của Tôi</span>,
+                        label: <span className="text-sm sm:text-base font-medium">Của Tôi</span>,
                         children: <MyTeamTab />
                     }
                 ]}
@@ -69,11 +69,11 @@ const MainContent = () => {
     const [filtersVisible, setFiltersVisible] = useState(false);
     const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    
+
     moment.locale('vi');
     const dispatch = useAppDispatch();
     const [value, setValue] = useState<string>(''); // State lưu giá trị khu vực được chọn
-    
+
     // Lấy dữ liệu từ Redux store một cách an toàn
     const matchState = useAppSelector(state => state.match);
     const footballFields = useAppSelector(state => state.footballField.detail) as FootballField;
@@ -109,7 +109,7 @@ const MainContent = () => {
                 setIsLoading(false);
             }
         };
-        
+
         fetchMatches();
     }, [dispatch]);
 
@@ -153,10 +153,10 @@ const MainContent = () => {
     useEffect(() => {
         // Lấy ngày hiện tại ở đầu ngày (00:00:00)
         const today = moment().startOf('day');
-        
+
         // Lấy danh sách trận đấu từ Redux store
         const matchs = matchState.value;
-        
+
         // Kiểm tra matchs có phải là mảng không
         if (!matchs || !Array.isArray(matchs)) {
             console.warn("matchs is not an array:", matchs);
@@ -222,65 +222,32 @@ const MainContent = () => {
     return (
         <>
             {/* Bộ lọc và thống kê */}
-            <div className="bg-white shadow rounded-xl px-4 py-3 mx-4 mt-4">
-                <div className="flex justify-between items-center w-full mb-2">
-                    <div className="flex items-center">
+            <div className="bg-white shadow rounded-xl px-3 sm:px-4 py-3 mx-0 sm:mx-4 mt-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full mb-2 gap-3 sm:gap-0">
+                    <div className="flex items-center flex-wrap gap-2">
                         <Button
                             icon={<FilterOutlined />}
                             onClick={toggleFilters}
-                            className="mr-2"
+                            className="mr-0 sm:mr-2"
+                            size="small"
                         >
-                            Bộ lọc
+                            <span className="hidden sm:inline">Bộ lọc</span>
+                            <span className="sm:hidden">Lọc</span>
                         </Button>
                         {(value || selectedDate || selectedTime) && (
-                            <Button type="link" onClick={clearFilters} className="text-orange-500">
+                            <Button type="link" onClick={clearFilters} className="text-orange-500 p-0 h-auto text-xs sm:text-sm">
                                 Xóa bộ lọc
                             </Button>
                         )}
-                    </div>
-
-                    {/* Phải: Thống kê */}
-                    <div className="flex space-x-6">
-                        <div className="text-right">
-                            <div className="text-orange-500 text-lg font-bold leading-none">683</div>
-                            <div className="text-xs text-gray-500">Người chơi</div>
-                        </div>
-                        <div className="text-right">
-                            <div className="text-orange-500 text-lg font-bold leading-none">1055</div>
-                            <div className="text-xs text-gray-500">Câu lạc bộ</div>
-                        </div>
                     </div>
                 </div>
 
                 {/* Mở rộng bộ lọc */}
                 {filtersVisible && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3 pt-3 border-t border-gray-200">
-                        {/* Khu vực */}
-                        {/* <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Khu vực</label>
-                            <Select
-                                showSearch
-                                value={value}
-                                onChange={handleChange}
-                                placeholder="Chọn khu vực"
-                                className="w-full"
-                                style={{ width: '100%' }}
-                                optionFilterProp="children"
-                                filterOption={(input, option) => 
-                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                                }
-                                options={groupedByAddress.map((province: string) => ({
-                                    value: province,
-                                    label: province
-                                }))}
-                                suffixIcon={<EnvironmentOutlined style={{ color: '#f97316' }} />}
-                                allowClear
-                            />
-                        </div> */}
-
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3 pt-3 border-t border-gray-200">
                         {/* Ngày */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Ngày thi đấu</label>
+                            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Ngày thi đấu</label>
                             <DatePicker
                                 className="w-full"
                                 format="DD/MM/YYYY"
@@ -289,12 +256,13 @@ const MainContent = () => {
                                 onChange={handleDateChange}
                                 suffixIcon={<CalendarOutlined style={{ color: '#f97316' }} />}
                                 allowClear
+                                size="small"
                             />
                         </div>
 
                         {/* Giờ - Sử dụng Select thay vì TimePicker */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Khung giờ</label>
+                            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Khung giờ</label>
                             <Select
                                 showSearch
                                 value={selectedTime}
@@ -313,6 +281,7 @@ const MainContent = () => {
                                 suffixIcon={<ClockCircleOutlined style={{ color: '#f97316' }} />}
                                 allowClear
                                 notFoundContent="Không có khung giờ nào"
+                                size="small"
                             />
                         </div>
                     </div>
@@ -320,7 +289,7 @@ const MainContent = () => {
             </div>
 
             {/* Hiển thị kết quả lọc */}
-            <div className="px-4 mt-4 text-sm text-gray-500">
+            <div className="px-0 sm:px-4 mt-4 text-xs sm:text-sm text-gray-500">
                 {filtersVisible && (
                     filteredMatches.length > 0 ? (
                         <p>Tìm thấy {filteredMatches.length} trận đấu sắp tới</p>
@@ -331,14 +300,75 @@ const MainContent = () => {
             </div>
 
             {/* Match list */}
-            <div className="mt-4 px-4 space-y-4 pb-10">
+            <div className="mt-4 px-0 sm:px-4 space-y-3 sm:space-y-4 pb-10">
                 {filteredMatches.length > 0 ? (
                     filteredMatches.slice((currentPage - 1) * 5, currentPage * 5).map((match: Match) => (
-                        <div key={match._id} className="bg-white p-4 shadow-md rounded-xl">
+                        <div key={match._id} className="bg-white p-3 sm:p-4 shadow-md rounded-xl mx-0 sm:mx-0">
                             <Link href={`/homepage/timDoi/${match._id}`}>
-                                {/* Nội dung match giữ nguyên */}
-                                {/* 3 phần: Đội A - VS - Đội B */}
-                                <div className="grid grid-cols-3 items-center mb-2">
+                                {/* Mobile Layout */}
+                                <div className="block sm:hidden">
+                                    {/* Đội A */}
+                                    <div className="mb-3">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="relative w-14 h-14 flex-shrink-0">
+                                                <Image
+                                                    src={match.club_A?.teamImage || ""}
+                                                    className="rounded-full object-cover"
+                                                    layout="fill"
+                                                    alt="bg"
+                                                    unoptimized={true}
+                                                />
+                                            </div>
+                                            <div>
+                                                <div className="font-semibold text-base">{match.club_A?.teamName}</div>
+                                                <div className='flex items-center flex-wrap gap-2 text-sm mt-1 text-orange-500'>
+                                                    <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{match.club_A?.ageGroup}</span>
+                                                    <span>⚡ 99</span>
+                                                    <span>⭐ ?</span>
+                                                    <span>👍 100</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* VS */}
+                                    <div className="text-center text-2xl font-bold my-3">VS</div>
+
+                                    {/* Đội B */}
+                                    {match.club_B ? (
+                                        <div className="mb-3">
+                                            <div className="flex items-center space-x-3">
+                                                <div className="relative w-14 h-14 flex-shrink-0">
+                                                    <Image
+                                                        src={match.club_B?.teamImage || ""}
+                                                        className="rounded-full object-cover"
+                                                        layout="fill"
+                                                        alt="bg"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <div className="font-semibold text-base">{match.club_B?.teamName}</div>
+                                                    <div className='flex items-center flex-wrap gap-2 text-sm mt-1 text-orange-500'>
+                                                        <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{match.club_B?.ageGroup}</span>
+                                                        <span>⚡ 99</span>
+                                                        <span>⭐ ?</span>
+                                                        <span>👍 100</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col items-center text-center mb-3">
+                                            <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-lg text-gray-500">
+                                                ?
+                                            </div>
+                                            <div className="text-xs text-gray-400 mt-1">Chưa có đối thủ</div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Desktop Layout */}
+                                <div className="hidden sm:grid sm:grid-cols-3 items-center mb-2">
                                     {/* Đội A */}
                                     <div>
                                         <div className="flex items-center space-x-3">
@@ -396,9 +426,9 @@ const MainContent = () => {
                                 </div>
 
                                 {/* Time + location */}
-                                <div className="mt-3 text-sm text-gray-700">
-                                    <div className="flex items-center justify-between">
-                                        <span className='capitalize'>
+                                <div className="mt-3 text-xs sm:text-sm text-gray-700">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+                                        <span className='capitalize text-sm sm:text-base font-medium'>
                                             {match.orderId?.timeStart} | {
                                                 match.orderId?.date ?
                                                     moment(match.orderId.date, "DD-MM-YYYY")
@@ -421,31 +451,34 @@ const MainContent = () => {
                                                 // Nếu là ngày hôm nay và chưa có đối thủ
                                                 if (!match.club_B) {
                                                     return (
-                                                        <span className="bg-red-100 text-red-600 rounded-md px-2 py-1 text-xs font-bold flex items-center">
+                                                        <span className="bg-red-100 text-red-600 rounded-md px-2 py-1 text-xs font-bold flex items-center self-start sm:self-center">
                                                             <ClockCircleOutlined className="mr-1" />
-                                                            Hôm nay,  {match.orderId?.timeStart || match.time}
+                                                            <span className="hidden sm:inline">Hôm nay, {match.orderId?.timeStart || match.time}</span>
+                                                            <span className="sm:hidden">Hôm nay</span>
                                                         </span>
                                                     );
                                                 } else {
                                                     // Nếu là ngày hôm nay nhưng đã có đối thủ
                                                     return (
-                                                        <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
-                                                            Hôm nay, {match.orderId?.timeStart || match.time}
+                                                        <span className="bg-orange-100 text-orange-500 rounded-md px-2 py-1 text-xs self-start sm:self-center">
+                                                            <span className="hidden sm:inline">Hôm nay, {match.orderId?.timeStart || match.time}</span>
+                                                            <span className="sm:hidden">Hôm nay</span>
                                                         </span>
                                                     );
                                                 }
                                             } else {
                                                 // Nếu là ngày khác, hiển thị số ngày còn lại
                                                 return (
-                                                    <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
+                                                    <span className="bg-orange-100 text-orange-500 rounded-md px-2 py-1 text-xs self-start sm:self-center">
                                                         {diffDays} ngày nữa
                                                     </span>
                                                 );
                                             }
                                         })()}
                                     </div>
-                                    <div>{match.footballField?.name},
-                                        {match.footballField && (` ${match.footballField?.address?.detail ? `${match.footballField?.address?.detail}, ` : ""} ${match.footballField?.address?.ward}, ${match.footballField?.address?.district}, ${match.footballField?.address?.province}`)}
+                                    <div className="mt-2 text-xs sm:text-sm text-gray-600 break-words">
+                                        {match.footballField?.name}
+                                        {match.footballField && (`, ${match.footballField?.address?.detail ? `${match.footballField?.address?.detail}, ` : ""} ${match.footballField?.address?.ward}, ${match.footballField?.address?.district}, ${match.footballField?.address?.province}`)}
                                     </div>
                                 </div>
                             </Link>
@@ -526,27 +559,88 @@ const MyTeamTab = () => {
     }, [matchs, auth.value.user._id]);
 
     return (
-        <div className="mt-6 px-4">
+        <div className="mt-4 sm:mt-6 px-0 sm:px-4">
             <Tabs
                 defaultActiveKey="home"
                 centered
-                tabBarGutter={40}
+                tabBarGutter={20}
                 items={[
                     {
                         key: 'home',
-                        label: <span className="text-sm font-medium">Vai Trò Đội Nhà</span>,
+                        label: <span className="text-xs sm:text-sm font-medium">Vai Trò Đội Nhà</span>,
                         children: (
                             <div>
                                 {/* Match list */}
                                 {
                                     auth.isLoggedIn ?
                                         <div>
-                                            <div className="mt-8 px-4 space-y-4 pb-10">
+                                            <div className="mt-6 sm:mt-8 px-0 sm:px-4 space-y-3 sm:space-y-4 pb-10">
                                                 {matchsHome.slice((currentPage - 1) * 5, currentPage * 5).map((match: Match) => (
-                                                    <div key={match._id} className="bg-white p-4 shadow-md rounded-xl">
+                                                    <div key={match._id} className="bg-white p-3 sm:p-4 shadow-md rounded-xl">
                                                         <Link href={`/homepage/timDoi/${match._id}`}>
-                                                            {/* 3 phần: Đội A - VS - Đội B */}
-                                                            <div className="grid grid-cols-3 items-center mb-2">
+                                                            {/* Mobile Layout */}
+                                                            <div className="block sm:hidden">
+                                                                {/* Đội A */}
+                                                                <div className="mb-3">
+                                                                    <div className="flex items-center space-x-3">
+                                                                        <div className="relative w-14 h-14 flex-shrink-0">
+                                                                            <Image
+                                                                                src={match.club_A?.teamImage || ""}
+                                                                                className="rounded-full object-cover"
+                                                                                layout="fill"
+                                                                                alt="bg"
+                                                                            />
+                                                                        </div>
+                                                                        <div>
+                                                                            <div className="font-semibold text-base">{match.club_A?.teamName}</div>
+                                                                            <div className='flex items-center flex-wrap gap-2 text-sm mt-1 text-orange-500'>
+                                                                                <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{match.club_A?.ageGroup}</span>
+                                                                                <span>⚡ 99</span>
+                                                                                <span>⭐ ?</span>
+                                                                                <span>👍 100</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* VS */}
+                                                                <div className="text-center text-2xl font-bold my-3">VS</div>
+
+                                                                {/* Đội B */}
+                                                                {match.club_B ? (
+                                                                    <div className="mb-3">
+                                                                        <div className="flex items-center space-x-3">
+                                                                            <div className="relative w-14 h-14 flex-shrink-0">
+                                                                                <Image
+                                                                                    src={match.club_B?.teamImage || ""}
+                                                                                    className="rounded-full object-cover"
+                                                                                    layout="fill"
+                                                                                    alt="bg"
+                                                                                />
+                                                                            </div>
+                                                                            <div>
+                                                                                <div className="font-semibold text-base">{match.club_B?.teamName}</div>
+                                                                                <div className='flex items-center flex-wrap gap-2 text-sm mt-1 text-orange-500'>
+                                                                                    <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{match.club_B?.ageGroup}</span>
+                                                                                    <span>⚡ 99</span>
+                                                                                    <span>⭐ ?</span>
+                                                                                    <span>👍 100</span>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="flex flex-col items-center text-center mb-3">
+                                                                        <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-lg text-gray-500">
+                                                                            ?
+                                                                        </div>
+                                                                        <div className="text-xs text-gray-400 mt-1">Chưa có đối thủ</div>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+
+                                                            {/* Desktop Layout */}
+                                                            <div className="hidden sm:grid sm:grid-cols-3 items-center mb-2">
                                                                 {/* Đội A */}
                                                                 <div>
                                                                     <div className="flex items-center space-x-3">
@@ -554,7 +648,7 @@ const MyTeamTab = () => {
                                                                             <Image
                                                                                 src={match.club_A?.teamImage || ""}
                                                                                 className="rounded-full object-cover"
-                                                                                layout="fill"  // Lấp đầy toàn bộ container
+                                                                                layout="fill"
                                                                                 alt="bg"
                                                                             />
                                                                         </div>
@@ -580,7 +674,7 @@ const MyTeamTab = () => {
                                                                                 <Image
                                                                                     src={match.club_B?.teamImage || ""}
                                                                                     className="rounded-full object-cover"
-                                                                                    layout="fill"  // Lấp đầy toàn bộ container
+                                                                                    layout="fill"
                                                                                     alt="bg"
                                                                                 />
                                                                             </div>
@@ -592,7 +686,6 @@ const MyTeamTab = () => {
                                                                             <span>👍 100</span>
                                                                         </div>
                                                                     </div>
-
                                                                 ) : (
                                                                     <div className="flex flex-col items-end text-right">
                                                                         <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-lg text-gray-500">
@@ -604,9 +697,9 @@ const MyTeamTab = () => {
                                                             </div>
 
                                                             {/* Time + location */}
-                                                            <div className="mt-3 text-sm text-gray-700">
-                                                                <div className="flex items-center justify-between">
-                                                                    <span className='capitalize'>
+                                                            <div className="mt-3 text-xs sm:text-sm text-gray-700">
+                                                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+                                                                    <span className='capitalize text-sm sm:text-base font-medium'>
                                                                         {match.orderId?.timeStart} | {
                                                                             match.orderId?.date ?
                                                                                 moment(match.orderId.date, "DD-MM-YYYY")
@@ -623,22 +716,24 @@ const MyTeamTab = () => {
                                                                         if (diffDays === 0) {
                                                                             // Nếu là ngày hôm nay, hiển thị "Hôm nay" và giờ bắt đầu
                                                                             return (
-                                                                                <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
-                                                                                    Hôm nay, {match.orderId?.timeStart || match.time}
+                                                                                <span className="bg-orange-100 text-orange-500 rounded-md px-2 py-1 text-xs self-start sm:self-center">
+                                                                                    <span className="hidden sm:inline">Hôm nay, {match.orderId?.timeStart || match.time}</span>
+                                                                                    <span className="sm:hidden">Hôm nay</span>
                                                                                 </span>
                                                                             );
                                                                         } else {
                                                                             // Nếu là ngày khác, hiển thị số ngày còn lại
                                                                             return (
-                                                                                <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
+                                                                                <span className="bg-orange-100 text-orange-500 rounded-md px-2 py-1 text-xs self-start sm:self-center">
                                                                                     {diffDays} ngày nữa
                                                                                 </span>
                                                                             );
                                                                         }
                                                                     })()}
                                                                 </div>
-                                                                <div>{match.footballField?.name},
-                                                                    {match.footballField && (` ${match.footballField?.address?.detail ? `${match.footballField?.address?.detail}, ` : ""} ${match.footballField?.address?.ward}, ${match.footballField?.address?.district}, ${match.footballField?.address?.province}`)}
+                                                                <div className="mt-2 text-xs sm:text-sm text-gray-600 break-words">
+                                                                    {match.footballField?.name}
+                                                                    {match.footballField && (`, ${match.footballField?.address?.detail ? `${match.footballField?.address?.detail}, ` : ""} ${match.footballField?.address?.ward}, ${match.footballField?.address?.district}, ${match.footballField?.address?.province}`)}
                                                                 </div>
                                                             </div>
                                                         </Link>
@@ -655,27 +750,31 @@ const MyTeamTab = () => {
                                                     />
                                                 </div>
                                             </div>
-                                            <div className="flex flex-col items-center justify-center text-center">
+                                            <div className="flex flex-col items-center justify-center text-center px-4">
                                                 <Button
                                                     type="primary"
-                                                    className="bg-orange-500 mt-4 px-6 rounded-full h-10 flex items-center"
-                                                    icon={<PlusOutlined className="text-xl mr-1" />}
-                                                    onClick={handleCreateMatch} // Gắn sự kiện onclick
+                                                    className="bg-orange-500 mt-4 px-4 sm:px-6 rounded-full h-10 sm:h-12 flex items-center text-sm sm:text-base"
+                                                    icon={<PlusOutlined className="text-base sm:text-xl mr-1" />}
+                                                    onClick={handleCreateMatch}
+                                                    size="large"
                                                 >
-                                                    Tạo Trận Đấu Mới
+                                                    <span className="hidden sm:inline">Tạo Trận Đấu Mới</span>
+                                                    <span className="sm:hidden">Tạo Trận Đấu</span>
                                                 </Button>
                                             </div>
                                         </div>
                                         :
-                                        <div className="flex flex-col items-center justify-center text-center mt-10">
-                                            <p className="text-gray-500 mb-2 text-sm">Chưa có trận đấu nào? Bắt đầu tạo trận đấu mới để tham gia vào bảng xếp hạng của Sporta ngay!</p>
+                                        <div className="flex flex-col items-center justify-center text-center mt-8 sm:mt-10 px-4">
+                                            <p className="text-gray-500 mb-2 text-xs sm:text-sm leading-relaxed">Chưa có trận đấu nào? Bắt đầu tạo trận đấu mới để tham gia vào bảng xếp hạng của Sporta ngay!</p>
                                             <Button
                                                 type="primary"
-                                                className="bg-orange-500 mt-4 px-6 rounded-full h-10 flex items-center"
-                                                icon={<PlusOutlined className="text-xl mr-1" />}
-                                                onClick={handleCreateMatch} // Gắn sự kiện onclick
+                                                className="bg-orange-500 mt-4 px-4 sm:px-6 rounded-full h-10 sm:h-12 flex items-center text-sm sm:text-base"
+                                                icon={<PlusOutlined className="text-base sm:text-xl mr-1" />}
+                                                onClick={handleCreateMatch}
+                                                size="large"
                                             >
-                                                Tạo Trận Đấu Mới
+                                                <span className="hidden sm:inline">Tạo Trận Đấu Mới</span>
+                                                <span className="sm:hidden">Tạo Trận Đấu</span>
                                             </Button>
                                         </div>
                                 }
@@ -685,19 +784,80 @@ const MyTeamTab = () => {
                     },
                     {
                         key: 'away',
-                        label: <span className="text-sm font-medium">Vai Trò Đội Khách</span>,
+                        label: <span className="text-xs sm:text-sm font-medium">Vai Trò Đội Khách</span>,
                         children:
                             <div>
                                 {/* Match list */}
                                 {
                                     auth.isLoggedIn ?
                                         <div>
-                                            <div className="mt-8 px-4 space-y-4 pb-10">
+                                            <div className="mt-6 sm:mt-8 px-0 sm:px-4 space-y-3 sm:space-y-4 pb-10">
                                                 {matchsAway.slice((currentPage - 1) * 5, currentPage * 5).map((match: Match) => (
-                                                    <div key={match._id} className="bg-white p-4 shadow-md rounded-xl">
+                                                    <div key={match._id} className="bg-white p-3 sm:p-4 shadow-md rounded-xl">
                                                         <Link href={`/homepage/timDoi/${match._id}`}>
-                                                            {/* 3 phần: Đội A - VS - Đội B */}
-                                                            <div className="grid grid-cols-3 items-center mb-2">
+                                                            {/* Mobile Layout */}
+                                                            <div className="block sm:hidden">
+                                                                {/* Đội A */}
+                                                                <div className="mb-3">
+                                                                    <div className="flex items-center space-x-3">
+                                                                        <div className="relative w-14 h-14 flex-shrink-0">
+                                                                            <Image
+                                                                                src={match.club_A?.teamImage || ""}
+                                                                                className="rounded-full object-cover"
+                                                                                layout="fill"
+                                                                                alt="bg"
+                                                                            />
+                                                                        </div>
+                                                                        <div>
+                                                                            <div className="font-semibold text-base">{match.club_A?.teamName}</div>
+                                                                            <div className='flex items-center flex-wrap gap-2 text-sm mt-1 text-orange-500'>
+                                                                                <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{match.club_A?.ageGroup}</span>
+                                                                                <span>⚡ 99</span>
+                                                                                <span>⭐ ?</span>
+                                                                                <span>👍 100</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* VS */}
+                                                                <div className="text-center text-2xl font-bold my-3">VS</div>
+
+                                                                {/* Đội B */}
+                                                                {match.club_B ? (
+                                                                    <div className="mb-3">
+                                                                        <div className="flex items-center space-x-3">
+                                                                            <div className="relative w-14 h-14 flex-shrink-0">
+                                                                                <Image
+                                                                                    src={match.club_B?.teamImage || ""}
+                                                                                    className="rounded-full object-cover"
+                                                                                    layout="fill"
+                                                                                    alt="bg"
+                                                                                />
+                                                                            </div>
+                                                                            <div>
+                                                                                <div className="font-semibold text-base">{match.club_B?.teamName}</div>
+                                                                                <div className='flex items-center flex-wrap gap-2 text-sm mt-1 text-orange-500'>
+                                                                                    <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{match.club_B?.ageGroup}</span>
+                                                                                    <span>⚡ 99</span>
+                                                                                    <span>⭐ ?</span>
+                                                                                    <span>👍 100</span>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="flex flex-col items-center text-center mb-3">
+                                                                        <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-lg text-gray-500">
+                                                                            ?
+                                                                        </div>
+                                                                        <div className="text-xs text-gray-400 mt-1">Chưa có đối thủ</div>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+
+                                                            {/* Desktop Layout */}
+                                                            <div className="hidden sm:grid sm:grid-cols-3 items-center mb-2">
                                                                 {/* Đội A */}
                                                                 <div>
                                                                     <div className="flex items-center space-x-3">
@@ -705,7 +865,7 @@ const MyTeamTab = () => {
                                                                             <Image
                                                                                 src={match.club_A?.teamImage || ""}
                                                                                 className="rounded-full object-cover"
-                                                                                layout="fill"  // Lấp đầy toàn bộ container
+                                                                                layout="fill"
                                                                                 alt="bg"
                                                                             />
                                                                         </div>
@@ -731,7 +891,7 @@ const MyTeamTab = () => {
                                                                                 <Image
                                                                                     src={match.club_B?.teamImage || ""}
                                                                                     className="rounded-full object-cover"
-                                                                                    layout="fill"  // Lấp đầy toàn bộ container
+                                                                                    layout="fill"
                                                                                     alt="bg"
                                                                                 />
                                                                             </div>
@@ -743,7 +903,6 @@ const MyTeamTab = () => {
                                                                             <span>👍 100</span>
                                                                         </div>
                                                                     </div>
-
                                                                 ) : (
                                                                     <div className="flex flex-col items-end text-right">
                                                                         <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-lg text-gray-500">
@@ -755,9 +914,9 @@ const MyTeamTab = () => {
                                                             </div>
 
                                                             {/* Time + location */}
-                                                            <div className="mt-3 text-sm text-gray-700">
-                                                                <div className="flex items-center justify-between">
-                                                                    <span className='capitalize'>
+                                                            <div className="mt-3 text-xs sm:text-sm text-gray-700">
+                                                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+                                                                    <span className='capitalize text-sm sm:text-base font-medium'>
                                                                         {match.orderId?.timeStart} | {
                                                                             match.orderId?.date ?
                                                                                 moment(match.orderId.date, "DD-MM-YYYY")
@@ -774,22 +933,24 @@ const MyTeamTab = () => {
                                                                         if (diffDays === 0) {
                                                                             // Nếu là ngày hôm nay, hiển thị "Hôm nay" và giờ bắt đầu
                                                                             return (
-                                                                                <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
-                                                                                    Hôm nay, {match.orderId?.timeStart || match.time}
+                                                                                <span className="bg-orange-100 text-orange-500 rounded-md px-2 py-1 text-xs self-start sm:self-center">
+                                                                                    <span className="hidden sm:inline">Hôm nay, {match.orderId?.timeStart || match.time}</span>
+                                                                                    <span className="sm:hidden">Hôm nay</span>
                                                                                 </span>
                                                                             );
                                                                         } else {
                                                                             // Nếu là ngày khác, hiển thị số ngày còn lại
                                                                             return (
-                                                                                <span className="bg-orange-100 text-orange-500 rounded-md px-2 text-xs">
+                                                                                <span className="bg-orange-100 text-orange-500 rounded-md px-2 py-1 text-xs self-start sm:self-center">
                                                                                     {diffDays} ngày nữa
                                                                                 </span>
                                                                             );
                                                                         }
                                                                     })()}
                                                                 </div>
-                                                                <div>{match.footballField?.name},
-                                                                    {match.footballField && (` ${match.footballField?.address?.detail ? `${match.footballField?.address?.detail}, ` : ""} ${match.footballField?.address?.ward}, ${match.footballField?.address?.district}, ${match.footballField?.address?.province}`)}
+                                                                <div className="mt-2 text-xs sm:text-sm text-gray-600 break-words">
+                                                                    {match.footballField?.name}
+                                                                    {match.footballField && (`, ${match.footballField?.address?.detail ? `${match.footballField?.address?.detail}, ` : ""} ${match.footballField?.address?.ward}, ${match.footballField?.address?.district}, ${match.footballField?.address?.province}`)}
                                                                 </div>
                                                             </div>
                                                         </Link>
@@ -806,27 +967,31 @@ const MyTeamTab = () => {
                                                     />
                                                 </div>
                                             </div>
-                                            <div className="flex flex-col items-center justify-center text-center">
+                                            <div className="flex flex-col items-center justify-center text-center px-4">
                                                 <Button
                                                     type="primary"
-                                                    className="bg-orange-500 mt-4 px-6 rounded-full h-10 flex items-center"
-                                                    icon={<PlusOutlined className="text-xl mr-1" />}
-                                                    onClick={handleCreateMatch} // Gắn sự kiện onclick
+                                                    className="bg-orange-500 mt-4 px-4 sm:px-6 rounded-full h-10 sm:h-12 flex items-center text-sm sm:text-base"
+                                                    icon={<PlusOutlined className="text-base sm:text-xl mr-1" />}
+                                                    onClick={handleCreateMatch}
+                                                    size="large"
                                                 >
-                                                    Tạo Trận Đấu Mới
+                                                    <span className="hidden sm:inline">Tạo Trận Đấu Mới</span>
+                                                    <span className="sm:hidden">Tạo Trận Đấu</span>
                                                 </Button>
                                             </div>
                                         </div>
                                         :
-                                        <div className="flex flex-col items-center justify-center text-center mt-10">
-                                            <p className="text-gray-500 mb-2 text-sm">Chưa có trận đấu nào? Bắt đầu tạo trận đấu mới để tham gia vào bảng xếp hạng của Sporta ngay!</p>
+                                        <div className="flex flex-col items-center justify-center text-center mt-8 sm:mt-10 px-4">
+                                            <p className="text-gray-500 mb-2 text-xs sm:text-sm leading-relaxed">Chưa có trận đấu nào? Bắt đầu tạo trận đấu mới để tham gia vào bảng xếp hạng của Sporta ngay!</p>
                                             <Button
                                                 type="primary"
-                                                className="bg-orange-500 mt-4 px-6 rounded-full h-10 flex items-center"
-                                                icon={<PlusOutlined className="text-xl mr-1" />}
-                                                onClick={handleCreateMatch} // Gắn sự kiện onclick
+                                                className="bg-orange-500 mt-4 px-4 sm:px-6 rounded-full h-10 sm:h-12 flex items-center text-sm sm:text-base"
+                                                icon={<PlusOutlined className="text-base sm:text-xl mr-1" />}
+                                                onClick={handleCreateMatch}
+                                                size="large"
                                             >
-                                                Tạo Trận Đấu Mới
+                                                <span className="hidden sm:inline">Tạo Trận Đấu Mới</span>
+                                                <span className="sm:hidden">Tạo Trận Đấu</span>
                                             </Button>
                                         </div>
                                 }
