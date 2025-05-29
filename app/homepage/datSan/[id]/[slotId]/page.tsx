@@ -305,7 +305,7 @@ const BookingPage = () => {
                                     <p>• Đơn đặt sân của bạn đã được ghi nhận.</p>
                                     <p>• Vui lòng hoàn tất thanh toán để chủ sân xác nhận đặt sân.</p>
                                     <p>• Bạn có thể theo dõi trạng thái đặt sân trong mục thông báo.</p>
-                                    <p>• Bạn có thể hủy đặt sân trước 24 giờ.</p>
+                                    <p>• Bạn không thể hủy sân khi đã đặt.</p>
                                 </div>
                             }
                             type="info"
@@ -327,341 +327,403 @@ const BookingPage = () => {
     }
 
     return (
-        <div className="container mx-auto py-6 px-4">
-            <Form
-                form={form}
-                layout="vertical"
-                onFinish={showConfirmModal}
-                initialValues={{
-                    paymentMethod: selectedPayment
-                }}
-            >
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Cột bên trái - Thông tin đơn hàng */}
-                    <div className="md:col-span-2">
-                        <Card title="Thanh toán" className="mb-6">
-                            {/* Tóm tắt đơn hàng */}
-                            <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                                <h3 className="text-lg font-semibold mb-3">Tóm tắt đơn hàng</h3>
-                                <div className="space-y-2">
-                                    <div className="grid grid-cols-3">
-                                        <div className="col-span-1 font-medium">Ngày:</div>
-                                        <div className="col-span-2 text-right">{fieldData?.date}</div>
+        <div className="min-h-screen bg-gray-50">
+            <div className="container mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
+                <Form
+                    form={form}
+                    layout="vertical"
+                    onFinish={showConfirmModal}
+                    initialValues={{
+                        paymentMethod: selectedPayment
+                    }}
+                >
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+                        {/* Cột bên trái - Thông tin đơn hàng */}
+                        <div className="lg:col-span-2 order-2 lg:order-1">
+                            <Card
+                                title={
+                                    <div className="flex items-center text-lg sm:text-xl font-bold text-gray-900">
+                                        <CreditCardOutlined className="mr-2 text-orange-500" />
+                                        Thanh toán
                                     </div>
-                                    <div className="grid grid-cols-3">
-                                        <div className="col-span-1 font-medium">Tên sân:</div>
-                                        <div className="col-span-2 text-right">{fieldData?.fieldName}</div>
+                                }
+                                className="mb-4 sm:mb-6 shadow-lg border-0"
+                            >
+                                {/* Tóm tắt đơn hàng */}
+                                <div className="bg-gradient-to-r from-orange-50 to-orange-100 p-4 sm:p-6 rounded-xl mb-6 border border-orange-200">
+                                    <div className="flex items-center mb-4">
+                                        <InfoCircleOutlined className="text-orange-500 mr-2 text-lg" />
+                                        <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Tóm tắt đơn hàng</h3>
                                     </div>
-                                    <div className="grid grid-cols-3">
-                                        <div className="col-span-1 font-medium">Địa chỉ:</div>
-                                        <div className="col-span-2 text-right">{fieldData?.address}</div>
-                                    </div>
-                                    <div className="grid grid-cols-3">
-                                        <div className="col-span-1 font-medium">Sân số:</div>
-                                        <div className="col-span-2 text-right">{fieldData?.field}</div>
-                                    </div>
-                                    <div className="grid grid-cols-3">
-                                        <div className="col-span-1 font-medium">Giờ đá:</div>
-                                        <div className="col-span-2 text-right">{fieldData?.timeStart}</div>
-                                    </div>
-                                    <div className="grid grid-cols-3">
-                                        <div className="col-span-1 font-medium">Giá tiền:</div>
-                                        <div className="col-span-2 text-right text-red-600 font-semibold">{fieldData?.price?.toLocaleString()} VNĐ</div>
+                                    <div className="space-y-3">
+                                        <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                                            <div className="font-medium text-gray-700">Ngày:</div>
+                                            <div className="font-semibold text-gray-900">{fieldData?.date}</div>
+                                        </div>
+                                        <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                                            <div className="font-medium text-gray-700">Tên sân:</div>
+                                            <div className="font-semibold text-gray-900">{fieldData?.fieldName}</div>
+                                        </div>
+                                        <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                                            <div className="font-medium text-gray-700">Địa chỉ:</div>
+                                            <div className="font-semibold text-gray-900 text-right sm:text-right break-words">{fieldData?.address}</div>
+                                        </div>
+                                        <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                                            <div className="font-medium text-gray-700">Sân số:</div>
+                                            <div className="font-semibold text-gray-900">{fieldData?.field}</div>
+                                        </div>
+                                        <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                                            <div className="font-medium text-gray-700">Giờ đá:</div>
+                                            <div className="font-semibold text-gray-900">{fieldData?.timeStart}</div>
+                                        </div>
+                                        <div className="border-t border-orange-200 pt-3 mt-3">
+                                            <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                                                <div className="font-medium text-gray-700">Giá tiền:</div>
+                                                <div className="text-xl font-bold text-orange-600">{fieldData?.price?.toLocaleString()} VNĐ</div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            {/* Hình thức thanh toán */}
-                            <h3 className="text-lg font-semibold mb-3">Hình thức thanh toán</h3>
-                            <Form.Item
-                                name="paymentMethod"
-                                rules={[{ required: true, message: "Vui lòng chọn hình thức thanh toán!" }]}
-
-                            >
-                                <div className="border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-                                    <Radio.Group
-                                        className="w-full"
-                                        onChange={(e) => setSelectedPayment(e.target.value)}
-                                        defaultValue={selectedPayment}
+                                {/* Hình thức thanh toán */}
+                                <Card className="mb-6">
+                                    <div className="flex items-center mb-4">
+                                        <div>
+                                            <CreditCardOutlined className="text-orange-500 mr-2 text-lg" />
+                                        </div>
+                                        <div className="text-lg sm:text-xl font-semibold text-gray-900">Hình thức thanh toán</div>
+                                    </div>
+                                    <Form.Item
+                                        name="paymentMethod"
+                                        rules={[{ required: true, message: "Vui lòng chọn hình thức thanh toán!" }]}
                                     >
-                                        <Collapse
-                                            bordered={false}
-                                            expandIconPosition="end"
-                                            activeKey={selectedPayment ? [selectedPayment] : []}
-                                            className="bg-white"
-                                            ghost={true}
-                                        >
-                                            <Collapse.Panel
-                                                key="banking"
-                                                header={
-                                                    <Radio value="banking" className="w-full flex items-center">
-                                                        <BankOutlined className="text-blue-500 mr-2 text-lg" />
-                                                        <span>Chuyển khoản / Internet Banking</span>
-                                                    </Radio>
-                                                }
-                                                showArrow={false}
+                                        <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white">
+                                            <Radio.Group
+                                                className="w-full"
+                                                onChange={(e) => setSelectedPayment(e.target.value)}
+                                                defaultValue={selectedPayment}
                                             >
-                                                <div className="bg-gray-50 p-4 border-t border-gray-200">
-                                                    <table className="w-full text-sm">
-                                                        <tbody>
-                                                            <tr>
-                                                                <td className="py-1 font-medium w-1/4">Ngân hàng:</td>
-                                                                <td className="text-blue-600">Vietcombank</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td className="py-1 font-medium">Số tài khoản:</td>
-                                                                <td>1234567890</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td className="py-1 font-medium">Chủ tài khoản:</td>
-                                                                <td>CÔNG TY TNHH KICKZONE</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td className="py-1 font-medium">Nội dung:</td>
-                                                                <td>{fieldData?.fieldName} {fieldData?.date} {fieldData?.timeStart}</td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </Collapse.Panel>
+                                                <Collapse
+                                                    bordered={false}
+                                                    expandIconPosition="end"
+                                                    activeKey={selectedPayment ? [selectedPayment] : []}
+                                                    className="bg-white"
+                                                    ghost={true}
+                                                >
+                                                    <Collapse.Panel
+                                                        key="banking"
+                                                        header={
+                                                            <Radio value="banking" className="w-full flex items-center py-2">
+                                                                <BankOutlined className="text-blue-500 mr-3 text-lg sm:text-xl" />
+                                                                <span className="text-sm sm:text-base font-medium">Chuyển khoản / Internet Banking</span>
+                                                            </Radio>
+                                                        }
+                                                        showArrow={false}
+                                                        className="border-b border-gray-100 last:border-b-0"
+                                                    >
+                                                        <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 sm:p-6 border-t border-blue-200">
+                                                            <div className="space-y-3">
+                                                                <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                                                                    <span className="font-medium text-gray-700">Ngân hàng:</span>
+                                                                    <span className="text-blue-600 font-semibold">Vietcombank</span>
+                                                                </div>
+                                                                <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                                                                    <span className="font-medium text-gray-700">Số tài khoản:</span>
+                                                                    <span className="font-mono font-semibold">1234567890</span>
+                                                                </div>
+                                                                <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                                                                    <span className="font-medium text-gray-700">Chủ tài khoản:</span>
+                                                                    <span className="font-semibold">CÔNG TY TNHH KICKZONE</span>
+                                                                </div>
+                                                                <div className="border-t border-blue-200 pt-3 mt-3">
+                                                                    <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                                                                        <span className="font-medium text-gray-700">Nội dung:</span>
+                                                                        <span className="font-semibold text-orange-600 break-words">
+                                                                            Sân bóng KickZone {fieldData?.date} {fieldData?.timeStart}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </Collapse.Panel>
 
-                                            <Collapse.Panel
-                                                key="qr"
-                                                header={
-                                                    <Radio value="qr" className="w-full flex items-center">
-                                                        <QrcodeOutlined className="text-green-500 mr-2 text-lg" />
-                                                        <span>Quét mã QR</span>
-                                                    </Radio>
-                                                }
-                                                showArrow={false}
-                                            >
-                                                <div className="bg-gray-50 p-4 border-t border-gray-200 flex justify-center">
-                                                    <img src={qrContent} alt="QR Code thanh toán" className="h-64 w-64 border-gray-200 rounded-md mb-4" />
-                                                </div>
-                                            </Collapse.Panel>
+                                                    <Collapse.Panel
+                                                        key="qr"
+                                                        header={
+                                                            <Radio value="qr" className="w-full flex items-center py-2">
+                                                                <QrcodeOutlined className="text-green-500 mr-3 text-lg sm:text-xl" />
+                                                                <span className="text-sm sm:text-base font-medium">Quét mã QR</span>
+                                                            </Radio>
+                                                        }
+                                                        showArrow={false}
+                                                        className="border-b border-gray-100 last:border-b-0"
+                                                    >
+                                                        <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 sm:p-6 border-t border-green-200">
+                                                            <div className="flex flex-col items-center">
+                                                                <img
+                                                                    src={qrContent}
+                                                                    alt="QR Code thanh toán"
+                                                                    className="h-48 w-48 sm:h-64 sm:w-64 border-2 border-green-200 rounded-xl shadow-lg mb-4"
+                                                                />
+                                                                <p className="text-center text-sm text-gray-600">
+                                                                    Quét mã QR bằng ứng dụng ngân hàng để thanh toán
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </Collapse.Panel>
 
-                                            <Collapse.Panel
-                                                key="momo"
-                                                header={
-                                                    <Radio value="momo" className="w-full flex items-center">
-                                                        <MobileOutlined className="text-pink-500 mr-2 text-lg" />
-                                                        <span>Ví MoMo</span>
-                                                    </Radio>
-                                                }
-                                                showArrow={false}
-                                            >
-                                                <div className="bg-gray-50 p-4 border-t border-gray-200">
-                                                    <p className="text-gray-600">Quét mã MoMo hoặc chuyển khoản đến số điện thoại: 0987654321</p>
-                                                </div>
-                                            </Collapse.Panel>
+                                                    <Collapse.Panel
+                                                        key="momo"
+                                                        header={
+                                                            <Radio value="momo" className="w-full flex items-center py-2">
+                                                                <MobileOutlined className="text-pink-500 mr-3 text-lg sm:text-xl" />
+                                                                <span className="text-sm sm:text-base font-medium">Ví MoMo</span>
+                                                            </Radio>
+                                                        }
+                                                        showArrow={false}
+                                                        className="border-b border-gray-100 last:border-b-0"
+                                                    >
+                                                        <div className="bg-gradient-to-r from-pink-50 to-pink-100 p-4 sm:p-6 border-t border-pink-200">
+                                                            <p className="text-gray-700 text-center">
+                                                                Quét mã MoMo hoặc chuyển khoản đến số điện thoại:
+                                                                <span className="font-mono font-semibold text-pink-600 ml-1">0987654321</span>
+                                                            </p>
+                                                        </div>
+                                                    </Collapse.Panel>
 
-                                            <Collapse.Panel
-                                                key="card"
-                                                header={
-                                                    <Radio value="card" className="w-full flex items-center">
-                                                        <CreditCardOutlined className="text-orange-500 mr-2 text-lg" />
-                                                        <span>Thẻ Visa, Master, JCB</span>
-                                                    </Radio>
-                                                }
-                                                showArrow={false}
-                                            >
-                                                <div className="bg-gray-50 p-4 border-t border-gray-200">
-                                                    <p className="text-gray-600">Bạn sẽ được chuyển đến trang thanh toán an toàn sau khi xác nhận.</p>
-                                                </div>
-                                            </Collapse.Panel>
+                                                    <Collapse.Panel
+                                                        key="card"
+                                                        header={
+                                                            <Radio value="card" className="w-full flex items-center py-2">
+                                                                <CreditCardOutlined className="text-orange-500 mr-3 text-lg sm:text-xl" />
+                                                                <span className="text-sm sm:text-base font-medium">Thẻ Visa, Master, JCB</span>
+                                                            </Radio>
+                                                        }
+                                                        showArrow={false}
+                                                        className="border-b border-gray-100 last:border-b-0"
+                                                    >
+                                                        <div className="bg-gradient-to-r from-orange-50 to-orange-100 p-4 sm:p-6 border-t border-orange-200">
+                                                            <p className="text-gray-700 text-center">
+                                                                Bạn sẽ được chuyển đến trang thanh toán an toàn sau khi xác nhận.
+                                                            </p>
+                                                        </div>
+                                                    </Collapse.Panel>
 
-                                            <Collapse.Panel
-                                                key="atm"
-                                                header={
-                                                    <Radio value="atm" className="w-full flex items-center">
-                                                        <BankOutlined className="text-blue-700 mr-2 text-lg" />
-                                                        <span>Thẻ ATM (Thẻ nội địa)</span>
-                                                    </Radio>
-                                                }
-                                                showArrow={false}
-                                            >
-                                                <div className="bg-gray-50 p-4 border-t border-gray-200">
-                                                    <p className="text-gray-600">Bạn sẽ được chuyển đến cổng thanh toán Napas sau khi xác nhận.</p>
-                                                </div>
-                                            </Collapse.Panel>
-                                        </Collapse>
-                                    </Radio.Group>
-                                </div>
-                            </Form.Item>
+                                                    <Collapse.Panel
+                                                        key="atm"
+                                                        header={
+                                                            <Radio value="atm" className="w-full flex items-center py-2">
+                                                                <BankOutlined className="text-blue-700 mr-3 text-lg sm:text-xl" />
+                                                                <span className="text-sm sm:text-base font-medium">Thẻ ATM (Thẻ nội địa)</span>
+                                                            </Radio>
+                                                        }
+                                                        showArrow={false}
+                                                        className="border-b border-gray-100 last:border-b-0"
+                                                    >
+                                                        <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 sm:p-6 border-t border-blue-200">
+                                                            <p className="text-gray-700 text-center">
+                                                                Bạn sẽ được chuyển đến cổng thanh toán Napas sau khi xác nhận.
+                                                            </p>
+                                                        </div>
+                                                    </Collapse.Panel>
+                                                </Collapse>
+                                            </Radio.Group>
+                                        </div>
+                                    </Form.Item>
+                                </Card>
 
-                            {/* Thông tin cá nhân */}
-                            <h3 className="text-lg font-semibold mb-3">Thông tin cá nhân</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <Form.Item
-                                    name="teamName"
-                                    label="Tên đội bóng"
-                                    labelCol={{ span: 24 }}
-                                    wrapperCol={{ span: 24 }}
-                                    rules={[{ required: true, message: "Vui lòng nhập họ và tên!" }]}
-                                >
-                                    <Input
-                                        size="large"
-                                        placeholder="Tên đội bóng"
-                                        prefix={<UserOutlined />}
-                                        className="border-gray-200"
-                                    />
-                                </Form.Item>
-
-                                <Form.Item
-                                    name="phone"
-                                    label="Số điện thoại"
-                                    labelCol={{ span: 24 }}
-                                    wrapperCol={{ span: 24 }}
-                                    rules={[
-                                        { required: true, message: "Vui lòng nhập số điện thoại!" },
-                                        { pattern: /^[0-9]{10}$/, message: "Số điện thoại không hợp lệ!" }
-                                    ]}
-                                >
-                                    <Input
-                                        size="large"
-                                        placeholder="Số điện thoại"
-                                        prefix={<PhoneOutlined />}
-                                        className="border-gray-200"
-                                    />
-                                </Form.Item>
-                            </div>
-
-                            {/* <Form.Item
-                                name="email"
-                                label="Email"
-                                labelCol={{ span: 24 }}
-                                wrapperCol={{ span: 24 }}
-                                rules={[
-                                    { required: true, message: "Vui lòng nhập email!" },
-                                    { type: 'email', message: "Email không hợp lệ!" }
-                                ]}
-                            >
-                                <Input
-                                    size="large"
-                                    placeholder="Email"
-                                    prefix={<MailOutlined />}
-                                    className="border-gray-200"
-                                />
-                            </Form.Item> */}
-
-                            <Form.Item
-                                name="note"
-                                label="Ghi chú"
-                                labelCol={{ span: 24 }}
-                                wrapperCol={{ span: 24 }}
-                            >
-                                <Input.TextArea placeholder="Ghi chú thêm (nếu có)" rows={3} />
-                            </Form.Item>
-                        </Card>
-                    </div>
-
-                    {/* Cột bên phải - Tóm tắt và thanh toán */}
-                    <div className="md:col-span-1">
-                        <Card title="Tóm tắt thanh toán" className="sticky top-4">
-                            <div className="space-y-4">
-                                <div className="flex justify-between">
-                                    <span>Giá sân:</span>
-                                    <span>{fieldData?.price?.toLocaleString()} VNĐ</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Phí dịch vụ:</span>
-                                    <span>0 VNĐ</span>
-                                </div>
-                                <div className="border-t pt-2 flex justify-between font-semibold">
-                                    <span>Tổng cộng:</span>
-                                    <span className="text-red-600">{fieldData?.price?.toLocaleString()} VNĐ</span>
-                                </div>
-                            </div>
-
-                            <div className="mt-6">
-                                <Button
-                                    type="primary"
-                                    htmlType="submit"
-                                    disabled={isSuccess || isFieldBooked}
-                                    block
-                                    className="h-12 text-lg"
-                                    icon={<CheckCircleOutlined />}
-                                >
-                                    Xác nhận thanh toán
-                                </Button>
-
-                                {isFieldBooked && (
-                                    <div className="mt-2 text-red-500 text-center font-medium">
-                                        Khung giờ này đã có người đặt và đang chờ xác nhận. Vui lòng chọn sân khác.
+                                {/* Thông tin cá nhân */}
+                                <Card className="mb-6">
+                                    <div className="flex items-center mb-4">
+                                        <div><UserOutlined className="text-orange-500 mr-2 text-lg" /></div>
+                                        <div className="text-lg sm:text-xl font-semibold text-gray-900">Thông tin cá nhân</div>
                                     </div>
-                                )}
-                            </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <Form.Item
+                                            name="teamName"
+                                            label={<span className="text-sm font-medium text-gray-700">Tên đội bóng</span>}
+                                            labelCol={{ span: 24 }}
+                                            wrapperCol={{ span: 24 }}
+                                            rules={[{ required: true, message: "Vui lòng nhập tên đội bóng!" }]}
+                                        >
+                                            <Input
+                                                size="large"
+                                                placeholder="Nhập tên đội bóng"
+                                                prefix={<UserOutlined className="text-gray-400" />}
+                                                className="border-gray-200 rounded-lg focus:border-orange-500 focus:ring-orange-500"
+                                            />
+                                        </Form.Item>
 
-                            <div className="mt-4 text-sm text-gray-500">
-                                <p className="mb-2">
-                                    <LockOutlined className="mr-1" /> Thanh toán an toàn & bảo mật
-                                </p>
-                                <p className="flex items-center">
-                                    <InfoCircleOutlined className="mr-1" /> Bạn có thể hủy đặt sân trước 24 giờ
-                                </p>
-                            </div>
-                        </Card>
-                    </div>
-                </div>
-            </Form>
+                                        <Form.Item
+                                            name="phone"
+                                            label={<span className="text-sm font-medium text-gray-700">Số điện thoại</span>}
+                                            labelCol={{ span: 24 }}
+                                            wrapperCol={{ span: 24 }}
+                                            rules={[
+                                                { required: true, message: "Vui lòng nhập số điện thoại!" },
+                                                { pattern: /^[0-9]{10}$/, message: "Số điện thoại không hợp lệ!" }
+                                            ]}
+                                        >
+                                            <Input
+                                                size="large"
+                                                placeholder="Nhập số điện thoại"
+                                                prefix={<PhoneOutlined className="text-gray-400" />}
+                                                className="border-gray-200 rounded-lg focus:border-orange-500 focus:ring-orange-500"
+                                            />
+                                        </Form.Item>
+                                    </div>
 
-            {/* Modal xác nhận thanh toán */}
-            <Modal
-                title={
-                    <div className="flex items-center text-orange-500">
-                        <ExclamationCircleOutlined className="mr-2 text-xl" />
-                        <span>Xác nhận thanh toán</span>
+                                    <Form.Item
+                                        name="note"
+                                        label={<span className="text-sm font-medium text-gray-700">Ghi chú</span>}
+                                        labelCol={{ span: 24 }}
+                                        wrapperCol={{ span: 24 }}
+                                    >
+                                        <Input.TextArea
+                                            placeholder="Ghi chú thêm (nếu có)"
+                                            rows={3}
+                                            className="border-gray-200 rounded-lg focus:border-orange-500 focus:ring-orange-500"
+                                        />
+                                    </Form.Item>
+                                </Card>
+
+                            </Card>
+                        </div>
+
+                        {/* Cột bên phải - Tóm tắt và thanh toán */}
+                        <div className="lg:col-span-1 order-1 lg:order-2">
+                            <Card
+                                title={
+                                    <div className="flex items-center text-lg sm:text-xl font-bold text-gray-900">
+                                        <CheckCircleOutlined className="mr-2 text-orange-500" />
+                                        Tóm tắt thanh toán
+                                    </div>
+                                }
+                                className="sticky top-4 shadow-lg border-0"
+                            >
+                                <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 sm:p-6 rounded-xl border border-gray-200">
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-gray-700 font-medium">Giá sân:</span>
+                                            <span className="font-semibold text-gray-900">{fieldData?.price?.toLocaleString()} VNĐ</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-gray-700 font-medium">Phí dịch vụ:</span>
+                                            <span className="font-semibold text-green-600">0 VNĐ</span>
+                                        </div>
+                                        <div className="border-t border-gray-300 pt-4 flex justify-between items-center">
+                                            <span className="text-lg font-bold text-gray-900">Tổng cộng:</span>
+                                            <span className="text-xl font-bold text-orange-600">{fieldData?.price?.toLocaleString()} VNĐ</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="mt-6">
+                                    <Button
+                                        type="primary"
+                                        htmlType="submit"
+                                        disabled={isSuccess || isFieldBooked}
+                                        block
+                                        size="large"
+                                        className="h-12 sm:h-14 text-base sm:text-lg font-semibold bg-orange-500 hover:bg-orange-600 border-orange-500 rounded-xl shadow-lg"
+                                        icon={<CheckCircleOutlined />}
+                                    >
+                                        Xác nhận thanh toán
+                                    </Button>
+
+                                    {isFieldBooked && (
+                                        <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                            <div className="text-red-600 text-center font-medium text-sm">
+                                                ⚠️ Khung giờ này đã có người đặt và đang chờ xác nhận. Vui lòng chọn sân khác.
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="mt-6 space-y-3">
+                                    <div className="flex items-center text-sm text-gray-600 bg-green-50 p-3 rounded-lg border border-green-200">
+                                        <LockOutlined className="mr-2 text-green-600" />
+                                        <span>Thanh toán an toàn & bảo mật</span>
+                                    </div>
+                                    <div className="flex items-center text-sm text-gray-600 bg-blue-50 p-3 rounded-lg border border-blue-200">
+                                        <InfoCircleOutlined className="mr-2 text-blue-600" />
+                                        <span>Bạn không thể hủy sân khi đã đặt</span>
+                                    </div>
+                                </div>
+                            </Card>
+                        </div>
                     </div>
-                }
-                open={confirmModalVisible}
-                onCancel={handleConfirmCancel}
-                footer={[
-                    <Button key="back" onClick={handleConfirmCancel}>
-                        Hủy
-                    </Button>,
-                    selectedPayment !== "qr" && (
+                </Form>
+
+                {/* Modal xác nhận thanh toán */}
+                <Modal
+                    title={
+                        <div className="flex items-center text-orange-500">
+                            <ExclamationCircleOutlined className="mr-2 text-lg sm:text-xl" />
+                            <span className="text-base sm:text-lg font-semibold">Xác nhận thanh toán</span>
+                        </div>
+                    }
+                    open={confirmModalVisible}
+                    onCancel={handleConfirmCancel}
+                    footer={[
                         <Button
-                            key="submit"
-                            type="primary"
-                            onClick={() => {
-                                setConfirmModalVisible(false);
-                                setIsSuccess(true);
-                            }}
-                            className="bg-orange-500"
+                            key="back"
+                            onClick={handleConfirmCancel}
+                            size="large"
+                            className="rounded-lg"
                         >
-                            Tôi đã chuyển khoản
-                        </Button>
-                    ),
-                ]}
-                centered
-            >
-                <div className="py-4">
-                    {selectedPayment === "qr" ? (
-                        <div className="text-center">
-                            <PaymentQR
-                                onSuccess={(success) => {
-                                    if (success) {
-                                        setIsSuccess(true);
-                                    }
+                            Hủy
+                        </Button>,
+                        selectedPayment !== "qr" && (
+                            <Button
+                                key="submit"
+                                type="primary"
+                                onClick={() => {
+                                    setConfirmModalVisible(false);
+                                    setIsSuccess(true);
                                 }}
-                                orderId={orderId}
-                                userId={user.value.user._id as string}
-                                qrContent={qrContent}
-                                amount={fieldData?.price as number}
-                                description={`${fieldData?.field} ${fieldData?.date} ${fieldData?.timeStart}`}
-                                orderCreated={orderCreated}
-                                fieldData={fieldData} // Truyền thêm fieldData
-                                newOrder={newOrder} // Truyền thêm newOrder
-                            />
-                        </div>
-                    ) : (
-                        <div>
-                            <p className="mb-4">Vui lòng thực hiện chuyển khoản với thông tin sau:</p>
-                            {/* Thông tin chuyển khoản */}
-                        </div>
-                    )}
-                </div>
-            </Modal>
+                                size="large"
+                                className="bg-orange-500 hover:bg-orange-600 border-orange-500 rounded-lg"
+                            >
+                                Tôi đã chuyển khoản
+                            </Button>
+                        ),
+                    ]}
+                    centered
+                    width="90%"
+                    style={{ maxWidth: 600 }}
+                    className="payment-modal"
+                >
+                    <div className="py-2 sm:py-4">
+                        {selectedPayment === "qr" ? (
+                            <div className="text-center">
+                                <PaymentQR
+                                    onSuccess={(success) => {
+                                        if (success) {
+                                            setIsSuccess(true);
+                                        }
+                                    }}
+                                    orderId={orderId}
+                                    userId={user.value.user._id as string}
+                                    qrContent={qrContent}
+                                    amount={fieldData?.price as number}
+                                    description={`${fieldData?.field} ${fieldData?.date} ${fieldData?.timeStart}`}
+                                    orderCreated={orderCreated}
+                                    fieldData={fieldData} // Truyền thêm fieldData
+                                    newOrder={newOrder} // Truyền thêm newOrder
+                                />
+                            </div>
+                        ) : (
+                            <div className="p-4">
+                                <p className="mb-4 text-center text-gray-700">
+                                    Vui lòng thực hiện chuyển khoản với thông tin sau:
+                                </p>
+                                {/* Thông tin chuyển khoản sẽ được hiển thị ở đây */}
+                            </div>
+                        )}
+                    </div>
+                </Modal>
+            </div>
         </div>
     );
 };
