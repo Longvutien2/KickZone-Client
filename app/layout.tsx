@@ -8,6 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import './globals.css';
 import { PersistGate } from 'redux-persist/integration/react';
 import { setupAutoCleanup } from '@/utils/orderCleanup';
+import { SWRConfig } from 'swr';
 
 function AppContent({ children }: { children: ReactNode }) {
   // Setup auto-cleanup cho toàn bộ app
@@ -51,7 +52,22 @@ export default function Layout({ children }: { children: ReactNode }) {
       <body>
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
-            <AppContent>{children}</AppContent>
+            <SWRConfig
+              value={{
+                // 🚀 Global SWR Configuration
+                revalidateOnFocus: false, // Không reload khi focus window
+                revalidateOnReconnect: true, // Reload khi reconnect internet
+                dedupingInterval: 60000, // Cache 1 phút
+                errorRetryCount: 2, // Retry 2 lần khi lỗi
+                errorRetryInterval: 1000, // Retry sau 1 giây
+                refreshInterval: 0, // Không auto refresh (tùy từng hook)
+                onError: (error) => {
+                  console.error('SWR Error:', error);
+                },
+              }}
+            >
+              <AppContent>{children}</AppContent>
+            </SWRConfig>
           </PersistGate>
         </Provider>
       </body>

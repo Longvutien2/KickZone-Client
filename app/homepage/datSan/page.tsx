@@ -1,96 +1,86 @@
 'use client';
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { Card, Button, Collapse, Tag } from "antd";
 import { EnvironmentOutlined, PhoneOutlined, FilterOutlined, CalendarOutlined, RightOutlined } from '@ant-design/icons';
 import dayjs, { Dayjs } from "dayjs";
 import "dayjs/locale/vi"; // Import tiếng Việt cho Day.js
 import Link from "next/link";
 import { Field, TimeSlot } from "@/models/field";
-import { getFieldsByIdFootball } from "@/api/field";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
-import { getFootballFieldByIdSlice, getFootballFieldByIdUserSlice } from "@/features/footballField.slice";
-import { addBreadcrumb, resetBreadcrumb, setBreadcrumb } from "@/features/breadcrumb.slice";
+import { getFootballFieldByIdSlice } from "@/features/footballField.slice";
+import { setBreadcrumb } from "@/features/breadcrumb.slice";
 import { FootballField } from "@/models/football_field";
-import { getListTimeSlotsByFootballFieldId } from "@/features/timeSlot.slice";
-import { getListOrdersSlice } from "@/features/order.slice";
 import { Order } from "@/models/payment";
-
-const { Panel } = Collapse
+import { useFieldPageData } from "@/hooks/useFieldData";
 
 const Detail = () => {
-  const timeslots = useAppSelector(state => state.timeSlot.value)
-  // Thay đổi từ bookings sang orders
-  const orders = useAppSelector(state => state.order.value)
   const footballField = useAppSelector(state => state.footballField.detail) as FootballField
+  const dispatch = useAppDispatch();
 
+  // 🚀 SWR hooks - Đơn giản và mạnh mẽ
+  const {
+    fields,
+    timeSlots: timeslots,
+    orders,
+    isLoading,
+    hasError,
+    refetchAll
+  } = useFieldPageData(footballField?._id);
 
-
-  const [data, setData] = useState<Field[]>([]); // Dữ liệu sân
   const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs()); // Ngày đang chọn
   const [selectedFieldType, setSelectedFieldType] = useState<string>("all"); // Bộ lọc loại sân
   const [showCalendar, setShowCalendar] = useState(false); // Hiển thị calendar inline
   const [tempSelectedDate, setTempSelectedDate] = useState<Dayjs>(dayjs()); // Ngày tạm chọn trong calendar
-  const [loading, setLoading] = useState(true); // Loading state
-  const dispatch = useAppDispatch();
 
   dayjs.locale("vi"); // Thiết lập ngôn ngữ cho Dayjs
   console.log("orders", orders);
 
-  // Hàm chuyển đổi key tab thành định dạng ngày
-  const handleDateChange = (key: string) => {
+  // 🚀 MEMOIZED FUNCTIONS - Tối ưu performance
+  const handleDateChange = useCallback((key: string) => {
     // Tách giá trị ngày, tháng, năm từ key
     const [day, month, year] = key.split("/").map(Number);
     // Tạo đối tượng dayjs đúng
     const convertedDate = dayjs(`${year}-${month}-${day}`, "YYYY-M-D", true);
     setSelectedDate(convertedDate);
-  };
-
-  // Lọc danh sách sân có ca đá trong ngày được chọn
-  // const filteredFields = data.map((field: any) => {
-  //     const schedule = field.timeSlots.find((s: any) => s.date === selectedDate.format("YYYY-MM-DD"));
-  //     return schedule ? { ...field, timeSlots: schedule.timeSlots } : null;
-  // }).filter(Boolean);
-
+  }, []);
 
   // Chuyển đổi số thứ trong tuần thành dạng đúng của tiếng Việt
-  const getVietnameseDay = (dayNumber: number) => {
+  const getVietnameseDay = useCallback((dayNumber: number) => {
     if (dayNumber === 0) return "CN"; // Chủ Nhật
     return `Th ${dayNumber + 1}`; // Thứ 2 -> Thứ 7
-  };
+  }, []);
 
-  // Hàm lọc sân theo loại
-  const filterFieldsByType = (fields: Field[], type: string) => {
-    if (type === "all") return fields;
-    return fields.filter(field => field.people.toString() === type);
-  };
+  // 🚀 MEMOIZED FILTERED FIELDS - Chỉ tính toán lại khi fields hoặc selectedFieldType thay đổi
+  const filteredFields = useMemo(() => {
+    if (selectedFieldType === "all") return fields;
+    return fields.filter((field: Field) => field.people.toString() === selectedFieldType);
+  }, [fields, selectedFieldType]);
 
-  // Lọc dữ liệu khi selectedFieldType thay đổi
-  const getFilteredFields = () => {
-    return filterFieldsByType(data, selectedFieldType);
-  };
+  // 🚀 MEMOIZED DATES - Chỉ tính toán lại khi selectedDate thay đổi
+  const dates = useMemo(() => {
+    return Array.from({ length: 30 }, (_, index) => {
+      const date = dayjs().add(index, "day");
+      const isSelected = date.format("D/M/YYYY") === selectedDate.format("D/M/YYYY");
 
-  // Tạo danh sách 30 ngày tiếp theo với style giống Moveek
-  const dates = Array.from({ length: 30 }, (_, index) => {
-    const date = dayjs().add(index, "day");
-    const isSelected = date.format("D/M/YYYY") === selectedDate.format("D/M/YYYY");
-
-    return {
-      key: date.format("D/M/YYYY"),
-      label: (
-        <div className={`flex flex-col items-center justify-center py-2 sm:py-3 transition-all flex-shrink-0 ${isSelected
-          ? 'bg-[#FE6900] text-white shadow-md'
-          : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-          } w-[80px] sm:w-[100px] md:w-[120px] h-[60px] sm:h-[75px] md:h-[90px]`}>
-          <div className="text-sm sm:text-base md:text-lg font-medium">{date.format("D/M")}</div>
-          <div className={`text-xs sm:text-sm md:text-base ${isSelected ? 'text-white' : 'text-gray-500'}`}>
-            {getVietnameseDay(date.day())}
+      return {
+        key: date.format("D/M/YYYY"),
+        label: (
+          <div className={`flex flex-col items-center justify-center py-2 sm:py-3 transition-all flex-shrink-0 ${isSelected
+            ? 'bg-[#FE6900] text-white shadow-md'
+            : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+            } w-[80px] sm:w-[100px] md:w-[120px] h-[60px] sm:h-[75px] md:h-[90px]`}>
+            <div className="text-sm sm:text-base md:text-lg font-medium">{date.format("D/M")}</div>
+            <div className={`text-xs sm:text-sm md:text-base ${isSelected ? 'text-white' : 'text-gray-500'}`}>
+              {getVietnameseDay(date.day())}
+            </div>
           </div>
-        </div>
-      ),
-    };
-  });
+        ),
+      };
+    });
+  }, [selectedDate, getVietnameseDay]);
 
 
+  // 🚀 Simple useEffect chỉ để load footballField và set breadcrumb
   useEffect(() => {
     const getData = async () => {
       try {
@@ -109,43 +99,6 @@ const Detail = () => {
 
     getData();
   }, []);
-
-  // UseEffect riêng để fetch data khi footballField đã được load
-  useEffect(() => {
-    const fetchFieldData = async () => {
-      if (!footballField?._id) return;
-
-      try {
-        setLoading(true);
-
-        // Lấy danh sách sân và timeslots
-        const fieldsResponse = await getFieldsByIdFootball(footballField._id as string);
-        setData(fieldsResponse.data);
-
-        // Lấy danh sách khung giờ
-        await dispatch(getListTimeSlotsByFootballFieldId(footballField._id as string));
-
-        // Lấy danh sách orders
-        await dispatch(getListOrdersSlice());
-
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching field data:", error);
-        setLoading(false);
-      }
-    };
-
-    fetchFieldData();
-  }, [footballField?._id]);
-
-  // Thêm useEffect mới để lấy orders khi selectedDate thay đổi
-  useEffect(() => {
-    const fetchData = async () => {
-      // Nếu không có API cụ thể, lấy tất cả orders
-      await dispatch(getListOrdersSlice());
-    };
-    if (selectedDate && footballField._id) fetchData();
-  }, [selectedDate, footballField._id])
   console.log("orders", orders);
 
   return (
@@ -386,25 +339,40 @@ const Detail = () => {
                 </h2>
               </div>
 
-              {loading ? (
+              {isLoading || !fields ? (
                 <div className="space-y-4">
                   {[1, 2, 3].map((item) => (
-                    <div key={item} className="bg-gray-100 rounded-xl p-4 animate-pulse">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="h-6 bg-gray-300 rounded w-32"></div>
-                        <div className="h-4 bg-gray-300 rounded w-16"></div>
+                    <div key={item} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden animate-pulse">
+                      {/* Header skeleton */}
+                      <div className="p-4 border-b border-gray-100">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="h-6 bg-gray-300 rounded w-24"></div>
+                            <div className="h-5 bg-gray-200 rounded w-16"></div>
+                          </div>
+                          <div className="h-8 bg-gray-300 rounded w-20"></div>
+                        </div>
+                        <div className="mt-2 space-y-1">
+                          <div className="h-4 bg-gray-200 rounded w-48"></div>
+                          <div className="h-4 bg-gray-200 rounded w-32"></div>
+                        </div>
                       </div>
-                      <div className="grid grid-cols-3 gap-2">
-                        {[1, 2, 3, 4, 5, 6].map((slot) => (
-                          <div key={slot} className="h-8 bg-gray-300 rounded"></div>
-                        ))}
+
+                      {/* Time slots skeleton */}
+                      <div className="p-4">
+                        <div className="h-5 bg-gray-300 rounded w-32 mb-3"></div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                          {[1, 2, 3, 4, 5, 6, 7, 8].map((slot) => (
+                            <div key={slot} className="h-10 bg-gray-200 rounded"></div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
-              ) : data && data.length > 0 ? (
+              ) : fields && fields.length > 0 ? (
                 <div className="space-y-4">
-                  {getFilteredFields().map((field: Field, index: number) => (
+                  {filteredFields.map((field: Field, index: number) => (
                     <div key={index + 1} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                       <Collapse
                         className="border-none"
@@ -438,10 +406,10 @@ const Detail = () => {
                                     <p className="text-gray-500 font-medium">Sân này hiện đang bảo trì, không thể đặt lịch.</p>
                                   </div>
                                 ) : (
-                                  timeslots && timeslots.length > 0 ? (
+                                  timeslots && Array.isArray(timeslots) && timeslots.length > 0 ? (
                                     <div>
                                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-                                        {timeslots.map((slot: TimeSlot, idx) => (
+                                        {timeslots.map((slot: TimeSlot, idx: number) => (
                                           <Button
                                             key={idx}
                                             // Thay đổi từ bookings.some sang orders.some
@@ -586,29 +554,40 @@ const Detail = () => {
               }
               className="shadow-sm border border-gray-200 rounded-xl"
             >
-              <div className="space-y-3">
-                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <span className="text-gray-600 text-sm">🏟️ Tổng số sân:</span>
-                  <span className="font-bold text-[#FE6900] text-lg">{data?.length || 0}</span>
+              {isLoading || !fields ? (
+                <div className="space-y-3">
+                  {[1, 2, 3, 4].map((item) => (
+                    <div key={item} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg animate-pulse">
+                      <div className="h-4 bg-gray-300 rounded w-24"></div>
+                      <div className="h-6 bg-gray-300 rounded w-8"></div>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <span className="text-gray-600 text-sm">👁️ Sân hiển thị:</span>
-                  <span className="font-bold text-[#FE6900] text-lg">{getFilteredFields()?.length || 0}</span>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <span className="text-gray-600 text-sm">🏟️ Tổng số sân:</span>
+                    <span className="font-bold text-[#FE6900] text-lg">{fields?.length || 0}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <span className="text-gray-600 text-sm">👁️ Sân hiển thị:</span>
+                    <span className="font-bold text-[#FE6900] text-lg">{filteredFields?.length || 0}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <span className="text-gray-600 text-sm">⏰ Khung giờ có sẵn:</span>
+                    <span className="font-bold text-[#FE6900] text-lg">{Array.isArray(timeslots) ? timeslots.length : 0}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
+                    <span className="text-gray-600 text-sm">✅ Đã đặt hôm nay:</span>
+                    <span className="font-bold text-[#FE6900] text-lg">
+                      {orders.length > 0 && orders?.filter((o: Order) =>
+                        o.date === dayjs().format('DD-MM-YYYY') &&
+                        o.paymentStatus === "success"
+                      )?.length || 0}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <span className="text-gray-600 text-sm">⏰ Khung giờ có sẵn:</span>
-                  <span className="font-bold text-[#FE6900] text-lg">{timeslots?.length || 0}</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
-                  <span className="text-gray-600 text-sm">✅ Đã đặt hôm nay:</span>
-                  <span className="font-bold text-[#FE6900] text-lg">
-                    {orders.length > 0 && orders?.filter((o: Order) =>
-                      o.date === dayjs().format('DD-MM-YYYY') &&
-                      o.paymentStatus === "success"
-                    )?.length || 0}
-                  </span>
-                </div>
-              </div>
+              )}
             </Card>
           </div>
         </div>
