@@ -56,13 +56,7 @@ const EditTimeSlotPage = () => {
     // Set initial values cho form
     const getInitialValues = () => {
         if (!oldTimeSlot) return {};
-
-        const { startTime, endTime } = parseTimeString(oldTimeSlot.time);
-        return {
-            ...oldTimeSlot,
-            startTime,
-            endTime
-        };
+        return oldTimeSlot;
     };
 
     useEffect(() => {
