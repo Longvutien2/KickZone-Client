@@ -20,7 +20,7 @@ const NotificationPage = () => {
     const user = useAppSelector(state => state.auth.value);
     const dispatch = useAppDispatch();
 
-    const socket = io("http://localhost:8000");
+    const socket = io(process.env.NEXT_PUBLIC_API_BACKEND_IO);
     useEffect(() => {
         socket.on('pushNotification', (data: any) => {
             notifications.filter((item: any) => item.targetUser === data.targetUser).length > 0 && setFilteredNotifications((prev: any) => [...prev, data]);

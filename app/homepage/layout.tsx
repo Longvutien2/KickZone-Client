@@ -33,7 +33,7 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
     // Xử lý đăng xuất tại đây (xóa token, điều hướng, v.v.)
   };
 
-  const socket = io("http://localhost:8000");
+  const socket = io(process.env.NEXT_PUBLIC_API_BACKEND_IO);
   useEffect(() => {
     socket.on('pushNotification', (data: any) => {
       notifications.filter((item: any) => item.targetUser === data.targetUser).length > 0 && setNotification((prev: any) => [...prev, data]);
