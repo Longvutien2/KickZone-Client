@@ -386,7 +386,7 @@ const BookingPage = () => {
                                 </div>
 
                                 {/* Hình thức thanh toán */}
-                                <Card className="mb-6">
+                                <div className="mb-6">
                                     <div className="flex items-center mb-4">
                                         <div>
                                             <CreditCardOutlined className="text-orange-500 mr-2 text-lg" />
@@ -530,7 +530,7 @@ const BookingPage = () => {
                                             </Radio.Group>
                                         </div>
                                     </Form.Item>
-                                </Card>
+                                </div>
 
                                 {/* Thông tin cá nhân */}
                                 <Card className="mb-6">

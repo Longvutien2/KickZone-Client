@@ -18,7 +18,6 @@ import { Order } from "@/models/payment";
 const { Panel } = Collapse
 
 const Detail = () => {
-  const auth = useAppSelector((state) => state.auth)
   const timeslots = useAppSelector(state => state.timeSlot.value)
   // Thay đổi từ bookings sang orders
   const orders = useAppSelector(state => state.order.value)
@@ -26,27 +25,16 @@ const Detail = () => {
 
 
 
-  const [data, setData] = useState<Field[]>([]); // Dữ liệu lọc the
-  const [filteredData, setFilteredData] = useState<Field[]>([]); // Dữ liệu sau khi lọc
-  // const { id } = useParams();
+  const [data, setData] = useState<Field[]>([]); // Dữ liệu sân
   const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs()); // Ngày đang chọn
-  const [activeField, setActiveField] = useState<string | null>(null); // Sân nào đang mở
-  const [selectedDate2, setSelectedDate2] = useState(dayjs().format("D/M"));
   const [selectedFieldType, setSelectedFieldType] = useState<string>("all"); // Bộ lọc loại sân
   const [showCalendar, setShowCalendar] = useState(false); // Hiển thị calendar inline
   const [tempSelectedDate, setTempSelectedDate] = useState<Dayjs>(dayjs()); // Ngày tạm chọn trong calendar
+  const [loading, setLoading] = useState(true); // Loading state
   const dispatch = useAppDispatch();
 
-  if (!data) return <p className="text-center text-red-500">Không tìm thấy sân bóng</p>;
-
   dayjs.locale("vi"); // Thiết lập ngôn ngữ cho Dayjs
-  // Thay đổi log từ bookings sang orders
   console.log("orders", orders);
-
-  // Hàm toggle mở / đóng sân
-  const toggleField = (id: string) => {
-    setActiveField(activeField === id ? null : id);
-  };
 
   // Hàm chuyển đổi key tab thành định dạng ngày
   const handleDateChange = (key: string) => {
@@ -108,16 +96,6 @@ const Detail = () => {
       try {
         // Lấy thông tin sân bóng của người dùng
         await dispatch(getFootballFieldByIdSlice("67ce9ea74c79326f98b8bf8e"));
-        if (!footballField._id) return;
-
-        // Lấy danh sách sân và timeslots
-        const fieldsResponse = await getFieldsByIdFootball(footballField._id as string);
-        setData(fieldsResponse.data);
-        // Lấy danh sách khung giờ
-        await dispatch(getListTimeSlotsByFootballFieldId(footballField._id as string));
-
-        // Thay đổi từ getBookingsByFootballFieldAndDateSlice sang getListOrdersSlice
-        await dispatch(getListOrdersSlice());
 
         // Thêm breadcrumb
         dispatch(setBreadcrumb([
@@ -130,7 +108,35 @@ const Detail = () => {
     };
 
     getData();
-  }, [auth.value]);
+  }, []);
+
+  // UseEffect riêng để fetch data khi footballField đã được load
+  useEffect(() => {
+    const fetchFieldData = async () => {
+      if (!footballField?._id) return;
+
+      try {
+        setLoading(true);
+
+        // Lấy danh sách sân và timeslots
+        const fieldsResponse = await getFieldsByIdFootball(footballField._id as string);
+        setData(fieldsResponse.data);
+
+        // Lấy danh sách khung giờ
+        await dispatch(getListTimeSlotsByFootballFieldId(footballField._id as string));
+
+        // Lấy danh sách orders
+        await dispatch(getListOrdersSlice());
+
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching field data:", error);
+        setLoading(false);
+      }
+    };
+
+    fetchFieldData();
+  }, [footballField?._id]);
 
   // Thêm useEffect mới để lấy orders khi selectedDate thay đổi
   useEffect(() => {
@@ -140,6 +146,7 @@ const Detail = () => {
     };
     if (selectedDate && footballField._id) fetchData();
   }, [selectedDate, footballField._id])
+  console.log("orders", orders);
 
   return (
     <div className="min-h-screen ">
@@ -378,7 +385,24 @@ const Detail = () => {
                   Danh sách sân ({selectedDate.format("DD/MM/YYYY")})
                 </h2>
               </div>
-              {data &&
+
+              {loading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map((item) => (
+                    <div key={item} className="bg-gray-100 rounded-xl p-4 animate-pulse">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="h-6 bg-gray-300 rounded w-32"></div>
+                        <div className="h-4 bg-gray-300 rounded w-16"></div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        {[1, 2, 3, 4, 5, 6].map((slot) => (
+                          <div key={slot} className="h-8 bg-gray-300 rounded"></div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : data && data.length > 0 ? (
                 <div className="space-y-4">
                   {getFilteredFields().map((field: Field, index: number) => (
                     <div key={index + 1} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -464,7 +488,13 @@ const Detail = () => {
                     </div>
                   ))}
                 </div>
-              }
+              ) : (
+                <div className="text-center py-12">
+                  <div className="text-6xl mb-4">🏟️</div>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">Chưa có sân nào</h3>
+                  <p className="text-gray-500">Hiện tại chưa có sân bóng nào được thiết lập.</p>
+                </div>
+              )}
             </div>
           </div>
 
