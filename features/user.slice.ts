@@ -1,5 +1,5 @@
 
-import { createUser, deleteUser, getUserById, getUsers, updateUser } from '@/api/user';
+import { createUser, deleteUser, getUserById, getUsers, updateUser } from '@/api/auth';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
 // Lấy danh sách người dùng

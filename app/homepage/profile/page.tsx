@@ -1,6 +1,6 @@
 // pages/index.tsx
 'use client'
-import { getTeamByUserId } from '@/api/team'
+// import { getTeamByUserId } from '@/api/team'
 import { setBreadcrumb } from '@/features/breadcrumb.slice'
 import { signout, changeuserprofile, changepass } from '@/features/auth.slice'
 import { Team } from '@/models/team'
