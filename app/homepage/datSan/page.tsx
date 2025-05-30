@@ -17,15 +17,15 @@ const Detail = () => {
   const footballField = useAppSelector(state => state.footballField.detail) as FootballField
   const dispatch = useAppDispatch();
 
-  // 🚀 SWR hooks - Đơn giản và mạnh mẽ
+  // 🚀 SWR hooks - Đơn giản và mạnh mẽ với error handling
   const {
-    fields,
-    timeSlots: timeslots,
-    orders,
+    fields = [],
+    timeSlots: timeslots = [],
+    orders = [],
     isLoading,
     hasError,
     refetchAll
-  } = useFieldPageData(footballField?._id);
+  } = useFieldPageData(footballField?._id) || {};
 
   const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs()); // Ngày đang chọn
   const [selectedFieldType, setSelectedFieldType] = useState<string>("all"); // Bộ lọc loại sân
@@ -34,6 +34,29 @@ const Detail = () => {
 
   dayjs.locale("vi"); // Thiết lập ngôn ngữ cho Dayjs
   console.log("orders", orders);
+  console.log("fields", fields);
+  console.log("timeslots", timeslots);
+  console.log("isLoading", isLoading);
+  console.log("hasError", hasError);
+
+  // 🚀 Error handling
+  if (hasError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Có lỗi xảy ra</h2>
+          <p className="text-gray-600 mb-4">Không thể tải dữ liệu. Vui lòng thử lại.</p>
+          <button
+            onClick={() => refetchAll?.()}
+            className="bg-[#FE6900] text-white px-6 py-2 rounded-lg hover:bg-[#e55a00]"
+          >
+            Thử lại
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // 🚀 MEMOIZED FUNCTIONS - Tối ưu performance
   const handleDateChange = useCallback((key: string) => {
@@ -406,14 +429,14 @@ const Detail = () => {
                                     <p className="text-gray-500 font-medium">Sân này hiện đang bảo trì, không thể đặt lịch.</p>
                                   </div>
                                 ) : (
-                                  timeslots && Array.isArray(timeslots) && timeslots.length > 0 ? (
+                                  Array.isArray(timeslots) && timeslots.length > 0 ? (
                                     <div>
                                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
                                         {timeslots.map((slot: TimeSlot, idx: number) => (
                                           <Button
                                             key={idx}
                                             // Thay đổi từ bookings.some sang orders.some
-                                            disabled={orders.length > 0 && orders.some(
+                                            disabled={Array.isArray(orders) && orders.length > 0 && orders.some(
                                               (o: Order) =>
                                                 o.date === selectedDate.format('DD-MM-YYYY') &&
                                                 o.fieldName === field.name &&
@@ -422,7 +445,7 @@ const Detail = () => {
                                             )}
                                             className={`
                                           px-3 py-2 m-1 rounded-lg text-sm font-medium transition-all duration-200
-                                          ${orders.length > 0 && orders.some(
+                                          ${Array.isArray(orders) && orders.length > 0 && orders.some(
                                               (o: Order) =>
                                                 o.date === selectedDate.format('DD-MM-YYYY') &&
                                                 o.fieldName === field.name &&
@@ -580,10 +603,10 @@ const Detail = () => {
                   <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
                     <span className="text-gray-600 text-sm">✅ Đã đặt hôm nay:</span>
                     <span className="font-bold text-[#FE6900] text-lg">
-                      {orders.length > 0 && orders?.filter((o: Order) =>
+                      {Array.isArray(orders) && orders.length > 0 ? orders.filter((o: Order) =>
                         o.date === dayjs().format('DD-MM-YYYY') &&
                         o.paymentStatus === "success"
-                      )?.length || 0}
+                      ).length : 0}
                     </span>
                   </div>
                 </div>

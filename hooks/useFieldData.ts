@@ -1,4 +1,4 @@
-// 🚀 Custom hooks với SWR - Đơn giản và mạnh mẽ
+// 🚀 Custom hooks với SWR - Tối ưu cho production
 import useSWR from 'swr';
 import { getFieldsByIdFootball } from '@/api/field';
 import { useAppDispatch } from '@/store/hook';
@@ -82,30 +82,78 @@ export function useOrders() {
   };
 }
 
-// 🚀 Hook tổng hợp để lấy tất cả data cần thiết
+// 🚀 OPTIMIZED: Hook tổng hợp với parallel loading cho production
 export function useFieldPageData(footballFieldId: string | undefined) {
-  const fieldsQuery = useFields(footballFieldId);
-  const timeSlotsQuery = useTimeSlots(footballFieldId);
-  const ordersQuery = useOrders();
+  const dispatch = useAppDispatch();
 
-  // Tính toán loading state tổng thể
-  const isLoading = fieldsQuery.isLoading || timeSlotsQuery.isLoading || ordersQuery.isLoading;
+  // 🚀 PARALLEL SWR CALLS - Tất cả API calls chạy song song
+  const fieldsQuery = useSWR(
+    footballFieldId ? `fields-${footballFieldId}` : null,
+    () => getFieldsByIdFootball(footballFieldId!),
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 60000, // Cache 1 phút
+      errorRetryCount: 2,
+      errorRetryInterval: 1000,
+      keepPreviousData: true, // 🚀 Giữ data cũ khi revalidate
+    }
+  );
 
-  // Tính toán error state
+  const timeSlotsQuery = useSWR(
+    footballFieldId ? `timeslots-${footballFieldId}` : null,
+    async () => {
+      const result = await dispatch(getListTimeSlotsByFootballFieldId(footballFieldId!));
+      return result.payload;
+    },
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 120000, // Cache 2 phút
+      errorRetryCount: 1,
+      errorRetryInterval: 1500,
+      keepPreviousData: true, // 🚀 Giữ data cũ khi revalidate
+    }
+  );
+
+  const ordersQuery = useSWR(
+    'orders-list',
+    async () => {
+      const result = await dispatch(getListOrdersSlice());
+      return result.payload;
+    },
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 90000, // Cache 1.5 phút
+      errorRetryCount: 1,
+      errorRetryInterval: 2000,
+      refreshInterval: 300000, // Auto refresh mỗi 5 phút
+      keepPreviousData: true, // 🚀 Giữ data cũ khi revalidate
+    }
+  );
+
+  // 🚀 PROGRESSIVE LOADING - Hiển thị data ngay khi có
+  const fields = fieldsQuery.data?.data || [];
+  const timeSlots = timeSlotsQuery.data || [];
+  const orders = ordersQuery.data || [];
+
+  // 🚀 SMART LOADING STATE - Chỉ loading khi thực sự cần
+  const isLoading = (fieldsQuery.isLoading && !fieldsQuery.data) ||
+                   (timeSlotsQuery.isLoading && !timeSlotsQuery.data) ||
+                   (ordersQuery.isLoading && !ordersQuery.data);
+
   const hasError = fieldsQuery.error || timeSlotsQuery.error || ordersQuery.error;
 
   // Function để refetch tất cả data
   const refetchAll = () => {
-    fieldsQuery.refetch();
-    timeSlotsQuery.refetch();
-    ordersQuery.refetch();
+    fieldsQuery.mutate();
+    timeSlotsQuery.mutate();
+    ordersQuery.mutate();
   };
 
   return {
     // Data
-    fields: fieldsQuery.fields,
-    timeSlots: timeSlotsQuery.timeSlots,
-    orders: ordersQuery.orders,
+    fields,
+    timeSlots,
+    orders,
 
     // States
     isLoading,
@@ -123,8 +171,8 @@ export function useFieldPageData(footballFieldId: string | undefined) {
 
     // Refetch functions
     refetchAll,
-    refetchFields: fieldsQuery.refetch,
-    refetchTimeSlots: timeSlotsQuery.refetch,
-    refetchOrders: ordersQuery.refetch,
+    refetchFields: fieldsQuery.mutate,
+    refetchTimeSlots: timeSlotsQuery.mutate,
+    refetchOrders: ordersQuery.mutate,
   };
 }
