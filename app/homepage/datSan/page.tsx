@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { Card, Button, Collapse, Tag } from "antd";
 import { EnvironmentOutlined, PhoneOutlined, FilterOutlined, CalendarOutlined, RightOutlined } from '@ant-design/icons';
 import dayjs, { Dayjs } from "dayjs";
@@ -12,9 +12,12 @@ import { setBreadcrumb } from "@/features/breadcrumb.slice";
 import { FootballField } from "@/models/football_field";
 import { Order } from "@/models/payment";
 import { useFieldPageData } from "@/hooks/useFieldData";
+import { toast } from "react-toastify";
 
 const Detail = () => {
   const footballField = useAppSelector(state => state.footballField.detail) as FootballField
+  const auth = useAppSelector(state => state.auth)
+
   const dispatch = useAppDispatch();
 
   // 🚀 SWR hooks - Đơn giản và mạnh mẽ với error handling
@@ -33,11 +36,6 @@ const Detail = () => {
   const [tempSelectedDate, setTempSelectedDate] = useState<Dayjs>(dayjs()); // Ngày tạm chọn trong calendar
 
   dayjs.locale("vi"); // Thiết lập ngôn ngữ cho Dayjs
-  console.log("orders", orders);
-  console.log("fields", fields);
-  console.log("timeslots", timeslots);
-  console.log("isLoading", isLoading);
-  console.log("hasError", hasError);
 
   // 🚀 Error handling
   if (hasError) {
@@ -122,7 +120,6 @@ const Detail = () => {
 
     getData();
   }, []);
-  console.log("orders", orders);
 
   return (
     <div className="min-h-screen ">
@@ -432,36 +429,48 @@ const Detail = () => {
                                   Array.isArray(timeslots) && timeslots.length > 0 ? (
                                     <div>
                                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-                                        {timeslots.map((slot: TimeSlot, idx: number) => (
-                                          <Button
-                                            key={idx}
-                                            // Thay đổi từ bookings.some sang orders.some
-                                            disabled={Array.isArray(orders) && orders.length > 0 && orders.some(
-                                              (o: Order) =>
-                                                o.date === selectedDate.format('DD-MM-YYYY') &&
-                                                o.fieldName === field.name &&
-                                                o.timeStart === slot.time &&
-                                                o.paymentStatus === "success"
-                                            )}
-                                            className={`
-                                          px-3 py-2 m-1 rounded-lg text-sm font-medium transition-all duration-200
-                                          ${Array.isArray(orders) && orders.length > 0 && orders.some(
-                                              (o: Order) =>
-                                                o.date === selectedDate.format('DD-MM-YYYY') &&
-                                                o.fieldName === field.name &&
-                                                o.timeStart === slot.time &&
-                                                o.paymentStatus === "success"
-                                            )
-                                                ? 'bg-gray-200 text-gray-400 cursor-not-allowed border-gray-200'
-                                                : 'bg-white border-[#FE6900]  text-[#FE6900] hover:bg-[#FE6900] hover:text-white border-1'
-                                              }
-                                        `}
-                                          >
-                                            <Link href={`/homepage/datSan/${field._id}/${slot._id}?date=${selectedDate.format("DD-MM-YYYY")}`}>
-                                              {slot.time}
-                                            </Link>
-                                          </Button>
-                                        ))}
+                                        {timeslots.map((slot: TimeSlot, idx: number) => {
+                                          // 🚀 Check if slot is already booked
+                                          const isBooked = Array.isArray(orders) && orders.length > 0 && orders.some(
+                                            (o: Order) =>
+                                              o.date === selectedDate.format('DD-MM-YYYY') &&
+                                              o.fieldName === field.name &&
+                                              o.timeStart === slot.time &&
+                                              o.paymentStatus === "success"
+                                          );
+
+                                          // 🚀 Handle click event
+                                          const handleSlotClick = (e: React.MouseEvent) => {
+                                            if (!auth.isLoggedIn) {
+                                              e.preventDefault();
+                                              toast.warning("Bạn cần đăng nhập để tiếp tục đặt sân!");
+                                              return;
+                                            }
+                                          };
+
+                                          return (
+                                            <Button
+                                              key={idx}
+                                              disabled={isBooked}
+                                              className={`
+                                                px-3 py-2 m-1 rounded-lg text-sm font-medium transition-all duration-200  bg-white border-[#FE6900] text-[#FE6900]  border-1
+                                              `}
+                                            >
+                                              {auth.isLoggedIn && !isBooked ? (
+                                                <Link
+                                                  href={`/homepage/datSan/${field._id}/${slot._id}?date=${selectedDate.format("DD-MM-YYYY")}`}
+                                                  onClick={handleSlotClick}
+                                                >
+                                                  {slot.time}
+                                                </Link>
+                                              ) : (
+                                                <span onClick={handleSlotClick} className="cursor-pointer">
+                                                  {slot.time}
+                                                </span>
+                                              )}
+                                            </Button>
+                                          );
+                                        })}
                                       </div>
                                     </div>
                                   ) : (
@@ -473,7 +482,6 @@ const Detail = () => {
                                 )}
                               </div>,
                           }
-
                         ]}
                       />
                     </div>
@@ -558,6 +566,11 @@ const Detail = () => {
                 </li>
                 <li className="text-gray-700">
                   <span className="font-medium">Chọn khung giờ</span> còn trống
+                  {!auth.isLoggedIn && (
+                    <span className="ml-2 text-xs bg-yellow-100 text-yellow-600 px-2 py-1 rounded">
+                      🔒 Cần đăng nhập
+                    </span>
+                  )}
                 </li>
                 <li className="text-gray-700">
                   <span className="font-medium">Điền thông tin</span> và thanh toán

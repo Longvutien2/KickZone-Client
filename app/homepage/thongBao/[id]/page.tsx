@@ -130,96 +130,81 @@ const NotificationDetailPage = () => {
 
                     {(notification.notificationType === 'field_booked' || notification.notificationType === 'new_order' || notification.notificationType === 'field_booking_failed') && notification.orderId && (
                         <>
-                            <Title level={5} className="mt-4 sm:mt-6 mb-3 text-base sm:text-lg">Thông tin đặt sân</Title>
+                            <div className="bg-white rounded-lg p-4 mb-4 border border-green-100">
+                                <Title level={5} className="mb-3 text-base sm:text-lg flex items-center">
+                                    <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                                    Thông tin đặt sân
+                                </Title>
 
-                            <div className="space-y-3 sm:space-y-4">
-                                <div className="flex sm:flex-row sm:items-center gap-1 sm:gap-2">
-                                    <div>
-                                        <Text strong className="text-sm sm:text-base w-full sm:w-32 flex-shrink-0"> Tên sân:</Text>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                                    <div className="flex">
+                                        <span className="font-medium text-gray-600 w-20 flex-shrink-0">Tên sân:</span>
+                                        <span className="text-gray-800">{notification.footballfield?.name}</span>
                                     </div>
-                                    <Text className="text-sm sm:text-base break-words">{notification.footballfield?.name}</Text>
-                                </div>
-
-                                <div className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-2">
-                                    <div className="flex items-center">
-                                        <EnvironmentOutlined className="mr-2 text-gray-500 flex-shrink-0" />
-                                        <Text strong className="text-sm sm:text-base w-full sm:w-24 flex-shrink-0">Địa chỉ:</Text>
+                                    <div className="flex">
+                                        <span className="font-medium text-gray-600 w-20 flex-shrink-0">Thời gian:</span>
+                                        <span className="text-gray-800">{notification.orderId.timeStart}</span>
                                     </div>
-                                    <Text className="text-sm sm:text-base break-words leading-relaxed">
-                                        {notification.footballfield?.address?.detail || ''}
-                                        {notification.footballfield?.address?.ward ? `${notification.footballfield.address.detail ? ', ' : ''}${notification.footballfield.address.ward}` : ''}
-                                        {notification.footballfield?.address?.district ? `${notification.footballfield.address.ward || notification.footballfield.address.detail ? ', ' : ''}${notification.footballfield.address.district}` : ''}
-                                        {notification.footballfield?.address?.province ? `${notification.footballfield.address.district || notification.footballfield.address.ward || notification.footballfield.address.detail ? ', ' : ''}${notification.footballfield.address.province}` : ''}
-                                    </Text>
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                                    <div className="flex  sm:flex-row sm:items-center gap-1 sm:gap-2">
-                                        <div className="flex items-center">
-                                            <AppstoreOutlined className="mr-2 text-gray-500 flex-shrink-0" />
-                                            <Text strong className="text-sm sm:text-base flex-shrink-0">Số sân:</Text>
-                                        </div>
-                                        <Tag color="blue" className="self-start sm:self-center"> {notification.orderId.fieldName}</Tag>
+                                    <div className="flex">
+                                        <span className="font-medium text-gray-600 w-20 flex-shrink-0">Sân số:</span>
+                                        <span className="text-blue-600 font-semibold">{notification.orderId.fieldName}</span>
                                     </div>
-
-                                    <div className="flex  sm:flex-row sm:items-center gap-1 sm:gap-2">
-                                        <div className="flex items-center">
-                                            <ClockCircleOutlined className="mr-2 text-gray-500 flex-shrink-0" />
-                                            <Text strong className="text-sm sm:text-base flex-shrink-0">Thời gian:</Text>
-                                        </div>
-                                        <Text className="text-sm sm:text-base">{notification.orderId.timeStart}</Text>
+                                    <div className="flex">
+                                        <span className="font-medium text-gray-600 w-20 flex-shrink-0">Thanh toán:</span>
+                                        <span className="text-gray-800">{notification.orderId.gateway}</span>
                                     </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                                    <div className="flex  sm:flex-row sm:items-center gap-1 sm:gap-2">
-                                        <div className="flex items-center">
-                                            <DollarOutlined className="mr-2 text-gray-500 flex-shrink-0" />
-                                            <Text strong className="text-sm sm:text-base flex-shrink-0">Giá:</Text>
-                                        </div>
-                                        <Text className="text-red-600 font-medium text-sm sm:text-base">
-                                            {notification.orderId.amount?.toLocaleString()} VND
-                                        </Text>
+                                    <div className="flex md:col-span-2">
+                                        <span className="font-medium text-gray-600 w-20 flex-shrink-0">Địa chỉ:</span>
+                                        <span className="text-gray-800">
+                                            {notification.footballfield?.address?.detail || ''}
+                                            {notification.footballfield?.address?.ward ? `${notification.footballfield.address.detail ? ', ' : ''}${notification.footballfield.address.ward}` : ''}
+                                            {notification.footballfield?.address?.district ? `${notification.footballfield.address.ward || notification.footballfield.address.detail ? ', ' : ''}${notification.footballfield.address.district}` : ''}
+                                            {notification.footballfield?.address?.province ? `${notification.footballfield.address.district || notification.footballfield.address.ward || notification.footballfield.address.detail ? ', ' : ''}${notification.footballfield.address.province}` : ''}
+                                        </span>
                                     </div>
-
-                                    <div className="flex sm:flex-row sm:items-center gap-1 sm:gap-2">
-                                        <div className="flex items-center">
-                                            <CreditCardOutlined className="mr-2 text-gray-500 flex-shrink-0" />
-                                            <Text strong className="text-sm sm:text-base flex-shrink-0">Thanh toán:</Text>
-                                        </div>
-                                        <Text className="text-sm sm:text-base">{notification.orderId.gateway}</Text>
+                                    <div className="flex">
+                                        <span className="font-medium text-gray-600 w-20 flex-shrink-0">Giá:</span>
+                                        <span className="text-red-600 font-bold">{notification.orderId.amount?.toLocaleString()} VNĐ</span>
+                                    </div>
+                                    <div className="flex">
+                                        <span className="font-medium text-gray-600 w-20 flex-shrink-0">Thời gian đặt:</span>
+                                        <span className="text-gray-800">{new Date(notification.createdAt).toLocaleString('vi-VN')}</span>
                                     </div>
                                 </div>
-
-                                {notification.notificationType === 'field_booking_failed' && (
-                                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mt-2">
-                                        <Text strong className="text-red-500 text-sm sm:text-base w-full sm:w-32 flex-shrink-0">Lý do từ chối:</Text>
-                                        <Text className="text-red-500 text-sm sm:text-base">Thanh toán không hợp lệ</Text>
-                                    </div>
-                                )}
                             </div>
+
+                            {notification.notificationType === 'field_booking_failed' && (
+                                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-4">
+                                    <div className="flex items-center">
+                                        <span className="font-medium text-red-600 w-24 flex-shrink-0">Lý do từ chối:</span>
+                                        <span className="text-red-600">Thanh toán không hợp lệ</span>
+                                    </div>
+                                </div>
+                            )}
 
                             <Divider />
 
-                            <Title level={5} className="mt-4 mb-3 text-base sm:text-lg">Thông tin người đặt</Title>
+                            <div className="bg-white rounded-lg p-4 border border-green-100">
+                                <Title level={5} className="mb-3 text-base sm:text-lg flex items-center">
+                                    <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
+                                    Thông tin người đặt
+                                </Title>
 
-                            <div className="space-y-3 sm:space-y-4">
-                                <div className="flex sm:flex-row sm:items-center gap-1 sm:gap-2">
-                                    <div className="flex items-center">
-                                        <UserOutlined className="mr-2 text-gray-500 flex-shrink-0" />
-                                        <Text strong className="text-sm sm:text-base w-full sm:w-32 flex-shrink-0">Tên đội:</Text>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                                    <div className="flex">
+                                        <span className="font-medium text-gray-600 w-24 flex-shrink-0">Tên đội:</span>
+                                        <span className="text-gray-800 font-semibold">{notification.orderId.teamName}</span>
                                     </div>
-                                    <div>
-                                        <Text className="text-sm sm:text-base break-words">{notification.orderId.teamName}</Text>
+                                    <div className="flex">
+                                        <span className="font-medium text-gray-600 w-24 flex-shrink-0">Số điện thoại:</span>
+                                        <span className="text-gray-800">{notification.orderId.phoneNumber}</span>
                                     </div>
-                                </div>
-
-                                <div className="flex sm:flex-row sm:items-center gap-1 sm:gap-2">
-                                    <div className="flex items-center">
-                                        <PhoneOutlined className="mr-2 text-gray-500 flex-shrink-0" />
-                                        <Text strong className="text-sm sm:text-base w-full sm:w-32 flex-shrink-0">Số điện thoại:</Text>
-                                    </div>
-                                    <Text className="text-sm sm:text-base break-words">{notification.orderId.phoneNumber}</Text>
+                                    {notification.orderId.description && (
+                                        <div className="flex md:col-span-2">
+                                            <span className="font-medium text-gray-600 w-24 flex-shrink-0">Ghi chú:</span>
+                                            <span className="text-gray-800 italic">"{notification.orderId.description}"</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </>

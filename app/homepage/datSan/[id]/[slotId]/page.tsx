@@ -1,35 +1,21 @@
 'use client';
-import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { Button, Input, Radio, Card, Form, notification, Collapse, Modal, Alert, Result, QRCode } from 'antd';
-import { useDispatch, useSelector } from "react-redux";
-import { RootStateType } from "@/models/type";
-import { Field, TimeSlot } from "@/models/field";
+import { Button, Input, Radio, Card, Form, Collapse, Modal, Alert, Result, QRCode } from 'antd';
+import { useDispatch } from "react-redux";
+import { TimeSlot } from "@/models/field";
 import { FootballField } from "@/models/football_field";
-import { Notification } from "@/models/notification";
 import { getFieldById, getFieldsByIdFootball } from "@/api/field";
 import { createBooking, getBookings } from "@/api/booking";
 import { getTimeSlotById } from "@/api/timeSlot";
-import { updateTimeSlotSlice } from "@/features/timeSlot.slice";
-import { addNotificationSlice } from "@/features/notification.slice";
 import { AppDispatch } from "@/store/store";
 import { useParams, useSearchParams } from "next/navigation";
-import { addBreadcrumb, resetBreadcrumb } from "@/features/breadcrumb.slice";
+import { addBreadcrumb } from "@/features/breadcrumb.slice";
 import { useAppSelector } from "@/store/hook";
-import { BankOutlined, CheckCircleOutlined, CreditCardOutlined, InfoCircleOutlined, LockOutlined, MailOutlined, MobileOutlined, PhoneOutlined, QrcodeOutlined, UserOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import { BankOutlined, CheckCircleOutlined, CreditCardOutlined, InfoCircleOutlined, LockOutlined, MailOutlined, MobileOutlined, PhoneOutlined, QrcodeOutlined, UserOutlined, ExclamationCircleOutlined, CopyOutlined } from "@ant-design/icons";
 import { toast } from 'react-toastify';
 import PaymentQR from "@/components/Payment";
 import { createOrder, getOrdersByUserId, updatePendingOrder } from "@/api/payment";
-import { Order } from "@/models/payment";
 import { useOrderCleanup } from "@/utils/orderCleanup";
-
-const paymentMethods = [
-    { id: "bank", name: "Chuyển khoản / Internet Banking" },
-    { id: "qr", name: "Quét mã QR" },
-    { id: "momo", name: "Ví MoMo" },
-    { id: "visa", name: "Thẻ Visa, Master, JCB" },
-    { id: "atm", name: "Thẻ ATM (Thẻ nội địa)" },
-];
 
 interface FieldData {
     date: string;
@@ -102,15 +88,8 @@ const BookingPage = () => {
     // Function to generate QR code
     const generateQRCode = () => {
         if (fieldData) {
-            const bankId = "MB"; // Mã ngân hàng MB Bank
-            const accountNo = "29777777729"; // Số tài khoản
             const amount = fieldData.price; // Số tiền
-            const accountName = "VU TIEN LONG"; // Tên tài khoản
             const description = `${fieldData.field} ${fieldData.date} ${fieldData.timeStart}`; // Nội dung chuyển khoản
-
-            // // Mã hóa các thông tin để đưa vào URL
-            // const encodedDescription = encodeURIComponent(description);
-            // const encodedAccountName = encodeURIComponent(accountName);
 
             const orderId = `${Date.now()}`;
             // Tạo URL VietQR
@@ -128,8 +107,13 @@ const BookingPage = () => {
             generateQRCode();
         }
 
-        // Nếu chọn thanh toán QR, kiểm tra và tạo/cập nhật đơn hàng
-        if (selectedPayment === "qr" && orderId && user.value.user._id && fieldData) {
+        // Nếu chọn thanh toán QR hoặc Banking, kiểm tra và tạo/cập nhật đơn hàng
+        if ((selectedPayment === "qr" || selectedPayment === "banking") && user.value.user._id && fieldData) {
+            // Generate orderId if not exists
+            const currentOrderId = orderId || `${Date.now()}`;
+            if (!orderId) {
+                setOrderId(currentOrderId);
+            }
             try {
                 // Kiểm tra xem đã có order pending cho cùng sân/thời gian chưa
                 const existingOrder = await checkExistingPendingOrder(
@@ -159,8 +143,8 @@ const BookingPage = () => {
                     }
                 } else {
                     // Nếu chưa có, tạo order mới
-                    const { data } = await createOrder({
-                        sepayId: orderId,
+                    const orderData = {
+                        sepayId: currentOrderId,
                         userId: user.value.user._id,
                         teamName: values.teamName,
                         phoneNumber: values.phone,
@@ -168,12 +152,13 @@ const BookingPage = () => {
                         fieldName: fieldData.field,
                         timeStart: fieldData.timeStart,
                         date: fieldData.date,
-                        gateway: "MBBank",
-                        accountNumber: "29777777729",
+                        gateway: "MBBank", // Cả banking và QR đều dùng MBBank
+                        accountNumber: selectedPayment === "qr" ? "29777777729" : "VQRQACMYR4474",
                         amount: fieldData.price as number,
                         content: `${fieldData.field} ${fieldData.date} ${fieldData.timeStart}`,
                         paymentStatus: "pending",
-                    });
+                    };
+                    const { data } = await createOrder(orderData);
                     setOrderCreated(true);
                     data && setNewOrder(data);
                 }
@@ -189,21 +174,6 @@ const BookingPage = () => {
     const handleConfirmCancel = () => {
         setConfirmModalVisible(false);
     };
-
-    // const handleConfirmOk = async () => {
-    //     setConfirmModalVisible(false);
-    //     if (formValues) {
-    //         await processBooking(formValues);
-    //     }
-    // };
-
-    // const processBooking = async (values: Information) => {
-    //     if (fieldData) {
-    //         // Không cần tạo booking và gửi thông báo ở đây nữa
-    //         // Việc này đã được xử lý trong component PaymentQR
-    //         setIsSuccess(true);
-    //     }
-    // }
 
     // Auto cleanup orders pending khi component mount
     useOrderCleanup(true);
@@ -265,36 +235,79 @@ const BookingPage = () => {
                     subTitle="Bạn đã đặt sân thành công. Vui lòng chờ chủ sân xác nhận."
                     className="text-left"
                     extra={[
-                        <div key="booking-details" className=" bg-gray-50 p-6 rounded-lg mb-6 border border-gray-200 max-w-full">
-                            <h3 className="text-lg font-semibold  mb-4">Thông tin đặt sân</h3>
-                            <div className="space-y-3 text-left">
-                                <div className="flex gap-8">
-                                    <div className="font-medium w-24">Tên sân:</div>
-                                    <div>{fieldData?.fieldName}</div>
+                        <div key="booking-details" className="bg-green-50 border border-green-200 rounded-lg p-6 mb-6 max-w-full">
+                            <div className="flex items-center mb-4">
+                                <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                                <h3 className="text-lg font-semibold text-green-800">Chúc mừng bạn đã đặt sân thành công tại Sân bóng KickZone.</h3>
+                            </div>
+
+                            {/* Thông tin đặt sân */}
+                            <div className="bg-white rounded-lg p-4 mb-4 border border-green-100">
+                                <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
+                                    <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                                    Thông tin đặt sân
+                                </h4>
+                                <div className="text-left grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                                    <div className="flex">
+                                        <span className="font-medium text-gray-600 w-20 flex-shrink-0">Tên sân:</span>
+                                        <span className="text-gray-800">{fieldData?.fieldName}</span>
+                                    </div>
+                                    <div className="flex">
+                                        <span className="font-medium text-gray-600 w-20 flex-shrink-0">Thời gian:</span>
+                                        <span className="text-gray-800">{fieldData?.timeStart}</span>
+                                    </div>
+                                    <div className="flex">
+                                        <span className="font-medium text-gray-600 w-20 flex-shrink-0">Sân số:</span>
+                                        <span className="text-blue-600 font-semibold">{fieldData?.field}</span>
+                                    </div>
+                                    <div className="flex">
+                                        <span className="font-medium text-gray-600 w-20 flex-shrink-0">Thanh toán:</span>
+                                        <span className="text-gray-800">MBBank</span>
+                                    </div>
+                                    <div className="flex md:col-span-2">
+                                        <span className="font-medium text-gray-600 w-20 flex-shrink-0">Địa chỉ:</span>
+                                        <span className="text-gray-800">210 lê trọng tấn, Phường Bạch Đằng, Quận Hai Bà Trưng, Thành phố Hà Nội</span>
+                                    </div>
+                                    <div className="flex">
+                                        <span className="font-medium text-gray-600 w-20 flex-shrink-0">Giá:</span>
+                                        <span className="text-red-600 font-bold">{fieldData?.price?.toLocaleString()} VNĐ</span>
+                                    </div>
+                                    <div className="flex">
+                                        <span className="font-medium text-gray-600 w-20 flex-shrink-0">Thời gian đặt:</span>
+                                        <span className="text-gray-800">{new Date().toLocaleString('vi-VN')}</span>
+                                    </div>
                                 </div>
-                                <div className="flex gap-8">
-                                    <div className="font-medium w-24">Sân số:</div>
-                                    <div>{fieldData?.field}</div>
+                            </div>
+
+                            {/* Thông tin người đặt */}
+                            <div className="bg-white rounded-lg p-4 border border-green-100">
+                                <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
+                                    <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
+                                    Thông tin người đặt
+                                </h4>
+                                <div className="text-left grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                                    <div className="flex">
+                                        <span className="font-medium text-gray-600 w-24 flex-shrink-0">Tên đội:</span>
+                                        <span className="text-gray-800 font-semibold">{formValues.teamName}</span>
+                                    </div>
+                                    <div className="flex">
+                                        <span className="font-medium text-gray-600 w-24 flex-shrink-0">Số điện thoại:</span>
+                                        <span className="text-gray-800">{formValues.phone}</span>
+                                    </div>
+                                    {formValues.note && (
+                                        <div className="flex md:col-span-2">
+                                            <span className="font-medium text-gray-600 w-24 flex-shrink-0">Ghi chú:</span>
+                                            <span className="text-gray-800 italic">"{formValues.note}"</span>
+                                        </div>
+                                    )}
                                 </div>
-                                <div className="flex gap-8">
-                                    <div className="font-medium w-24">Ngày đá:</div>
-                                    <div>{fieldData?.date}</div>
-                                </div>
-                                <div className="flex gap-8">
-                                    <div className="font-medium w-24">Giờ đá:</div>
-                                    <div>{fieldData?.timeStart}</div>
-                                </div>
-                                <div className="flex gap-8">
-                                    <div className="font-medium w-24">Giá tiền:</div>
-                                    <div className="text-red-600">{fieldData?.price?.toLocaleString()} VNĐ</div>
-                                </div>
-                                <div className="flex gap-8">
-                                    <div className="font-medium w-24">Phương thức:</div>
-                                    <div>{selectedPayment === "banking" ? "Chuyển khoản" :
-                                        selectedPayment === "qr" ? "Quét mã QR" :
-                                            selectedPayment === "momo" ? "Ví MoMo" :
-                                                selectedPayment === "card" ? "Thẻ Visa/Master" : "Thẻ ATM"}</div>
-                                </div>
+                            </div>
+
+                            {/* Thông báo quan trọng */}
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-4">
+                                <p className="text-sm text-yellow-800 text-center">
+                                    <strong>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!</strong>
+                                </p>
                             </div>
                         </div>,
                         <Alert
@@ -303,9 +316,9 @@ const BookingPage = () => {
                             description={
                                 <div className="space-y-2 mt-2 ">
                                     <p>• Đơn đặt sân của bạn đã được ghi nhận.</p>
-                                    <p>• Vui lòng hoàn tất thanh toán để chủ sân xác nhận đặt sân.</p>
+                                    <p>• Đơn hàng sẽ được xác nhận tự động sau khi thanh toán thành công.</p>
                                     <p>• Bạn có thể theo dõi trạng thái đặt sân trong mục thông báo.</p>
-                                    <p>• Bạn không thể hủy sân khi đã đặt.</p>
+                                    <p>• Liên hệ hotline nếu cần hỗ trợ: <strong>0966724435</strong></p>
                                 </div>
                             }
                             type="info"
@@ -422,26 +435,46 @@ const BookingPage = () => {
                                                         className="border-b border-gray-100 last:border-b-0"
                                                     >
                                                         <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 sm:p-6 border-t border-blue-200">
-                                                            <div className="space-y-3">
-                                                                <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
-                                                                    <span className="font-medium text-gray-700">Ngân hàng:</span>
-                                                                    <span className="text-blue-600 font-semibold">Vietcombank</span>
-                                                                </div>
-                                                                <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
-                                                                    <span className="font-medium text-gray-700">Số tài khoản:</span>
-                                                                    <span className="font-mono font-semibold">1234567890</span>
-                                                                </div>
-                                                                <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
-                                                                    <span className="font-medium text-gray-700">Chủ tài khoản:</span>
-                                                                    <span className="font-semibold">CÔNG TY TNHH KICKZONE</span>
-                                                                </div>
-                                                                <div className="border-t border-blue-200 pt-3 mt-3">
-                                                                    <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
-                                                                        <span className="font-medium text-gray-700">Nội dung:</span>
-                                                                        <span className="font-semibold text-orange-600 break-words">
-                                                                            Sân bóng KickZone {fieldData?.date} {fieldData?.timeStart}
-                                                                        </span>
+                                                            <div className="space-y-4">
+                                                                {/* Thông tin ngân hàng */}
+                                                                <div className="bg-white p-4 rounded-lg border border-blue-200 shadow-sm">
+                                                                    <h4 className="font-semibold text-blue-800 mb-3 flex items-center">
+                                                                        <BankOutlined className="mr-2" />
+                                                                        Thông tin chuyển khoản
+                                                                    </h4>
+                                                                    <div className="space-y-3">
+                                                                        <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                                                                            <span className="font-medium text-gray-700">Ngân hàng:</span>
+                                                                            <span className="text-blue-600 font-semibold">MB Bank</span>
+                                                                        </div>
+                                                                        <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                                                                            <span className="font-medium text-gray-700">Số tài khoản:</span>
+                                                                            <div className="flex items-center gap-2">
+                                                                                <span className="font-mono font-semibold text-lg bg-gray-100 px-2 py-1 rounded">VQRQACMYR4474</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                                                                            <span className="font-medium text-gray-700">Chủ tài khoản:</span>
+                                                                            <span className="font-semibold">VU TIEN LONG</span>
+                                                                        </div>
+                                                                        <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                                                                            <span className="font-medium text-gray-700">Số tiền:</span>
+                                                                            <span className="font-bold text-xl text-red-600">{fieldData?.price?.toLocaleString()} VNĐ</span>
+                                                                        </div>
                                                                     </div>
+                                                                </div>
+
+                                                                {/* Hướng dẫn chuyển khoản */}
+                                                                <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+                                                                    <h5 className="font-semibold text-blue-800 mb-2">📋 Hướng dẫn chuyển khoản:</h5>
+                                                                    <ol className="text-sm text-blue-700 space-y-1 list-decimal list-inside">
+                                                                        <li>Mở ứng dụng MBBank hoặc Internet Banking</li>
+                                                                        <li>Chọn chuyển khoản đến tài khoản MBBank</li>
+                                                                        <li>Nhập số tài khoản: <strong>VQRQACMYR4474</strong></li>
+                                                                        <li>Nhập số tiền: <strong>{fieldData?.price?.toLocaleString()} VNĐ</strong></li>
+                                                                        <li>Nhập nội dung: <strong>{fieldData?.field} {fieldData?.date} {fieldData?.timeStart}</strong></li>
+                                                                        <li>Xác nhận và hoàn tất giao dịch</li>
+                                                                    </ol>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -471,61 +504,6 @@ const BookingPage = () => {
                                                             </div>
                                                         </div>
                                                     </Collapse.Panel>
-
-                                                    <Collapse.Panel
-                                                        key="momo"
-                                                        header={
-                                                            <Radio value="momo" className="w-full flex items-center py-2">
-                                                                <MobileOutlined className="text-pink-500 mr-3 text-lg sm:text-xl" />
-                                                                <span className="text-sm sm:text-base font-medium">Ví MoMo</span>
-                                                            </Radio>
-                                                        }
-                                                        showArrow={false}
-                                                        className="border-b border-gray-100 last:border-b-0"
-                                                    >
-                                                        <div className="bg-gradient-to-r from-pink-50 to-pink-100 p-4 sm:p-6 border-t border-pink-200">
-                                                            <p className="text-gray-700 text-center">
-                                                                Quét mã MoMo hoặc chuyển khoản đến số điện thoại:
-                                                                <span className="font-mono font-semibold text-pink-600 ml-1">0987654321</span>
-                                                            </p>
-                                                        </div>
-                                                    </Collapse.Panel>
-
-                                                    <Collapse.Panel
-                                                        key="card"
-                                                        header={
-                                                            <Radio value="card" className="w-full flex items-center py-2">
-                                                                <CreditCardOutlined className="text-orange-500 mr-3 text-lg sm:text-xl" />
-                                                                <span className="text-sm sm:text-base font-medium">Thẻ Visa, Master, JCB</span>
-                                                            </Radio>
-                                                        }
-                                                        showArrow={false}
-                                                        className="border-b border-gray-100 last:border-b-0"
-                                                    >
-                                                        <div className="bg-gradient-to-r from-orange-50 to-orange-100 p-4 sm:p-6 border-t border-orange-200">
-                                                            <p className="text-gray-700 text-center">
-                                                                Bạn sẽ được chuyển đến trang thanh toán an toàn sau khi xác nhận.
-                                                            </p>
-                                                        </div>
-                                                    </Collapse.Panel>
-
-                                                    <Collapse.Panel
-                                                        key="atm"
-                                                        header={
-                                                            <Radio value="atm" className="w-full flex items-center py-2">
-                                                                <BankOutlined className="text-blue-700 mr-3 text-lg sm:text-xl" />
-                                                                <span className="text-sm sm:text-base font-medium">Thẻ ATM (Thẻ nội địa)</span>
-                                                            </Radio>
-                                                        }
-                                                        showArrow={false}
-                                                        className="border-b border-gray-100 last:border-b-0"
-                                                    >
-                                                        <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 sm:p-6 border-t border-blue-200">
-                                                            <p className="text-gray-700 text-center">
-                                                                Bạn sẽ được chuyển đến cổng thanh toán Napas sau khi xác nhận.
-                                                            </p>
-                                                        </div>
-                                                    </Collapse.Panel>
                                                 </Collapse>
                                             </Radio.Group>
                                         </div>
@@ -533,60 +511,61 @@ const BookingPage = () => {
                                 </div>
 
                                 {/* Thông tin cá nhân */}
-                                <Card className="mb-6">
+                                <div className="mb-6">
                                     <div className="flex items-center mb-4">
                                         <div><UserOutlined className="text-orange-500 mr-2 text-lg" /></div>
                                         <div className="text-lg sm:text-xl font-semibold text-gray-900">Thông tin cá nhân</div>
                                     </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <Card>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <Form.Item
+                                                name="teamName"
+                                                label={<span className="text-sm font-medium text-gray-700">Tên đội bóng</span>}
+                                                labelCol={{ span: 24 }}
+                                                wrapperCol={{ span: 24 }}
+                                                rules={[{ required: true, message: "Vui lòng nhập tên đội bóng!" }]}
+                                            >
+                                                <Input
+                                                    size="large"
+                                                    placeholder="Nhập tên đội bóng"
+                                                    prefix={<UserOutlined className="text-gray-400" />}
+                                                    className="border-gray-200 rounded-lg focus:border-orange-500 focus:ring-orange-500"
+                                                />
+                                            </Form.Item>
+
+                                            <Form.Item
+                                                name="phone"
+                                                label={<span className="text-sm font-medium text-gray-700">Số điện thoại</span>}
+                                                labelCol={{ span: 24 }}
+                                                wrapperCol={{ span: 24 }}
+                                                rules={[
+                                                    { required: true, message: "Vui lòng nhập số điện thoại!" },
+                                                    { pattern: /^[0-9]{10}$/, message: "Số điện thoại không hợp lệ!" }
+                                                ]}
+                                            >
+                                                <Input
+                                                    size="large"
+                                                    placeholder="Nhập số điện thoại"
+                                                    prefix={<PhoneOutlined className="text-gray-400" />}
+                                                    className="border-gray-200 rounded-lg focus:border-orange-500 focus:ring-orange-500"
+                                                />
+                                            </Form.Item>
+                                        </div>
+
                                         <Form.Item
-                                            name="teamName"
-                                            label={<span className="text-sm font-medium text-gray-700">Tên đội bóng</span>}
+                                            name="note"
+                                            label={<span className="text-sm font-medium text-gray-700">Ghi chú</span>}
                                             labelCol={{ span: 24 }}
                                             wrapperCol={{ span: 24 }}
-                                            rules={[{ required: true, message: "Vui lòng nhập tên đội bóng!" }]}
                                         >
-                                            <Input
-                                                size="large"
-                                                placeholder="Nhập tên đội bóng"
-                                                prefix={<UserOutlined className="text-gray-400" />}
+                                            <Input.TextArea
+                                                placeholder="Ghi chú thêm (nếu có)"
+                                                rows={3}
                                                 className="border-gray-200 rounded-lg focus:border-orange-500 focus:ring-orange-500"
                                             />
                                         </Form.Item>
-
-                                        <Form.Item
-                                            name="phone"
-                                            label={<span className="text-sm font-medium text-gray-700">Số điện thoại</span>}
-                                            labelCol={{ span: 24 }}
-                                            wrapperCol={{ span: 24 }}
-                                            rules={[
-                                                { required: true, message: "Vui lòng nhập số điện thoại!" },
-                                                { pattern: /^[0-9]{10}$/, message: "Số điện thoại không hợp lệ!" }
-                                            ]}
-                                        >
-                                            <Input
-                                                size="large"
-                                                placeholder="Nhập số điện thoại"
-                                                prefix={<PhoneOutlined className="text-gray-400" />}
-                                                className="border-gray-200 rounded-lg focus:border-orange-500 focus:ring-orange-500"
-                                            />
-                                        </Form.Item>
-                                    </div>
-
-                                    <Form.Item
-                                        name="note"
-                                        label={<span className="text-sm font-medium text-gray-700">Ghi chú</span>}
-                                        labelCol={{ span: 24 }}
-                                        wrapperCol={{ span: 24 }}
-                                    >
-                                        <Input.TextArea
-                                            placeholder="Ghi chú thêm (nếu có)"
-                                            rows={3}
-                                            className="border-gray-200 rounded-lg focus:border-orange-500 focus:ring-orange-500"
-                                        />
-                                    </Form.Item>
-                                </Card>
-
+                                    </Card>
+                                </div>
                             </Card>
                         </div>
 
@@ -674,20 +653,17 @@ const BookingPage = () => {
                         >
                             Hủy
                         </Button>,
-                        selectedPayment !== "qr" && (
-                            <Button
-                                key="submit"
-                                type="primary"
-                                onClick={() => {
-                                    setConfirmModalVisible(false);
-                                    setIsSuccess(true);
-                                }}
-                                size="large"
-                                className="bg-orange-500 hover:bg-orange-600 border-orange-500 rounded-lg"
-                            >
-                                Tôi đã chuyển khoản
-                            </Button>
-                        ),
+                        <Button
+                            key="submit"
+                            type="primary"
+                            onClick={() => {
+                                setConfirmModalVisible(false);
+                            }}
+                            size="large"
+                            className="bg-orange-500 hover:bg-orange-600 border-orange-500 rounded-lg"
+                        >
+                            {selectedPayment === "qr" ? "Thanh toán bằng QR" : "Tôi đã chuyển khoản"}
+                        </Button>,
                     ]}
                     centered
                     width="90%"
@@ -695,32 +671,24 @@ const BookingPage = () => {
                     className="payment-modal"
                 >
                     <div className="py-2 sm:py-4">
-                        {selectedPayment === "qr" ? (
-                            <div className="text-center">
-                                <PaymentQR
-                                    onSuccess={(success) => {
-                                        if (success) {
-                                            setIsSuccess(true);
-                                        }
-                                    }}
-                                    orderId={orderId}
-                                    userId={user.value.user._id as string}
-                                    qrContent={qrContent}
-                                    amount={fieldData?.price as number}
-                                    description={`${fieldData?.field} ${fieldData?.date} ${fieldData?.timeStart}`}
-                                    orderCreated={orderCreated}
-                                    fieldData={fieldData} // Truyền thêm fieldData
-                                    newOrder={newOrder} // Truyền thêm newOrder
-                                />
-                            </div>
-                        ) : (
-                            <div className="p-4">
-                                <p className="mb-4 text-center text-gray-700">
-                                    Vui lòng thực hiện chuyển khoản với thông tin sau:
-                                </p>
-                                {/* Thông tin chuyển khoản sẽ được hiển thị ở đây */}
-                            </div>
-                        )}
+                        <div className="text-center">
+                            <PaymentQR
+                                onSuccess={(success) => {
+                                    if (success) {
+                                        setIsSuccess(true);
+                                    }
+                                }}
+                                orderId={orderId}
+                                userId={user.value.user._id as string}
+                                qrContent={qrContent}
+                                amount={fieldData?.price as number}
+                                description={`${fieldData?.field} ${fieldData?.date} ${fieldData?.timeStart}`}
+                                orderCreated={orderCreated}
+                                selectedPayment={selectedPayment}
+                                fieldData={fieldData}
+                                newOrder={newOrder}
+                            />
+                        </div>
                     </div>
                 </Modal>
             </div>
