@@ -57,7 +57,6 @@ const ListOrder = () => {
         }
     };
 
-    // Sắp xếp orders theo thời gian tạo, mới nhất lên đầu
     useEffect(() => {
         if (orders && orders.length > 0) {
             // Tạo bản sao của mảng orders để không ảnh hưởng đến state gốc
@@ -68,10 +67,6 @@ const ListOrder = () => {
                 // Nếu có trường createdAt, sử dụng nó để sắp xếp
                 if (a.createdAt && b.createdAt) {
                     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-                }
-                // Nếu có trường transactionDate, sử dụng nó để sắp xếp
-                else if (a.transactionDate && b.transactionDate) {
-                    return new Date(b.transactionDate).getTime() - new Date(a.transactionDate).getTime();
                 }
                 // Nếu không có cả hai trường, giữ nguyên thứ tự
                 return 0;

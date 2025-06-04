@@ -645,25 +645,7 @@ const BookingPage = () => {
                     open={confirmModalVisible}
                     onCancel={handleConfirmCancel}
                     footer={[
-                        <Button
-                            key="back"
-                            onClick={handleConfirmCancel}
-                            size="large"
-                            className="rounded-lg"
-                        >
-                            Hủy
-                        </Button>,
-                        <Button
-                            key="submit"
-                            type="primary"
-                            onClick={() => {
-                                setConfirmModalVisible(false);
-                            }}
-                            size="large"
-                            className="bg-orange-500 hover:bg-orange-600 border-orange-500 rounded-lg"
-                        >
-                            {selectedPayment === "qr" ? "Thanh toán bằng QR" : "Tôi đã chuyển khoản"}
-                        </Button>,
+                     <div></div>
                     ]}
                     centered
                     width="90%"

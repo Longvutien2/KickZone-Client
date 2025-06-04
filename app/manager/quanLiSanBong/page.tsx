@@ -1,11 +1,14 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Card, Typography, Button, Select, Divider, Tag, Avatar, Calendar, ConfigProvider, Checkbox, Modal, Layout } from 'antd';
+import { Card, Typography, Button, Select, Divider, Tag, Avatar, Calendar, ConfigProvider, Checkbox, Modal, Layout, DatePicker, Table } from 'antd';
 import { UserOutlined, CalendarOutlined, AppstoreOutlined, SettingOutlined, LeftOutlined, RightOutlined, PhoneOutlined, MessageOutlined } from '@ant-design/icons';
 import dayjs, { Dayjs } from 'dayjs';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import viVN from 'antd/lib/locale/vi_VN';
 import { useAppDispatch, useAppSelector } from '@/store/hook';
+import { getListOrdersSlice } from '@/features/order.slice';
+import { getListFieldsSlice } from '@/features/field.slice';
+import { FootballField } from '@/models/football_field';
 
 // Kích hoạt plugin weekOfYear cho dayjs
 dayjs.extend(weekOfYear);
@@ -20,13 +23,15 @@ const QuanLiSanBong = () => {
     const [selectedField, setSelectedField] = useState<string | null>(null);
     const [viewMode, setViewMode] = useState<'day' | 'week' | 'month' | 'year' | 'schedule'>('month');
     const [showDropdown, setShowDropdown] = useState(false);
+    const [selectedDateForStats, setSelectedDateForStats] = useState<string>(dayjs().format('DD-MM-YYYY'));
     const user = useAppSelector((state) => state.auth?.value?.user);
-    const footballField = useAppSelector((state) => state.footballField?.value);
+    const footballField = useAppSelector((state) => state.footballField?.detail) as FootballField;
     const bookings = useAppSelector((state) => state.order?.value) || [];
+    const fields = useAppSelector((state) => state.field?.value) || [];
     const dispatch = useAppDispatch();
-
+    
     dayjs.locale("vi"); // Chuyển Ant Design sang Tiếng Việt
-
+    
     // Lấy danh sách các sân từ bookings (chỉ những booking có paymentStatus === "success")
     const fieldList = [...new Set(bookings
         .filter((booking: any) => booking.paymentStatus === "success")
@@ -196,6 +201,45 @@ const QuanLiSanBong = () => {
     // Nhóm bookings theo field hoặc ngày
     const groupedBookings = viewMode === 'day' ? groupBookings() : getListBookings();
 
+    useEffect(() => {
+        const getData = async () => {
+            await dispatch(getListOrdersSlice());
+        }
+        getData()
+    }, []);
+
+    // Load fields khi có footballField
+    useEffect(() => {
+        if (footballField?._id) {
+            dispatch(getListFieldsSlice(footballField._id));
+        }
+    }, [footballField?._id]);
+
+    // Tính số lượt đặt theo sân cho ngày đã chọn
+    const getFieldBookingStats = () => {
+        const selectedDateFormatted = dayjs(selectedDateForStats, 'DD-MM-YYYY').format('DD-MM-YYYY');
+
+        // Lọc bookings theo ngày đã chọn và paymentStatus success
+        const dayBookings = bookings.filter((booking: any) =>
+            booking.date === selectedDateFormatted && booking.paymentStatus === "success"
+        );
+
+        // Tạo map để đếm số lượt đặt theo sân
+        const fieldStats = fields.map((field: any) => {
+            const fieldBookings = dayBookings.filter((booking: any) => booking.fieldName === field.name);
+            return {
+                fieldName: field.name,
+                fieldId: field._id,
+                bookingCount: fieldBookings.length,
+                people: field.people,
+                surface: field.surface,
+                status: field.status
+            };
+        });
+
+        return fieldStats;
+    };
+
     return (
         <Layout className="p-6 bg-gray-50 min-h-screen">
             <div className="mb-6">
@@ -204,7 +248,7 @@ const QuanLiSanBong = () => {
 
             <div className="flex flex-col lg:flex-row gap-6">
                 {/* Bộ lọc và danh sách đặt sân */}
-                <Card className="lg:w-1/3 shadow-sm">
+                <Card className="lg:w-1/4 shadow-sm">
                     <div className="mb-4">
                         <Title level={4} className="mb-4">{getListTitle()}</Title>
 
@@ -227,7 +271,9 @@ const QuanLiSanBong = () => {
                         {Object.keys(groupedBookings).length > 0 ? (
                             <div className="space-y-4">
                                 {Object.entries(groupedBookings).map(([key, bookings]) => (
-                                    <div key={key} className="border rounded-lg p-3 bg-white">
+                                    <div key={key} className="border rounded-lg p-3 bg-white"
+                                        style={{border:"1px solid #D1D5DC"}}
+                                    >
                                         <Text strong className="text-lg">
                                             {viewMode === 'day' ? key : `${key}`}
                                         </Text>
@@ -270,7 +316,7 @@ const QuanLiSanBong = () => {
                 </Card>
 
                 {/* Lịch */}
-                <Card className="lg:w-2/3 shadow-sm rounded-xl overflow-hidden">
+                <Card className="lg:w-3/4 shadow-sm rounded-xl overflow-hidden">
                     <div >
                         <ConfigProvider
                             locale={viVN}
@@ -699,6 +745,74 @@ const QuanLiSanBong = () => {
                 </Card>
             </div>
 
+            {/* Thống kê sân theo ngày */}
+            <div className="mt-6">
+                <Card className="shadow-sm">
+                    <div className="mb-4 flex items-center justify-between">
+                        <Title level={4} className="mb-0 flex items-center">
+                            <AppstoreOutlined className="mr-2 text-blue-500" />
+                            Thống kê sân theo ngày
+                        </Title>
+                        <DatePicker
+                            value={dayjs(selectedDateForStats, 'DD-MM-YYYY')}
+                            onChange={(date) => {
+                                if (date) {
+                                    setSelectedDateForStats(date.format('DD-MM-YYYY'));
+                                }
+                            }}
+                            format="DD-MM-YYYY"
+                            placeholder="Chọn ngày"
+                            className="w-40"
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        {getFieldBookingStats().map((fieldStat: any) => (
+                            <div
+                                key={fieldStat.fieldId}
+                                className="border rounded-lg p-4 bg-white hover:shadow-md transition-shadow"
+                                style={{border:"1px solid #D1D5DC"}}
+                            >
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center">
+                                        <div className={`w-3 h-3  rounded-full mr-2  ${fieldStat.bookingCount > 0 ? 'bg-red-500' : 'bg-blue-500'} `}></div>
+                                        <Text strong className="text-lg">{fieldStat.fieldName}</Text>
+                                    </div>
+                                    <Tag color={fieldStat.status === 'Hoạt động' ? 'green' : 'red'}>
+                                        {fieldStat.status}
+                                    </Tag>
+                                </div>
+
+                                <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">Số lượt đặt:</span>
+                                        <span className={`font-bold ${fieldStat.bookingCount > 0 ? 'text-red-500' : 'text-blue-500'}`}>
+                                            {fieldStat.bookingCount} lượt
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">Sức chứa:</span>
+                                        <span className="font-medium">{fieldStat.people}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">Mặt sân:</span>
+                                        <span className="font-medium">{fieldStat.surface || 'Không xác định'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {getFieldBookingStats().length === 0 && (
+                        <div className="text-center py-8 text-gray-500">
+                            <AppstoreOutlined style={{ fontSize: '32px' }} />
+                            <p className="mt-2">Chưa có dữ liệu sân bóng</p>
+                            <p className="text-sm">Vui lòng thêm sân bóng để xem thống kê</p>
+                        </div>
+                    )}
+                </Card>
+            </div>
+
             {/* Modal hiển thị chi tiết đặt sân */}
             <Modal
                 title={
@@ -725,17 +839,13 @@ const QuanLiSanBong = () => {
                             </div>
                             <div className="ml-6 space-y-2">
                                 <div className="flex items-center">
-                                    <Text className="min-w-32">Họ tên:</Text>
+                                    <Text className="min-w-32">Tên đội:</Text>
                                     <Text strong>{selectedBooking.teamName || "Không có thông tin"}</Text>
                                 </div>
                                 <div className="flex items-center">
                                     <Text className="min-w-32">Số điện thoại:</Text>
                                     <Text strong>{selectedBooking.phoneNumber || "Không có thông tin"}</Text>
                                 </div>
-                                {/* <div className="flex items-center">
-                                    <Text className="min-w-32">Email:</Text>
-                                    <Text strong>{selectedBooking.email || "Không có thông tin"}</Text>
-                                </div> */}
                             </div>
                         </div>
 
@@ -750,16 +860,16 @@ const QuanLiSanBong = () => {
                                     <Text strong>{selectedBooking.fieldName || "Không có thông tin"}</Text>
                                 </div>
                                 <div className="flex items-center">
-                                    <Text className="min-w-32">Ngày đặt:</Text>
-                                    <Text strong>{selectedBooking.date || "Không có thông tin"}</Text>
-                                </div>
-                                <div className="flex items-center">
-                                    <Text className="min-w-32">Thời gian:</Text>
+                                    <Text className="min-w-32">Khung giờ:</Text>
                                     <Text strong>{selectedBooking.timeStart || ""}</Text>
+                                </div>
+                                 <div className="flex items-center">
+                                    <Text className="min-w-32">Ngày đặt:</Text>
+                                    <Text strong>{selectedBooking.transactionDate || "Không có thông tin"}</Text>
                                 </div>
                                 <div className="flex items-center">
                                     <Text className="min-w-32">Giá tiền:</Text>
-                                    <Text strong>{selectedBooking.amount ? Intl.NumberFormat('vi-VN').format(selectedBooking.amount) + " VND" : "Không có thông tin"}</Text>
+                                    <Text strong className='text-red-500'>{selectedBooking.amount ? Intl.NumberFormat('vi-VN').format(selectedBooking.amount) + " VND" : "Không có thông tin"}</Text>
                                 </div>
                             </div>
                         </div>

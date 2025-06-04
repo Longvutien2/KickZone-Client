@@ -97,45 +97,6 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
             path: "/manager/orders"
         },
         {
-            key: "bookingField",
-            label: <Link href="/manager/bookingField"><FileSearchOutlined />
-                <span>Quản lý yêu cầu</span>
-                {bookings.filter((item: any) => {
-                    // Lọc booking có trạng thái "Chờ xác nhận"
-                    if (item.status === "Chờ xác nhận") {
-                        // Kiểm tra ngày đặt
-                        if (item.date) {
-                            // Chuyển đổi định dạng ngày từ DD-MM-YYYY sang Date object
-                            const bookingDate = item.date.split('-').reverse().join('-');
-                            const bookingDateTime = new Date(bookingDate);
-                            const today = new Date();
-                            today.setHours(0, 0, 0, 0); // Đặt thời gian về 00:00:00
-
-                            // Chỉ lấy các đơn từ ngày hôm nay trở đi
-                            return bookingDateTime >= today;
-                        }
-                    }
-                    return false;
-                }).length > 0 && (
-                        <span className="ml-1 text-white bg-red-500 text-xs font-bold rounded-full px-2 py-0.5">
-                            {bookings.filter((item: any) => {
-                                if (item.status === "Chờ xác nhận") {
-                                    if (item.date) {
-                                        const bookingDate = item.date.split('-').reverse().join('-');
-                                        const bookingDateTime = new Date(bookingDate);
-                                        const today = new Date();
-                                        today.setHours(0, 0, 0, 0);
-                                        return bookingDateTime >= today;
-                                    }
-                                }
-                                return false;
-                            }).length}
-                        </span>
-                    )}
-            </Link>,
-            path: "/manager/bookingField"
-        },
-        {
             key: "thongBao",
             label: (
                 <Link href="/manager/notification" className="flex items-center gap-2">
