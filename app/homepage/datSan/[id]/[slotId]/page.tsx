@@ -1,7 +1,8 @@
 'use client';
 import { useEffect, useState } from "react";
-import { Button, Input, Radio, Card, Form, Collapse, Modal, Alert, Result, QRCode } from 'antd';
+import { Button, Input, Radio, Card, Form, Collapse, Alert } from 'antd';
 import { useDispatch } from "react-redux";
+import dynamic from 'next/dynamic';
 import { TimeSlot } from "@/models/field";
 import { FootballField } from "@/models/football_field";
 import { getFieldById, getFieldsByIdFootball } from "@/api/field";
@@ -13,9 +14,55 @@ import { addBreadcrumb } from "@/features/breadcrumb.slice";
 import { useAppSelector } from "@/store/hook";
 import { BankOutlined, CheckCircleOutlined, CreditCardOutlined, InfoCircleOutlined, LockOutlined, MailOutlined, MobileOutlined, PhoneOutlined, QrcodeOutlined, UserOutlined, ExclamationCircleOutlined, CopyOutlined } from "@ant-design/icons";
 import { toast } from 'react-toastify';
-import PaymentQR from "@/components/Payment";
 import { createOrder, getOrdersByUserId, updatePendingOrder } from "@/api/payment";
 import { useOrderCleanup } from "@/utils/orderCleanup";
+
+// Dynamic imports - chỉ load khi cần thiết
+const PaymentQR = dynamic(() => import("@/components/Payment"), {
+    loading: () => (
+        <div className="flex items-center justify-center p-8">
+            <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-2"></div>
+                <p className="text-gray-600">Đang tải thanh toán...</p>
+            </div>
+        </div>
+    ),
+    ssr: false
+});
+
+// Dynamic import cho Success Result - chỉ load khi booking thành công
+const SuccessResult = dynamic(() => import("antd").then(mod => ({ default: mod.Result })), {
+    loading: () => (
+        <div className="flex items-center justify-center min-h-screen">
+            <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
+                <p className="text-gray-600">Đang tải kết quả...</p>
+            </div>
+        </div>
+    ),
+    ssr: false
+});
+
+// Dynamic import cho QR Code Image - chỉ load khi user chọn QR payment
+const QRCodeImage = dynamic(() => Promise.resolve(({ src, alt, className }: { src: string; alt: string; className: string }) => (
+    <img src={src} alt={alt} className={className} />
+)), {
+    loading: () => (
+        <div className="h-48 w-48 sm:h-64 sm:w-64 border-2 border-green-200 rounded-xl shadow-lg mb-4 flex items-center justify-center bg-gray-100">
+            <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mx-auto mb-2"></div>
+                <p className="text-gray-600 text-sm">Đang tạo mã QR...</p>
+            </div>
+        </div>
+    ),
+    ssr: false
+});
+
+// Dynamic import cho Payment Modal - chỉ load khi user click "Xác nhận thanh toán"
+const PaymentModal = dynamic(() => import("antd").then(mod => ({ default: mod.Modal })), {
+    loading: () => null, // Không hiển thị loading cho modal
+    ssr: false
+});
 
 interface FieldData {
     date: string;
@@ -229,7 +276,7 @@ const BookingPage = () => {
     if (isSuccess && formValues) {
         return (
             <div className="container mx-auto py-6 px-4">
-                <Result
+                <SuccessResult
                     status="success"
                     title="Đặt sân thành công!"
                     subTitle="Bạn đã đặt sân thành công. Vui lòng chờ chủ sân xác nhận."
@@ -493,11 +540,13 @@ const BookingPage = () => {
                                                     >
                                                         <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 sm:p-6 border-t border-green-200">
                                                             <div className="flex flex-col items-center">
-                                                                <img
-                                                                    src={qrContent}
-                                                                    alt="QR Code thanh toán"
-                                                                    className="h-48 w-48 sm:h-64 sm:w-64 border-2 border-green-200 rounded-xl shadow-lg mb-4"
-                                                                />
+                                                                {qrContent && (
+                                                                    <QRCodeImage
+                                                                        src={qrContent}
+                                                                        alt="QR Code thanh toán"
+                                                                        className="h-48 w-48 sm:h-64 sm:w-64 border-2 border-green-200 rounded-xl shadow-lg mb-4"
+                                                                    />
+                                                                )}
                                                                 <p className="text-center text-sm text-gray-600">
                                                                     Quét mã QR bằng ứng dụng ngân hàng để thanh toán
                                                                 </p>
@@ -635,7 +684,8 @@ const BookingPage = () => {
                 </Form>
 
                 {/* Modal xác nhận thanh toán */}
-                <Modal
+                {confirmModalVisible && (
+                    <PaymentModal
                     title={
                         <div className="flex items-center text-orange-500">
                             <ExclamationCircleOutlined className="mr-2 text-lg sm:text-xl" />
@@ -672,7 +722,8 @@ const BookingPage = () => {
                             />
                         </div>
                     </div>
-                </Modal>
+                    </PaymentModal>
+                )}
             </div>
         </div>
     );

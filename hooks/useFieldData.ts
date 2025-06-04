@@ -95,7 +95,7 @@ export function useFieldPageData(footballFieldId: string | undefined) {
       dedupingInterval: 60000, // Cache 1 phút
       errorRetryCount: 2,
       errorRetryInterval: 1000,
-      keepPreviousData: true, // 🚀 Giữ data cũ khi revalidate
+      keepPreviousData: true, // 🚀 Bật lại cache cho performance
     }
   );
 
