@@ -134,5 +134,4 @@ const CalendarComponent: React.FC<CalendarComponentProps> = ({
   );
 };
 
-export { CalendarComponent };
 export default CalendarComponent;

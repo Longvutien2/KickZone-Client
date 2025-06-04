@@ -28,7 +28,7 @@ const nextConfig = {
   },
   // Các cấu hình khác của Next.js
   experimental: {
-    optimizeCss: true,
+    // optimizeCss: true, // Tạm tắt để tránh lỗi critters
   },
 }
 

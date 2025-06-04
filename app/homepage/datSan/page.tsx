@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState, useMemo, useCallback, Suspense } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import "dayjs/locale/vi"; // Import tiếng Việt cho Day.js
 import dynamic from 'next/dynamic';
@@ -18,9 +18,6 @@ import FieldTypeFilter from "@/components/booking/FieldTypeFilter";
 import FieldInfoCard from "@/components/booking/FieldInfoCard";
 import BookingGuide from "@/components/booking/BookingGuide";
 import StatisticsCard from "@/components/booking/StatisticsCard";
-
-// Import skeleton components (chỉ cho components cần thiết)
-import ErrorBoundary from "@/components/booking/ErrorBoundary";
 
 // Dynamic imports - Chỉ cho components thực sự cần lazy loading
 const FieldsList = dynamic(() => import("@/components/booking/FieldsList"), {
@@ -50,12 +47,7 @@ const Detail = () => {
     refetchAll
   } = useFieldPageData(footballField?._id) || {};
 
-  console.log('📊 Page data:', {
-    fields,
-    fieldsLength: fields?.length,
-    isLoading,
-    footballFieldId: footballField?._id
-  });
+
 
   const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs()); // Ngày đang chọn
   const [selectedFieldType, setSelectedFieldType] = useState<string>("all"); // Bộ lọc loại sân
@@ -122,8 +114,6 @@ const Detail = () => {
 
     getData();
   }, []);
-
-  // Suspense sẽ handle loading states
 
   return (
     <div className="min-h-screen ">

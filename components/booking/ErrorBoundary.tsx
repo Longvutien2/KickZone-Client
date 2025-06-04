@@ -18,14 +18,6 @@ class ErrorBoundary extends Component<Props, State> {
   };
 
   public static getDerivedStateFromError(error: Error): State {
-    console.log('🚨 ErrorBoundary caught:', error);
-
-    // Không catch Promise (để Suspense handle)
-    if (error instanceof Promise) {
-      console.log('⏳ Promise detected, letting Suspense handle...');
-      throw error;
-    }
-
     return { hasError: true, error };
   }
 
