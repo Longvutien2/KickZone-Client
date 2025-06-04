@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useMemo, useCallback, Suspense } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import "dayjs/locale/vi"; // Import tiếng Việt cho Day.js
 import dynamic from 'next/dynamic';
@@ -18,6 +18,8 @@ import FieldTypeFilter from "@/components/booking/FieldTypeFilter";
 import FieldInfoCard from "@/components/booking/FieldInfoCard";
 import BookingGuide from "@/components/booking/BookingGuide";
 import StatisticsCard from "@/components/booking/StatisticsCard";
+import ErrorBoundary from "@/components/booking/ErrorBoundary";
+import FieldListSkeleton from "@/components/booking/FieldListSkeleton";
 
 // Dynamic imports - Chỉ cho components thực sự cần lazy loading
 const FieldsList = dynamic(() => import("@/components/booking/FieldsList"), {
@@ -163,15 +165,19 @@ const Detail = () => {
                 </h2>
               </div>
 
-              <FieldsList
-                fields={fields}
-                filteredFields={filteredFields}
-                timeslots={timeslots}
-                orders={orders}
-                selectedDate={selectedDate}
-                isLoggedIn={auth.isLoggedIn}
-                isLoading={isLoading}
-              />
+              <ErrorBoundary>
+                <Suspense fallback={<FieldListSkeleton />}>
+                  <FieldsList
+                    fields={fields}
+                    filteredFields={filteredFields}
+                    timeslots={timeslots}
+                    orders={orders}
+                    selectedDate={selectedDate}
+                    isLoggedIn={auth.isLoggedIn}
+                    isLoading={isLoading}
+                  />
+                </Suspense>
+              </ErrorBoundary>
             </div>
           </div>
 
