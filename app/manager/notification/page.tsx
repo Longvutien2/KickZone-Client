@@ -23,7 +23,7 @@ const NotificationManager = () => {
     const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
     const user = useAppSelector(state => state.auth.value);
     
-    const socket = io(process.env.NEXT_PUBLIC_API_BACKEND_IO);
+    const socket = io(process.env.NEXT_PUBLIC_API_BACKEND_IO || 'http://localhost:8000');
     useEffect(() => {
         socket.on('pushNotification', (data: any) => {
             data && setFilteredNotifications((prev: any) => [...prev, data]);
