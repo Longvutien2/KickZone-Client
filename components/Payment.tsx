@@ -1,7 +1,7 @@
 // components/PaymentQR.tsx
 'use client';
 import { useState, useEffect, FC, useRef } from 'react';
-import { checkPaymentStatus } from '@/api/payment';
+import { checkPaymentStatus, getListOrders } from '@/api/payment';
 import { Order } from '@/models/payment';
 import { Spin, Alert, Result, Card } from 'antd';
 import { addNotificationSlice } from '@/features/notification.slice';
@@ -41,7 +41,7 @@ const PaymentQR: FC<PaymentQRProps> = ({
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
     const [notificationSent, setNotificationSent] = useState(false); // Thêm state để theo dõi việc gửi thông báo
-
+    
     // Sử dụng useRef để theo dõi interval và trạng thái mount
     const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
     const isMounted = useRef(true);
@@ -64,8 +64,6 @@ const PaymentQR: FC<PaymentQRProps> = ({
         if (notificationSent || !fieldData || !newOrder) return; // Nếu đã gửi thông báo hoặc không có dữ liệu, không làm gì cả
 
         try {
-            console.log("Đang gửi thông báo...");
-
             // Thông tin thông báo cho Manager (quản lý sân)
             const managerNotification: Notification = {
                 actor: 'manager',
@@ -101,13 +99,36 @@ const PaymentQR: FC<PaymentQRProps> = ({
     useEffect(() => {
         // Đánh dấu component đã mount
         isMounted.current = true;
-
         // Bắt đầu kiểm tra thanh toán nếu đơn hàng đã được tạo
         if (orderCreated && orderId && description) {
             // Hàm kiểm tra thanh toán
             const checkPayment = async () => {
                 try {
                     console.log("Đang kiểm tra thanh toán...");
+
+                    // 🚀 Double check: Kiểm tra xem có ai đặt sân này trước không
+                    const { data: allOrders } = await getListOrders();
+                    const isFieldAlreadyBooked = allOrders.some((order: any) =>
+                        order.fieldName === fieldData?.field &&
+                        order.timeStart === fieldData?.timeStart &&
+                        order.date === fieldData?.date &&
+                        order.paymentStatus === "success" &&
+                        order.userId !== userId
+                    );
+                    
+                    if (isFieldAlreadyBooked) {
+                        console.log("⚠️ Sân đã được đặt bởi người khác!");
+                        if (intervalIdRef.current) {
+                            clearInterval(intervalIdRef.current);
+                            intervalIdRef.current = null;
+                        }
+                        toast.error("Khung giờ này đã có người đặt và thanh toán thành công. Vui lòng chọn sân khác!");
+                        // Thông báo lỗi cho user
+                        if (onSuccess) onSuccess(false);
+                        return;
+                    }
+
+                    // Kiểm tra thanh toán của user hiện tại
                     const result = await checkPaymentStatus(orderId);
 
                     // Kiểm tra xem component còn mounted không trước khi cập nhật state
@@ -199,7 +220,7 @@ const PaymentQR: FC<PaymentQRProps> = ({
                                     </tr>
                                     <tr>
                                         <td className="py-1 font-medium">Nội dung CK:</td>
-                                        <td className="font-bold">{description}</td>
+                                        <td className="font-bold">{convertDescription(description)}</td>
                                     </tr>
                                     <tr>
                                         <td className="py-1 font-medium">Mã đơn hàng:</td>

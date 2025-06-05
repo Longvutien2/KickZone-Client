@@ -29,7 +29,7 @@ export const getWebhooks = () => {
 
 
 export const getListOrders = () => {
-  return API_NodeJS.get<Order>(`paymentSepay/listorders`);
+  return API_NodeJS.get<Order[]>(`paymentSepay/listorders`);
 };
 
 export const getOrdersByUserId = (userId: string) => {

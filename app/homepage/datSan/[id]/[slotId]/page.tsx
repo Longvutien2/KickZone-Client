@@ -14,8 +14,9 @@ import { addBreadcrumb } from "@/features/breadcrumb.slice";
 import { useAppSelector } from "@/store/hook";
 import { BankOutlined, CheckCircleOutlined, CreditCardOutlined, InfoCircleOutlined, LockOutlined, MailOutlined, MobileOutlined, PhoneOutlined, QrcodeOutlined, UserOutlined, ExclamationCircleOutlined, CopyOutlined } from "@ant-design/icons";
 import { toast } from 'react-toastify';
-import { createOrder, getOrdersByUserId, updatePendingOrder } from "@/api/payment";
+import { createOrder, getListOrders, getOrdersByUserId, updatePendingOrder } from "@/api/payment";
 import { useOrderCleanup } from "@/utils/orderCleanup";
+import { Order } from "@/models/payment";
 
 // Dynamic imports - chỉ load khi cần thiết
 const PaymentQR = dynamic(() => import("@/components/Payment"), {
@@ -82,8 +83,6 @@ interface Information {
 
 const BookingPage = () => {
     const user = useAppSelector((state) => state.auth)
-    const [fields, setField] = useState<FieldData | null>(null);
-    const [timeslots, setTimeslots] = useState<TimeSlot>();
     const { id, slotId } = useParams();
     const searchParams = useSearchParams();
     const date = searchParams.get('date');
@@ -100,17 +99,10 @@ const BookingPage = () => {
     const [newOrder, setNewOrder] = useState<any>();
 
     const dispatch = useDispatch<AppDispatch>();
-    console.log("fieldData", fieldData);
 
     // Thêm state để kiểm tra sân đã được đặt chưa
     const [isFieldBooked, setIsFieldBooked] = useState(false);
 
-    // Generate QR code when payment method changes or field data is loaded
-    useEffect(() => {
-        if (selectedPayment === "qr" && fieldData) {
-            generateQRCode();
-        }
-    }, [selectedPayment, fieldData]);
 
     // Function to check existing pending order
     const checkExistingPendingOrder = async (userId: string, fieldName: string, date: string, timeStart: string) => {
@@ -133,10 +125,11 @@ const BookingPage = () => {
     };
 
     // Function to generate QR code
-    const generateQRCode = () => {
+    const generateQRCode = (phoneNumber?: string) => {
         if (fieldData) {
-            const amount = fieldData.price; // Số tiền
-            const description = `${fieldData.field} ${fieldData.date} ${fieldData.timeStart}`; // Nội dung chuyển khoản
+            const amount = fieldData.price;
+            const phone = phoneNumber || formValues?.phone || '';
+            const description = `${fieldData.field} ${fieldData.date} ${fieldData.timeStart} ${phone}`; // Nội dung chuyển khoản
 
             const orderId = `${Date.now()}`;
             // Tạo URL VietQR
@@ -147,11 +140,17 @@ const BookingPage = () => {
     };
 
     const showConfirmModal = async (values: Information) => {
+        // 🚀 Kiểm tra sân có bị đặt trước không
+        const canProceed = await checkPaymentStatus();
+        if (!canProceed) {
+            return; // Dừng lại nếu sân đã được đặt
+        }
+
         setFormValues(values);
 
-        // Generate QR code if not already generated
-        if (selectedPayment === "qr" && !qrContent) {
-            generateQRCode();
+        // 🚀 Generate QR code sau khi có phone number từ form
+        if (selectedPayment === "qr") {
+            generateQRCode(values.phone); // Tạo QR với phone number từ form
         }
 
         // Nếu chọn thanh toán QR hoặc Banking, kiểm tra và tạo/cập nhật đơn hàng
@@ -178,7 +177,7 @@ const BookingPage = () => {
                             teamName: values.teamName,
                             phoneNumber: values.phone,
                             description: values.note,
-                            content: `${fieldData.field} ${fieldData.date} ${fieldData.timeStart}`,
+                            content: `${fieldData.field} ${fieldData.date} ${fieldData.timeStart} ${values.phone}`,
                         });
                         setNewOrder(updatedOrder);
                         setOrderCreated(true);
@@ -202,7 +201,7 @@ const BookingPage = () => {
                         gateway: "MBBank", // Cả banking và QR đều dùng MBBank
                         accountNumber: selectedPayment === "qr" ? "29777777729" : "VQRQACMYR4474",
                         amount: fieldData.price as number,
-                        content: `${fieldData.field} ${fieldData.date} ${fieldData.timeStart}`,
+                        content: `${fieldData.field} ${fieldData.date} ${fieldData.timeStart} ${values.phone}`,
                         paymentStatus: "pending",
                     };
                     const { data } = await createOrder(orderData);
@@ -244,26 +243,6 @@ const BookingPage = () => {
                     };
                     setFieldData(mockData);
 
-                    setField(field.data)
-                    setTimeslots(timeslot.data)
-
-                    // Kiểm tra xem sân đã được đặt chưa
-                    try {
-                        const { data: bookings } = await getBookings();
-
-                        const isBooked = bookings.some(booking =>
-                            booking.field === field.data.name &&
-                            booking.timeStart === timeslot.data.time &&
-                            booking.date === date &&
-                            (booking.status === "Chờ xác nhận" || booking.status === "Đã xác nhận")
-                        );
-
-                        if (isBooked) {
-                            setIsFieldBooked(true);
-                        }
-                    } catch (error) {
-                        console.error("Lỗi khi kiểm tra đặt sân:", error);
-                    }
                 }
 
                 dispatch(addBreadcrumb({ name: "Thanh toán", url: `/homepage/datSan/${id}/${slotId}` }));
@@ -301,7 +280,7 @@ const BookingPage = () => {
                                     </div>
                                     <div className="flex">
                                         <span className="font-medium text-gray-600 w-20 flex-shrink-0">Thời gian:</span>
-                                        <span className="text-gray-800">{fieldData?.timeStart}</span>
+                                        <span className="text-gray-800 font-bold">{fieldData?.timeStart} , {fieldData?.date}</span>
                                     </div>
                                     <div className="flex">
                                         <span className="font-medium text-gray-600 w-20 flex-shrink-0">Sân số:</span>
@@ -385,6 +364,25 @@ const BookingPage = () => {
             </div>
         );
     }
+    const checkPaymentStatus = async () => {
+        const { data: orders } = await getListOrders();
+        const isBooked = orders.some((order: Order) =>
+            order.fieldName === fieldData?.field &&
+            order.timeStart === fieldData?.timeStart &&
+            order.date === fieldData?.date &&
+            order.paymentStatus === "success"
+        );
+
+        if (isBooked) {
+            setIsFieldBooked(true);
+            toast.error("Khung giờ này đã có người đặt và thanh toán thành công. Vui lòng chọn sân khác!");
+            return false;
+        } else {
+            setIsFieldBooked(false);
+            return true;
+        }
+
+    };
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -540,15 +538,29 @@ const BookingPage = () => {
                                                     >
                                                         <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 sm:p-6 border-t border-green-200">
                                                             <div className="flex flex-col items-center">
-                                                                {qrContent && (
+                                                                {qrContent ? (
                                                                     <QRCodeImage
                                                                         src={qrContent}
                                                                         alt="QR Code thanh toán"
                                                                         className="h-48 w-48 sm:h-64 sm:w-64 border-2 border-green-200 rounded-xl shadow-lg mb-4"
                                                                     />
+                                                                ) : (
+                                                                    <div className="h-48 w-48 sm:h-64 sm:w-64 border-2 border-dashed border-green-300 rounded-xl flex items-center justify-center mb-4 bg-white">
+                                                                        <div className="text-center">
+                                                                            <QrcodeOutlined className="text-4xl text-green-400 mb-2" />
+                                                                            <p className="text-sm text-gray-500">
+                                                                                Nhập thông tin và click<br />
+                                                                                "Xác nhận thanh toán"<br />
+                                                                                để tạo mã QR
+                                                                            </p>
+                                                                        </div>
+                                                                    </div>
                                                                 )}
                                                                 <p className="text-center text-sm text-gray-600">
-                                                                    Quét mã QR bằng ứng dụng ngân hàng để thanh toán
+                                                                    {qrContent ?
+                                                                        "Quét mã QR bằng ứng dụng ngân hàng để thanh toán" :
+                                                                        "Mã QR sẽ được tạo sau khi bạn nhập đầy đủ thông tin"
+                                                                    }
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -648,7 +660,7 @@ const BookingPage = () => {
 
                                 <div className="mt-6">
                                     <Button
-                                        type="primary"
+                                        type="default"
                                         htmlType="submit"
                                         disabled={isSuccess || isFieldBooked}
                                         block
@@ -686,42 +698,45 @@ const BookingPage = () => {
                 {/* Modal xác nhận thanh toán */}
                 {confirmModalVisible && (
                     <PaymentModal
-                    title={
-                        <div className="flex items-center text-orange-500">
-                            <ExclamationCircleOutlined className="mr-2 text-lg sm:text-xl" />
-                            <span className="text-base sm:text-lg font-semibold">Xác nhận thanh toán</span>
+                        title={
+                            <div className="flex items-center text-orange-500">
+                                <ExclamationCircleOutlined className="mr-2 text-lg sm:text-xl" />
+                                <span className="text-base sm:text-lg font-semibold">Xác nhận thanh toán</span>
+                            </div>
+                        }
+                        open={confirmModalVisible}
+                        onCancel={handleConfirmCancel}
+                        footer={[
+                            <div></div>
+                        ]}
+                        centered
+                        width="90%"
+                        style={{ maxWidth: 600 }}
+                        className="payment-modal"
+                    >
+                        <div className="py-2 sm:py-4">
+                            <div className="text-center">
+                                <PaymentQR
+                                    onSuccess={(success) => {
+                                        if (success) {
+                                            setIsSuccess(true);
+                                        }else{
+                                            setIsFieldBooked(true);
+                                            setConfirmModalVisible(false);
+                                        }
+                                    }}
+                                    orderId={orderId}
+                                    userId={user.value.user._id as string}
+                                    qrContent={qrContent}
+                                    amount={fieldData?.price as number}
+                                    description={`${fieldData?.field} ${fieldData?.date} ${fieldData?.timeStart} ${formValues?.phone}`}
+                                    orderCreated={orderCreated}
+                                    selectedPayment={selectedPayment}
+                                    fieldData={fieldData}
+                                    newOrder={newOrder}
+                                />
+                            </div>
                         </div>
-                    }
-                    open={confirmModalVisible}
-                    onCancel={handleConfirmCancel}
-                    footer={[
-                     <div></div>
-                    ]}
-                    centered
-                    width="90%"
-                    style={{ maxWidth: 600 }}
-                    className="payment-modal"
-                >
-                    <div className="py-2 sm:py-4">
-                        <div className="text-center">
-                            <PaymentQR
-                                onSuccess={(success) => {
-                                    if (success) {
-                                        setIsSuccess(true);
-                                    }
-                                }}
-                                orderId={orderId}
-                                userId={user.value.user._id as string}
-                                qrContent={qrContent}
-                                amount={fieldData?.price as number}
-                                description={`${fieldData?.field} ${fieldData?.date} ${fieldData?.timeStart}`}
-                                orderCreated={orderCreated}
-                                selectedPayment={selectedPayment}
-                                fieldData={fieldData}
-                                newOrder={newOrder}
-                            />
-                        </div>
-                    </div>
                     </PaymentModal>
                 )}
             </div>

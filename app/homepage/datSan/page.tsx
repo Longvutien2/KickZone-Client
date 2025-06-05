@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState, useMemo, useCallback, Suspense } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import "dayjs/locale/vi"; // Import tiếng Việt cho Day.js
 import dynamic from 'next/dynamic';
@@ -8,7 +8,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { getFootballFieldByIdSlice } from "@/features/footballField.slice";
 import { setBreadcrumb } from "@/features/breadcrumb.slice";
 import { FootballField } from "@/models/football_field";
-import { useFieldPageData } from "@/hooks/useFieldData";
+import { useFieldPageData } from "@/hooks/useFieldDataPure";
 
 // Import components - Core components (always needed)
 import DateSelector from "@/components/booking/DateSelector";
@@ -18,8 +18,6 @@ import FieldTypeFilter from "@/components/booking/FieldTypeFilter";
 import FieldInfoCard from "@/components/booking/FieldInfoCard";
 import BookingGuide from "@/components/booking/BookingGuide";
 import StatisticsCard from "@/components/booking/StatisticsCard";
-import ErrorBoundary from "@/components/booking/ErrorBoundary";
-import FieldListSkeleton from "@/components/booking/FieldListSkeleton";
 
 // Dynamic imports - Chỉ cho components thực sự cần lazy loading
 const FieldsList = dynamic(() => import("@/components/booking/FieldsList"), {
@@ -39,7 +37,6 @@ const Detail = () => {
 
   const dispatch = useAppDispatch();
 
-  // 🚀 SWR hooks - Đơn giản và mạnh mẽ với error handling
   const {
     fields = [],
     timeSlots: timeslots = [],
@@ -48,7 +45,6 @@ const Detail = () => {
     hasError,
     refetchAll
   } = useFieldPageData(footballField?._id) || {};
-
 
 
   const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs()); // Ngày đang chọn
@@ -164,9 +160,6 @@ const Detail = () => {
                   Danh sách sân ({selectedDate.format("DD/MM/YYYY")})
                 </h2>
               </div>
-
-              <ErrorBoundary>
-                <Suspense fallback={<FieldListSkeleton />}>
                   <FieldsList
                     fields={fields}
                     filteredFields={filteredFields}
@@ -176,8 +169,6 @@ const Detail = () => {
                     isLoggedIn={auth.isLoggedIn}
                     isLoading={isLoading}
                   />
-                </Suspense>
-              </ErrorBoundary>
             </div>
           </div>
 
