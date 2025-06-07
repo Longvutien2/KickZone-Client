@@ -1,4 +1,11 @@
 // types/payment.ts
+
+// Payment status enum for better type safety
+export type PaymentStatus = 'success' | 'pending' | 'failed' | 'cancelled';
+
+// Payment method enum
+export type PaymentMethod = 'bank_transfer' | 'qr_code' | 'cash' | 'online';
+
 export interface Order {
   _id?: string;
   sepayId?: string;
@@ -9,13 +16,13 @@ export interface Order {
   accountNumber?: string; // Số tài khoản
   amount?: number;
   content?: string; // Nội dung chuyển khoản
-  paymentStatus?: string; // Trạng thái thanh toán
+  paymentStatus?: PaymentStatus; // Trạng thái thanh toán với type safety
   teamName: string;
   phoneNumber: string;
   description?: string;
   fieldName?: string;
-  footballField?: string | any;
-  paymentMethod?: string;
+  footballField?: string; // Remove any type
+  paymentMethod?: PaymentMethod;
   timeStart?: string;
   date?: string;
   createdAt?: string;
@@ -35,7 +42,7 @@ export interface CreateOrderResponse {
 
 export interface CheckPaymentResponse {
   success: boolean;
-  order: Order | any;
+  order: Order;
 }
 
 export interface WebhookData {

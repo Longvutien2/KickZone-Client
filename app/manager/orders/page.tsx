@@ -5,7 +5,7 @@ import { EyeOutlined, EditOutlined, DeleteOutlined, SearchOutlined, CalendarOutl
 import { Field, TimeSlot } from "@/models/field";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { getListOrdersSlice } from "@/features/order.slice";
-import { Order } from "@/models/payment";
+import { Order, PaymentStatus } from "@/models/payment";
 import { ColumnsType } from "antd/es/table";
 import { FootballField } from "@/models/football_field";
 import { performOrderCleanup } from "@/utils/orderCleanup";
@@ -105,13 +105,15 @@ const ListOrder = () => {
         getData()
     }, [editingTimeSlot]);
 
-    const getStatusColor = (status: string) => {
+    const getStatusColor = (status: PaymentStatus): string => {
         switch (status) {
             case 'success':
                 return 'green';
             case 'pending':
                 return 'orange';
             case 'failed':
+                return 'red';
+            case 'cancelled':
                 return 'red';
             default:
                 return 'blue';
@@ -234,7 +236,7 @@ const ListOrder = () => {
             title: 'Trạng thái',
             dataIndex: 'paymentStatus',
             key: 'paymentStatus',
-            render: (status: string) => {
+            render: (status: PaymentStatus) => {
                 const badge = statusMap[status];
                 return <Tag color={badge?.status || 'default'}>
                     {badge?.text || status}
@@ -361,7 +363,7 @@ const ListOrder = () => {
                             </div>
                             <div className="flex justify-between mb-2">
                                 <Text>Trạng thái:</Text>
-                                <Tag color={getStatusColor(selectedOrder.paymentStatus || "pending")}>
+                                <Tag color={getStatusColor((selectedOrder.paymentStatus || "pending") as PaymentStatus)}>
                                     {selectedOrder.paymentStatus === 'success' ? 'Đã thanh toán' :
                                         selectedOrder.paymentStatus === 'pending' ? 'Chờ thanh toán' : 'Thất bại'}
                                 </Tag>

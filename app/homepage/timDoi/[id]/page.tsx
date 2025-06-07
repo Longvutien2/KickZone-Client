@@ -58,6 +58,9 @@ const MatchDetail = () => {
                 await dispatch(getListMatchByFootballFieldIdSlice("67ce9ea74c79326f98b8bf8e" as string))
             }
 
+            // Tìm team được chọn từ danh sách
+            const selectedTeam = dataTeam?.find((team: Team) => team._id === values.club_B);
+
             // Thông báo cho người tạo trận đấu (club_A) - đã tìm được đối thủ
             const ownerNotification: Notification = {
                 actor: 'user',
@@ -65,8 +68,8 @@ const MatchDetail = () => {
                 title: 'Đã tìm thấy đối thủ!',
                 content: `Đã có đội bóng phù hợp với yêu cầu tìm đối của bạn. Vui lòng kiểm tra thông tin và liên hệ.`,
                 footballfield: match.footballField,
-                club_A: match.club_A._id,
-                club_B: values.club_B,
+                club_A: match.club_A,
+                club_B: selectedTeam,
                 targetUser: match.user._id, // ID của người tạo trận đấu
                 match: match._id,
                 orderId: match.orderId
@@ -80,8 +83,8 @@ const MatchDetail = () => {
                 title: 'Đã tìm thấy đối thủ!',
                 content: `Bạn đã tìm đối thành công. Vui lòng kiểm tra thông tin và liên hệ.`,
                 footballfield: match.footballField,
-                club_A: match.club_A._id,
-                club_B: values.club_B,
+                club_A: match.club_A,
+                club_B: selectedTeam,
                 targetUser: auth.value.user._id,
                 match: match._id,
                 orderId: match.orderId

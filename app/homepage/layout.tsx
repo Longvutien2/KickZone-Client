@@ -124,10 +124,10 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
       path: "/homepage/timDoi",
     },
     {
-      key: "lichDatSan",
+      key: "booking-history",
       label: "Lịch đặt sân",
       icon: <CalendarOutlined />,
-      path: "/homepage/lichDatSan",
+      path: "/homepage/booking-history",
     },
     {
       key: "datSan",

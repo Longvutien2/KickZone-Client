@@ -16,7 +16,7 @@ import { BankOutlined, CheckCircleOutlined, CreditCardOutlined, InfoCircleOutlin
 import { toast } from 'react-toastify';
 import { createOrder, getListOrders, getOrdersByUserId, updatePendingOrder } from "@/api/payment";
 import { useOrderCleanup } from "@/utils/orderCleanup";
-import { Order } from "@/models/payment";
+import { Order, PaymentStatus } from "@/models/payment";
 
 // Dynamic imports - chỉ load khi cần thiết
 const PaymentQR = dynamic(() => import("@/components/Payment"), {
@@ -202,7 +202,7 @@ const BookingPage = () => {
                         accountNumber: selectedPayment === "qr" ? "29777777729" : "VQRQACMYR4474",
                         amount: fieldData.price as number,
                         content: `${fieldData.field} ${fieldData.date} ${fieldData.timeStart} ${values.phone}`,
-                        paymentStatus: "pending",
+                        paymentStatus: "pending" as PaymentStatus,
                     };
                     const { data } = await createOrder(orderData);
                     setOrderCreated(true);

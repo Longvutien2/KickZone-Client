@@ -130,7 +130,7 @@ const NotificationDetailManager = () => {
                                         </div>
                                         <div>
                                             <Text strong className="block text-gray-500">Phương thức thanh toán:</Text>
-                                            <Text className="text-lg">{data.orderId?.payment_method || "QR"}</Text>
+                                            <Text className="text-lg">{data.orderId?.paymentMethod || "QR"}</Text>
                                         </div>
                                     </div>
 

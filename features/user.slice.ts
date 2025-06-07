@@ -1,5 +1,6 @@
 
 import { createUser, deleteUser, getUserById, getUsers, updateUser } from '@/api/auth';
+import { IUser } from '@/models/auth';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
 // Lấy danh sách người dùng
@@ -23,7 +24,7 @@ export const getUserByIdSlice = createAsyncThunk(
 // Thêm mới một người dùng
 export const addUserSlice = createAsyncThunk(
     'user/addUserSlice',
-    async (user: any) => {
+    async (user: IUser) => {
         const { data } = await createUser(user);
         return data;
     }
@@ -32,7 +33,7 @@ export const addUserSlice = createAsyncThunk(
 // Cập nhật thông tin người dùng
 export const updateUserSlice = createAsyncThunk(
     'user/updateUserSlice',
-    async (user: any) => {
+    async (user: IUser) => {
         const { data } = await updateUser(user);
         return data;
     }

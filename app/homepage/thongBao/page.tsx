@@ -55,8 +55,8 @@ const NotificationPage = () => {
 
             // Sắp xếp theo thời gian tạo, mới nhất lên đầu
             const sortedData = data.sort((a, b) => {
-                const timeA = new Date(a.createdAt).getTime();
-                const timeB = new Date(b.createdAt).getTime();
+                const timeA = new Date(a.createdAt || 0).getTime();
+                const timeB = new Date(b.createdAt || 0).getTime();
                 return timeB - timeA;
             });
             setFilteredNotifications(sortedData);
@@ -77,13 +77,18 @@ const NotificationPage = () => {
         setCurrentPage(page);
     };
 
-    const convertTime = (time: any) => {
+    const convertTime = (time: Date | string | undefined) => {
         if (!time) return '';
-        const vietnamTime = new Date(time).toLocaleString('vi-VN', {
-            timeZone: 'Asia/Ho_Chi_Minh',
-            hour12: false
-        });
-        return vietnamTime;
+        try {
+            const vietnamTime = new Date(time).toLocaleString('vi-VN', {
+                timeZone: 'Asia/Ho_Chi_Minh',
+                hour12: false
+            });
+            return vietnamTime;
+        } catch (error) {
+            console.error('Error converting time:', error);
+            return '';
+        }
     };
 
     const getNotificationIcon = (item: Notification) => {

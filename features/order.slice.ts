@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { getListOrders, getOrderDetails } from '@/api/payment';
+import { getListOrders, getOrderDetails, getOrdersByUserId } from '@/api/payment';
 
 
 // Lấy thông tin chi tiết đơn hàng
@@ -17,7 +17,16 @@ export const getListOrdersSlice = createAsyncThunk(
   async () => {
     const { data }:any = await getListOrders();
     return data;
+  }
+);
 
+// Lấy danh sách đơn hàng theo userId (tối ưu hơn)
+export const getOrdersByUserIdSlice = createAsyncThunk(
+  'order/getOrdersByUserIdSlice',
+  async (userId: string) => {
+    const { data }:any = await getOrdersByUserId(userId);
+    // Trả về orders array từ response mới
+    return data.orders || data;
   }
 );
 
@@ -38,6 +47,10 @@ const orderSlice = createSlice({
     });
 
     builder.addCase(getListOrdersSlice.fulfilled, (state, action) => {
+      state.value = action.payload;
+    });
+
+    builder.addCase(getOrdersByUserIdSlice.fulfilled, (state, action) => {
       state.value = action.payload;
     });
   },

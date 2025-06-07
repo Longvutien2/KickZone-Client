@@ -102,14 +102,17 @@ const CreateMatchPage = () => {
       // Thêm trận đấu mới
       const data = await dispatch(addMatchSlice(newData));
 
+      // Tìm team được chọn từ danh sách
+      const selectedTeam = myTeam?.find((team: Team) => team._id === values.club_A);
+
       // Tạo thông báo
       const userNotification: Notification = {
         actor: 'user',
         notificationType: 'posted_opponent',
         title: 'Đã đăng tìm đối !',
         content: `Bạn đã đăng tìm đối thành công. Vui lòng chờ đội bóng khác liên hệ để xác nhận.`,
-        club_A: values.club_A,
-        footballfield: footballField._id,
+        club_A: selectedTeam,
+        footballfield: footballField,
         targetUser: user.value.user._id,
         match: data.payload._id,
         orderId: values.orderId,
