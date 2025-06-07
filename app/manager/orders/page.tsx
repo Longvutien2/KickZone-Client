@@ -274,22 +274,6 @@ const ListOrder = () => {
             <div className="bg-white p-6 rounded-lg shadow">
                 <div className="flex justify-between items-center mb-4">
                     <h1 className="text-xl font-semibold">Quản lý đơn hàng</h1>
-                    <Popconfirm
-                        title="Xóa orders pending cũ"
-                        description="Bạn có chắc muốn xóa tất cả orders pending quá 10 phút?"
-                        onConfirm={handleCleanupPendingOrders}
-                        okText="Xác nhận"
-                        cancelText="Hủy"
-                    >
-                        <Button
-                            type="primary"
-                            danger
-                            icon={<ClearOutlined />}
-                            className="flex items-center"
-                        >
-                            Cleanup Orders Pending
-                        </Button>
-                    </Popconfirm>
                 </div>
                 <div>
                     <div className="text-left mt-8">

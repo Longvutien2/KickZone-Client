@@ -43,7 +43,7 @@ const HomePage = () => {
   };
 
   const navigationItems = [
-    { href: "/about", label: "Giới thiệu sân" },
+    { href: "/detail", label: "Giới thiệu sân" },
     { href: "/homepage", label: "Đặt sân" },
     { href: "/find-team", label: "Tìm đối" },
     { href: "/contact", label: "Liên hệ" },
@@ -79,7 +79,7 @@ const HomePage = () => {
               </Link>
             ))}
             <Button
-              className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl px-6 py-2 h-auto border-none font-semibold transition-colors duration-200 mr-3"
+              className="btn-orange-gradient rounded-xl px-6 py-2 h-auto font-semibold mr-3"
               onClick={() => router.push('/homepage')}
             >
               Đặt sân ngay
@@ -122,7 +122,7 @@ const HomePage = () => {
             ))}
             <div className="mt-4 space-y-3">
               <Button
-                className="bg-orange-500 hover:bg-orange-600 text-white rounded-full h-12 text-lg font-semibold border-none"
+                className="btn-orange-gradient rounded-full h-12 text-lg font-semibold"
                 onClick={() => {
                   router.push('/homepage');
                   setMobileMenuOpen(false);
@@ -132,7 +132,7 @@ const HomePage = () => {
                 Đặt sân ngay
               </Button>
               <Button
-                className="bg-green-600 hover:bg-green-700 text-white rounded-full h-12 text-lg font-semibold border-none"
+                className="btn-light-orange-gradient rounded-full h-12 text-lg font-semibold"
                 onClick={() => {
                   router.push('/manager');
                   setMobileMenuOpen(false);
@@ -156,16 +156,15 @@ const HomePage = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-3 justify-center lg:justify-start">
               <Button
-                type="primary"
                 size="large"
-                className="h-10 sm:h-12 px-6 text-sm sm:text-base font-semibold bg-orange-500 border-orange-500 hover:bg-orange-600 hover:border-orange-600 rounded-xl"
+                className="btn-orange-gradient h-10 sm:h-12 px-6 text-sm sm:text-base font-semibold rounded-xl"
                 onClick={() => router.push('/homepage')}
               >
                 Đặt sân ngay
               </Button>
               <Button
                 size="large"
-                className="h-10 sm:h-12 px-6 text-sm sm:text-base font-semibold bg-green-600 border-green-600 hover:bg-green-700 hover:border-green-700 text-white rounded-xl"
+                className="btn-light-orange-gradient h-10 sm:h-12 px-6 text-sm sm:text-base font-semibold rounded-xl"
                 onClick={() => router.push('/find-team')}
               >
                 Tìm đối thủ
@@ -298,9 +297,8 @@ const HomePage = () => {
               </ul>
 
               <Button
-                type="primary"
                 size="large"
-                className="h-12 sm:h-14 px-8 text-base sm:text-lg font-semibold bg-orange-500 border-orange-500 hover:bg-orange-600 hover:border-orange-600 rounded-full mt-8"
+                className="btn-orange-gradient h-12 sm:h-14 px-8 text-base sm:text-lg font-semibold rounded-full mt-8"
                 onClick={() => router.push('/homepage')}
               >
                 Đặt sân ngay

@@ -130,6 +130,96 @@ div:focus {
   border: none !important;
 }
 
+/* Custom Button Styles - Override Ant Design only for specific buttons */
+.btn-orange-gradient,
+.btn-light-orange-gradient {
+  border: none !important;
+  box-shadow: none !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.btn-orange-gradient:hover,
+.btn-orange-gradient:focus,
+.btn-orange-gradient:active,
+.btn-light-orange-gradient:hover,
+.btn-light-orange-gradient:focus,
+.btn-light-orange-gradient:active {
+  border: none !important;
+  box-shadow: 0 8px 25px rgba(254, 105, 0, 0.3) !important;
+}
+
+/* Orange gradient buttons */
+.btn-orange-gradient {
+  background: linear-gradient(135deg, #FE6900, #FF8533) !important;
+  color: white !important;
+  border: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-orange-gradient:hover {
+  background: linear-gradient(135deg, #E55A00, #FE6900) !important;
+  color: white !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(254, 105, 0, 0.4) !important;
+}
+
+.btn-orange-gradient:active {
+  transform: translateY(0px) !important;
+  box-shadow: 0 4px 15px rgba(254, 105, 0, 0.3) !important;
+}
+
+/* Light orange gradient buttons */
+.btn-light-orange-gradient {
+  background: linear-gradient(135deg, #FF8533, #FFA366) !important;
+  color: white !important;
+  border: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-light-orange-gradient:hover {
+  background: linear-gradient(135deg, #FE6900, #FF8533) !important;
+  color: white !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(255, 133, 51, 0.4) !important;
+}
+
+/* Remove Ant Design default hover effects only for orange gradient buttons */
+.btn-orange-gradient.ant-btn-primary:hover,
+.btn-orange-gradient.ant-btn-primary:focus,
+.btn-light-orange-gradient.ant-btn-primary:hover,
+.btn-light-orange-gradient.ant-btn-primary:focus {
+  background: inherit !important;
+  border-color: inherit !important;
+}
+
+/* Ensure default Ant Design button styles work properly */
+.ant-btn:not(.btn-orange-gradient):not(.btn-light-orange-gradient) {
+  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1) !important;
+}
+
+.ant-btn-primary:not(.btn-orange-gradient):not(.btn-light-orange-gradient):hover {
+  background-color: #40a9ff !important;
+  border-color: #40a9ff !important;
+  color: #fff !important;
+}
+
+.ant-btn-default:not(.btn-orange-gradient):not(.btn-light-orange-gradient):hover {
+  color: #40a9ff !important;
+  border-color: #40a9ff !important;
+  background-color: #fff !important;
+}
+
+/* Fix for blue buttons */
+.ant-btn[style*="background"] {
+  transition: all 0.3s ease !important;
+}
+
+.ant-btn[style*="background"]:hover {
+  filter: brightness(1.1) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
 /* Mobile-specific animations */
 @media (prefers-reduced-motion: reduce) {
   * {
