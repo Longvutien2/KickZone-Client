@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Button, Input, Radio, Card, Form, Collapse, Alert } from 'antd';
 import { useDispatch } from "react-redux";
 import dynamic from 'next/dynamic';
-import { TimeSlot } from "@/models/field";
+import { Field, TimeSlot } from "@/models/field";
 import { FootballField } from "@/models/football_field";
 import { getFieldById, getFieldsByIdFootball } from "@/api/field";
 import { createBooking, getBookings } from "@/api/booking";
@@ -14,7 +14,7 @@ import { addBreadcrumb } from "@/features/breadcrumb.slice";
 import { useAppSelector } from "@/store/hook";
 import { BankOutlined, CheckCircleOutlined, CreditCardOutlined, InfoCircleOutlined, LockOutlined, MailOutlined, MobileOutlined, PhoneOutlined, QrcodeOutlined, UserOutlined, ExclamationCircleOutlined, CopyOutlined } from "@ant-design/icons";
 import { toast } from 'react-toastify';
-import {  createOrder, getListOrders, getOrdersByUserId, updatePendingOrder } from "@/api/payment";
+import { createOrder, getListOrders, getOrdersByUserId, updatePendingOrder } from "@/api/payment";
 import { useOrderCleanup } from "@/utils/orderCleanup";
 import { Order, PaymentStatus } from "@/models/payment";
 import { checkOrderExists } from "@/utils/orderUtils";
@@ -84,6 +84,9 @@ interface Information {
 
 const BookingPage = () => {
     const user = useAppSelector((state) => state.auth)
+    const field = useAppSelector((state) => state.field.value)
+    const timeSlot = useAppSelector((state) => state.timeSlot.value)
+
     const { id, slotId } = useParams();
     const searchParams = useSearchParams();
     const date = searchParams.get('date');
@@ -236,23 +239,40 @@ const BookingPage = () => {
             const getData = async () => {
                 try {
                     // Load song song thay vì tuần tự
-                    const [timeslotResponse, fieldResponse] = await Promise.all([
-                        getTimeSlotById(slotId as string),
-                        getFieldById(id as string)
-                    ]);
+                    // const [timeslotResponse, fieldResponse] = await Promise.all([
+                    //     getTimeSlotById(slotId as string),
+                    //     getFieldById(id as string)
+                    // ]);
+
+                    // if (fieldResponse && timeslotResponse) {
+                    //     const mockData = {
+                    //         date: date as string,
+                    //         fieldName: fieldResponse.data.foolballFieldId?.name,
+                    //         address: `${fieldResponse.data.foolballFieldId?.address.detail ? `${fieldResponse.data.foolballFieldId.address.detail}, ` : ""} ${fieldResponse.data.foolballFieldId.address.ward}, ${fieldResponse.data.foolballFieldId.address.district}, ${fieldResponse.data.foolballFieldId.address.province}`,
+                    //         field: fieldResponse.data.name,
+                    //         timeStart: timeslotResponse.data.time,
+                    //         price: Number(timeslotResponse.data.price),
+                    //         footballField: fieldResponse.data.foolballFieldId._id
+                    //     };
+                    //     setFieldData(mockData);
+                    // }
+
+                    const fieldResponse = field.find((field:Field) => field._id === id) as any;
+                    const timeslotResponse = timeSlot.find((timeSlot:TimeSlot) => timeSlot._id === slotId) as any;
 
                     if (fieldResponse && timeslotResponse) {
                         const mockData = {
                             date: date as string,
-                            fieldName: fieldResponse.data.foolballFieldId?.name,
-                            address: `${fieldResponse.data.foolballFieldId?.address.detail ? `${fieldResponse.data.foolballFieldId.address.detail}, ` : ""} ${fieldResponse.data.foolballFieldId.address.ward}, ${fieldResponse.data.foolballFieldId.address.district}, ${fieldResponse.data.foolballFieldId.address.province}`,
-                            field: fieldResponse.data.name,
-                            timeStart: timeslotResponse.data.time,
-                            price: Number(timeslotResponse.data.price),
-                            footballField: fieldResponse.data.foolballFieldId._id
+                            fieldName: fieldResponse.foolballFieldId?.name,
+                            address: `${fieldResponse.foolballFieldId?.address.detail ? `${fieldResponse.foolballFieldId.address.detail}, ` : ""} ${fieldResponse.foolballFieldId.address.ward}, ${fieldResponse.foolballFieldId.address.district}, ${fieldResponse.foolballFieldId.address.province}`,
+                            field: fieldResponse.name,
+                            timeStart: timeslotResponse.time,
+                            price: Number(timeslotResponse.price),
+                            footballField: fieldResponse.foolballFieldId._id
                         };
                         setFieldData(mockData);
                     }
+
 
                     dispatch(addBreadcrumb({ name: "Thanh toán", url: `/homepage/datSan/${id}/${slotId}` }));
                 } catch (error) {
