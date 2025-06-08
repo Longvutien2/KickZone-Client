@@ -10,6 +10,7 @@ import { Notification } from '@/models/notification';
 import { toast } from 'react-toastify';
 import { useAppDispatch } from '@/store/hook';
 import { BankOutlined } from '@ant-design/icons';
+import { checkOrderExists } from '@/utils/orderUtils';
 
 interface PaymentQRProps {
     amount: number;
@@ -41,7 +42,7 @@ const PaymentQR: FC<PaymentQRProps> = ({
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
     const [notificationSent, setNotificationSent] = useState(false); // Thêm state để theo dõi việc gửi thông báo
-    
+
     // Sử dụng useRef để theo dõi interval và trạng thái mount
     const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
     const isMounted = useRef(true);
@@ -106,26 +107,19 @@ const PaymentQR: FC<PaymentQRProps> = ({
                 try {
                     console.log("Đang kiểm tra thanh toán...");
 
-                    // 🚀 Double check: Kiểm tra xem có ai đặt sân này trước không
-                    const { data: allOrders } = await getListOrders();
-                    const isFieldAlreadyBooked = allOrders.some((order: any) =>
-                        order.fieldName === fieldData?.field &&
-                        order.timeStart === fieldData?.timeStart &&
-                        order.date === fieldData?.date &&
-                        order.paymentStatus === "success" &&
-                        order.userId !== userId
-                    );
-                    
-                    if (isFieldAlreadyBooked) {
-                        console.log("⚠️ Sân đã được đặt bởi người khác!");
-                        if (intervalIdRef.current) {
-                            clearInterval(intervalIdRef.current);
-                            intervalIdRef.current = null;
+                    // Kiểm tra sân có bị đặt trước không
+                    if (fieldData) {
+                        const canProceed = await checkOrderExists(fieldData.field, fieldData.date, fieldData.timeStart, userId);
+                        if (canProceed === false) {
+                            // Sân đã được đặt bởi người khác!
+                            if (intervalIdRef.current) {
+                                clearInterval(intervalIdRef.current);
+                                intervalIdRef.current = null;
+                            }
+                            toast.error("Khung giờ này đã có người đặt và thanh toán thành công. Vui lòng chọn sân khác!");
+                            if (onSuccess) onSuccess(false);
+                            return;
                         }
-                        toast.error("Khung giờ này đã có người đặt và thanh toán thành công. Vui lòng chọn sân khác!");
-                        // Thông báo lỗi cho user
-                        if (onSuccess) onSuccess(false);
-                        return;
                     }
 
                     // Kiểm tra thanh toán của user hiện tại

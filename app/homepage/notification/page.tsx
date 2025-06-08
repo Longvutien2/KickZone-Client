@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
-import { List, Typography, Tabs, Avatar, Empty, message, Skeleton, Button } from 'antd';
+import { List, Typography, Tabs, Avatar, Empty, message, Skeleton, Button, Pagination } from 'antd';
 import Link from 'next/link';
 import { Notification } from '@/models/notification';
 import { BellOutlined, CheckCircleOutlined, CloseCircleOutlined, TeamOutlined, SearchOutlined, PlusCircleOutlined, DeleteOutlined } from '@ant-design/icons';
@@ -16,6 +16,8 @@ const NotificationPage = () => {
      const [filter, setFilter] = useState<'all' | 'unread'>('all');
     const [activeNotification, setActiveNotification] = useState<string>();
     const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize] = useState(10); // Tối đa 10 items mỗi page
     
     const user = useAppSelector(state => state.auth.value);
     const notifications = useAppSelector(state => state.notification.value);
@@ -56,7 +58,7 @@ const NotificationPage = () => {
     }, [dispatch, user?.user?._id]); // 🔧 KEY: Bỏ notifications khỏi dependency để tránh infinite loop
 
     // 🚀 EXACT SAME PATTERN: Memoized filtering logic để tối ưu performance
-    const filteredNotifications = useMemo(() => {
+    const allFilteredNotifications = useMemo(() => {
         if (!notifications || !Array.isArray(notifications) || notifications.length === 0) {
             return [];
         }
@@ -92,14 +94,25 @@ const NotificationPage = () => {
         }
     }, [filter, notifications, user?.user?._id]);
 
+    // 📄 Pagination logic
+    const totalItems = allFilteredNotifications.length;
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedNotifications = allFilteredNotifications.slice(startIndex, endIndex);
+
     // 🚀 MEMOIZED: Unread count
     const unreadCount = useMemo(() => {
-        return notifications?.filter((n: Notification) => 
-            n.actor === "user" && 
-            n.targetUser === user.user._id && 
+        return notifications?.filter((n: Notification) =>
+            n.actor === "user" &&
+            n.targetUser === user.user._id &&
             !n.read
         ).length || 0;
     }, [notifications, user?.user?._id]);
+
+    // Reset pagination khi filter thay đổi
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filter]);
 
     const handleNotificationClick = (id: string) => {
         setActiveNotification(id);
@@ -107,6 +120,11 @@ const NotificationPage = () => {
 
     const handleFilterChange = (newFilter: string) => {
         setFilter(newFilter as 'all' | 'unread');
+        setCurrentPage(1); // Reset về trang đầu khi đổi filter
+    };
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
     };
 
     // 🗑️ TEMP: Hàm xóa notifications để test
@@ -123,6 +141,9 @@ const NotificationPage = () => {
                 id: user.user._id!,
                 role: "user"
             })).unwrap();
+
+            // Reset về trang đầu
+            setCurrentPage(1);
 
             message.destroy();
             message.success('Đã xóa tất cả notifications!');
@@ -172,6 +193,9 @@ const NotificationPage = () => {
                 id: user.user._id!,
                 role: "user"
             })).unwrap();
+
+            // Reset về trang đầu
+            setCurrentPage(1);
 
             message.destroy();
             message.success('Đã xóa notifications cũ, giữ lại 5 cái mới nhất!');
@@ -307,10 +331,10 @@ const NotificationPage = () => {
                                 </div>
                             ))}
                         </div>
-                    ) : filteredNotifications.length > 0 ? (
+                    ) : paginatedNotifications.length > 0 ? (
                         <List
                             itemLayout="horizontal"
-                            dataSource={filteredNotifications}
+                            dataSource={paginatedNotifications}
                             renderItem={(item: Notification) => (
                                 <Link href={`/homepage/notification/${item._id}`}>
                                     <List.Item
@@ -368,6 +392,21 @@ const NotificationPage = () => {
                         />
                     )}
                 </div>
+
+                {/* 📄 Pagination */}
+                {totalItems > pageSize && (
+                    <div className="mt-6 flex justify-center">
+                        <Pagination
+                            current={currentPage}
+                            total={totalItems}
+                            pageSize={pageSize}
+                            onChange={handlePageChange}
+                            showSizeChanger={false}
+                            showQuickJumper={false}
+                            className="text-center"
+                        />
+                    </div>
+                )}
             </div>
         </div>
     );

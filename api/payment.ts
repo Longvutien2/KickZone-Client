@@ -31,6 +31,15 @@ export const getWebhooks = () => {
 export const getListOrders = () => {
   return API_NodeJS.get<Order[]>(`paymentSepay/listorders`);
 };
+// kiểm tra order có tồn tại chưa
+export const checkOrderExist = (fieldName: string, date: string, timeStart: string) => {
+  return API_NodeJS.get(`paymentSepay/check-exist?field=${fieldName}&date=${date}&time=${timeStart}`);
+};
+
+// kiểm tra order đã được đặt bởi người khác chưa
+export const checkUserOrderExists = (fieldName: string, date: string, timeStart: string, userId: string) => {
+  return API_NodeJS.get(`paymentSepay/check-user-exist?field=${fieldName}&date=${date}&time=${timeStart}&userId=${userId}`);
+};
 
 export const getOrdersByUserId = (userId: string) => {
   return API_NodeJS.get<Order[]>(`paymentSepay/userId/${userId}`);
@@ -45,4 +54,3 @@ export const cleanupPendingOrders = () => {
 export const updatePendingOrder = (orderId: string, orderData: Order) => {
   return API_NodeJS.put(`paymentSepay/update-pending-order/${orderId}`, orderData);
 };
-

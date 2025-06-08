@@ -14,9 +14,10 @@ import { addBreadcrumb } from "@/features/breadcrumb.slice";
 import { useAppSelector } from "@/store/hook";
 import { BankOutlined, CheckCircleOutlined, CreditCardOutlined, InfoCircleOutlined, LockOutlined, MailOutlined, MobileOutlined, PhoneOutlined, QrcodeOutlined, UserOutlined, ExclamationCircleOutlined, CopyOutlined } from "@ant-design/icons";
 import { toast } from 'react-toastify';
-import { createOrder, getListOrders, getOrdersByUserId, updatePendingOrder } from "@/api/payment";
+import {  createOrder, getListOrders, getOrdersByUserId, updatePendingOrder } from "@/api/payment";
 import { useOrderCleanup } from "@/utils/orderCleanup";
 import { Order, PaymentStatus } from "@/models/payment";
+import { checkOrderExists } from "@/utils/orderUtils";
 
 // Dynamic imports - chỉ load khi cần thiết
 const PaymentQR = dynamic(() => import("@/components/Payment"), {
@@ -140,10 +141,16 @@ const BookingPage = () => {
     };
 
     const showConfirmModal = async (values: Information) => {
-        // 🚀 Kiểm tra sân có bị đặt trước không
-        const canProceed = await checkPaymentStatus();
-        if (!canProceed) {
-            return; // Dừng lại nếu sân đã được đặt
+        // Kiểm tra sân có bị đặt trước không
+        if (fieldData) {
+            const canProceed = await checkOrderExists(fieldData.field, fieldData.date, fieldData.timeStart);
+            if (canProceed === false) {
+                setIsFieldBooked(true);
+                toast.error("Khung giờ này đã có người đặt và thanh toán thành công!");
+                return; // Dừng lại nếu sân đã được đặt
+            } else {
+                setIsFieldBooked(false);
+            }
         }
 
         setFormValues(values);
@@ -224,28 +231,34 @@ const BookingPage = () => {
     // Auto cleanup orders pending khi component mount
     useOrderCleanup(true);
 
-    // Giả lập dữ liệu sân từ server
     useEffect(() => {
         if (id && slotId) {
             const getData = async () => {
-                const timeslot = await getTimeSlotById(slotId as string);
-                const field = await getFieldById(id as string);
+                try {
+                    // Load song song thay vì tuần tự
+                    const [timeslotResponse, fieldResponse] = await Promise.all([
+                        getTimeSlotById(slotId as string),
+                        getFieldById(id as string)
+                    ]);
 
-                if (field && timeslot) {
-                    const mockData = {
-                        date: date as string,
-                        fieldName: field.data.foolballFieldId?.name,
-                        address: `${field.data.foolballFieldId?.address.detail ? `${field.data.foolballFieldId.address.detail}, ` : ""} ${field.data.foolballFieldId.address.ward}, ${field.data.foolballFieldId.address.district}, ${field.data.foolballFieldId.address.province}`,
-                        field: field.data.name,
-                        timeStart: timeslot.data.time,
-                        price: Number(timeslot.data.price),
-                        footballField: field.data.foolballFieldId._id
-                    };
-                    setFieldData(mockData);
+                    if (fieldResponse && timeslotResponse) {
+                        const mockData = {
+                            date: date as string,
+                            fieldName: fieldResponse.data.foolballFieldId?.name,
+                            address: `${fieldResponse.data.foolballFieldId?.address.detail ? `${fieldResponse.data.foolballFieldId.address.detail}, ` : ""} ${fieldResponse.data.foolballFieldId.address.ward}, ${fieldResponse.data.foolballFieldId.address.district}, ${fieldResponse.data.foolballFieldId.address.province}`,
+                            field: fieldResponse.data.name,
+                            timeStart: timeslotResponse.data.time,
+                            price: Number(timeslotResponse.data.price),
+                            footballField: fieldResponse.data.foolballFieldId._id
+                        };
+                        setFieldData(mockData);
+                    }
 
+                    dispatch(addBreadcrumb({ name: "Thanh toán", url: `/homepage/datSan/${id}/${slotId}` }));
+                } catch (error) {
+                    console.error("Error loading field data:", error);
+                    toast.error("Không thể tải thông tin sân. Vui lòng thử lại!");
                 }
-
-                dispatch(addBreadcrumb({ name: "Thanh toán", url: `/homepage/datSan/${id}/${slotId}` }));
             }
             getData();
         }
@@ -364,25 +377,6 @@ const BookingPage = () => {
             </div>
         );
     }
-    const checkPaymentStatus = async () => {
-        const { data: orders } = await getListOrders();
-        const isBooked = orders.some((order: Order) =>
-            order.fieldName === fieldData?.field &&
-            order.timeStart === fieldData?.timeStart &&
-            order.date === fieldData?.date &&
-            order.paymentStatus === "success"
-        );
-
-        if (isBooked) {
-            setIsFieldBooked(true);
-            toast.error("Khung giờ này đã có người đặt và thanh toán thành công. Vui lòng chọn sân khác!");
-            return false;
-        } else {
-            setIsFieldBooked(false);
-            return true;
-        }
-
-    };
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -720,7 +714,7 @@ const BookingPage = () => {
                                     onSuccess={(success) => {
                                         if (success) {
                                             setIsSuccess(true);
-                                        }else{
+                                        } else {
                                             setIsFieldBooked(true);
                                             setConfirmModalVisible(false);
                                         }
