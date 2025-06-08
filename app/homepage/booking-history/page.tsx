@@ -228,7 +228,7 @@ const BookingHistoryPage = () => {
 
     return (
         <div className="flex flex-col min-h-screen">
-            <div className="bg-white rounded-none sm:rounded-xl p-4 sm:p-6">
+            <div className="bg-white rounded-none sm:rounded-xl">
                 <Title level={3} className="mb-4 sm:mb-6 text-xl sm:text-2xl">
                     Lịch đặt sân
                 </Title>

@@ -20,9 +20,30 @@ export const getNotificationsById = (id: string) => {
   return API_NodeJS.get<Notification>(`notification/detail/${id}`);
 };
 
-// 4. Lấy thông tin chi tiết của một Notification theo ID
-export const getNotificationByActor = (userId: string, role: string) => {
-  return API_NodeJS.get<Notification[]>(`notification/${userId}/${role}`);
+// 4. Lấy thông tin chi tiết của một Notification theo ID với pagination
+export const getNotificationByActor = (
+  userId: string,
+  role: string,
+  options?: {
+    page?: number;
+    limit?: number;
+    filter?: 'all' | 'unread';
+  }
+) => {
+  const params = new URLSearchParams();
+  if (options?.page) params.append('page', options.page.toString());
+  if (options?.limit) params.append('limit', options.limit.toString());
+  if (options?.filter && options.filter !== 'all') params.append('filter', options.filter);
+
+  const queryString = params.toString();
+  const url = `notification/${userId}/${role}${queryString ? `?${queryString}` : ''}`;
+
+  return API_NodeJS.get<{
+    notifications: Notification[];
+    total: number;
+    page: number;
+    totalPages: number;
+  }>(url);
 };
 
 export const getNotificationByManager = (role: string) => {

@@ -70,7 +70,7 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
 
   const menuUser = [
     {
-      key: "thongBao",
+      key: "notification",
       label: "",
       icon: <div className='flex items-center gap-2'>
         <BellOutlined />
@@ -85,7 +85,7 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
           </div>
         }
       </div>,
-      path: "/homepage/thongBao",
+      path: "/homepage/notification",
     },
     user.value.user?.role === 0 && {
       key: "newField",

@@ -97,7 +97,7 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
             path: "/manager/orders"
         },
         {
-            key: "thongBao",
+            key: "notification",
             label: (
                 <Link href="/manager/notification" className="flex items-center gap-2">
                     <BellOutlined />

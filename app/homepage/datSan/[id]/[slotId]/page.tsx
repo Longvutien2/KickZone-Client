@@ -352,7 +352,7 @@ const BookingPage = () => {
                             className="max-w-full text-left  mb-4"
                         />,
                         <div key="buttons" className="flex justify-start space-x-4">
-                            <Button type="primary" href="/homepage/thongBao">
+                            <Button type="primary" href="/homepage/notification">
                                 Xem thông báo
                             </Button>
                             <Button href="/homepage/datSan">
