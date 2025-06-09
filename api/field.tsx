@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Field } from "@/models/field";
 import { API_NodeJS } from "./utils/axios";
-
+import { TimeSlot } from "@/models/field";
 // Đăng ký sân bóng mới
 export const createField = (field: Field) => {
   return API_NodeJS.post("fields", field);
@@ -44,4 +44,39 @@ export const updateSchedule = (fieldId: string, scheduleId: string, schedule: { 
 // Xóa một lịch đặt sân
 export const deleteSchedule = (fieldId: string, scheduleId: string) => {
   return API_NodeJS.delete(`fields/${fieldId}/delete-schedule/${scheduleId}`);
+};
+
+
+
+// =============================== TIME SLOT ========================================================
+
+
+// Đăng ký sân bóng mới
+export const createTimeSlot = (timeSlot: TimeSlot) => {
+  return API_NodeJS.post("timeSlot", timeSlot);
+};
+
+export const updateTimeSlot = (timeSlotId: string, timeSlot: TimeSlot) => {
+  return API_NodeJS.patch(`timeSlot/${timeSlotId}`, timeSlot);
+};
+
+// Lấy danh sách giờ theo sân
+export const getTimeSlot = () => {
+  return API_NodeJS.get<TimeSlot[]>(`timeSlot`);
+};
+
+export const getTimeSlotByIdFootballField = (idFootBallField: string) => {
+  return API_NodeJS.get<TimeSlot[]>(`timeSlot/${idFootBallField}/idFootBallField`);
+};
+
+export const getTimeSlotById = (id: string) => {
+  return API_NodeJS.get(`timeSlot/${id}`);
+};
+
+export const deleteTimeSlot = (id: string) => {
+  return API_NodeJS.delete(`timeSlot/${id}`);
+};
+
+export const deleteTimeSlotByFieldId = (id: string) => {
+  return API_NodeJS.delete(`timeSlot/byField/${id}`);
 };

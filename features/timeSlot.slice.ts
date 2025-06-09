@@ -1,4 +1,4 @@
-import { createTimeSlot, deleteTimeSlot, deleteTimeSlotByFieldId, getTimeSlot, getTimeSlotByIdFootballField, updateTimeSlot } from "@/api/timeSlot"
+import { createTimeSlot, deleteTimeSlot, deleteTimeSlotByFieldId, getTimeSlot, getTimeSlotByIdFootballField, updateTimeSlot } from "@/api/field"
 import { Field, TimeSlot } from "@/models/field"
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 
