@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
 export default function Homepage() {
-  redirect('/homepage/datSan'); // Điều hướng trực tiếp
+  redirect('/homepage/book-field'); // Điều hướng trực tiếp
 
 }

@@ -17,6 +17,11 @@ export interface Match {
     description?: string;
     bookingId?: string | any;
     orderId?: string | any;
+    status?: 'open' | 'pending' | 'confirmed' | 'cancelled'; // Trạng thái trận đấu
+    requestedBy?: string; // ID của team đã gửi yêu cầu
+    preferredPosition?: string; // Vị trí ưa thích của team gửi yêu cầu
+    experience?: string; // Kinh nghiệm thi đấu
+    message?: string; // Tin nhắn từ team gửi yêu cầu
     createdAt?: Date;
     updatedAt?: Date;
 }

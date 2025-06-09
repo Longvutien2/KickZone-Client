@@ -144,7 +144,7 @@ const CreateMatchPage = () => {
           </p>
           <Button
             type="primary"
-            onClick={() => router.push('/homepage/datSan')}
+            onClick={() => router.push('/homepage/book-field')}
             className="bg-orange-500 hover:bg-orange-600"
           >
             Đặt Sân Ngay

@@ -42,7 +42,7 @@ export const checkUserOrderExists = (fieldName: string, date: string, timeStart:
 };
 
 export const getOrdersByUserId = (userId: string) => {
-  return API_NodeJS.get<Order[]>(`paymentSepay/userId/${userId}`);
+  return API_NodeJS.get(`paymentSepay/userId/${userId}`);
 };
 
 // Xóa các orders pending quá 10 phút

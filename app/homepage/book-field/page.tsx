@@ -103,7 +103,7 @@ const Detail = () => {
         // Thêm breadcrumb
         dispatch(setBreadcrumb([
           { name: 'Home', url: '/' },
-          { name: 'Đặt sân', url: '/homepage/datSan' },
+          { name: 'Đặt sân', url: '/homepage/book-field' },
         ]));
       } catch (error) {
         console.error("Error fetching data:", error);

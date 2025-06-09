@@ -202,7 +202,7 @@ const AboutUs = () => {
                                 icon={<CalendarOutlined />}
                                 size="large"
                                 className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-none h-14 sm:h-16 text-lg font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
-                                onClick={() => window.location.href = '/homepage/datSan'}
+                                onClick={() => window.location.href = '/homepage/book-field'}
                             >
                                 <span className="hidden sm:inline">Đặt sân online</span>
                                 <span className="sm:hidden">Đặt sân</span>

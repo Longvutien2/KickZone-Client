@@ -34,7 +34,7 @@
 //         const newField = await dispatch(addFootBallFieldSlice(newData));
 //         if (newField) {
 //             toast.success("Tạo sân bóng thành công");
-//             router.push("/datSan");
+//             router.push("/book-field");
 //         }
 //     };
 

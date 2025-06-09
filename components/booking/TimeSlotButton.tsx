@@ -36,7 +36,7 @@ const TimeSlotButton: React.FC<TimeSlotButtonProps> = ({
     return (
       <Link
         key={index}
-        href={`/homepage/datSan/${fieldId}/${slot._id}?date=${selectedDate}`}
+        href={`/homepage/book-field/${fieldId}/${slot._id}?date=${selectedDate}`}
         onClick={handleSlotClick}
       >
         <Button

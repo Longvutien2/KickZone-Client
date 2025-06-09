@@ -118,10 +118,10 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
       path: "/",
     },
     {
-      key: "timDoi",
+      key: "find-opponent",
       label: "Cáp kèo, tìm đội",
       icon: <ThunderboltOutlined />,
-      path: "/homepage/timDoi",
+      path: "/homepage/find-opponent",
     },
     {
       key: "booking-history",
@@ -130,10 +130,10 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
       path: "/homepage/booking-history",
     },
     {
-      key: "datSan",
+      key: "book-field",
       label: "Đặt sân",
       icon: <AimOutlined />,
-      path: "/homepage/datSan",
+      path: "/homepage/book-field",
     },
     ...user.isLoggedIn ? menuUser : [],
   ].filter(Boolean);
@@ -188,7 +188,7 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
         open={mobileMenuOpen}
         width={280}
         className="lg:hidden"
-        bodyStyle={{ padding: 0 }}
+        styles={{ body: { padding: 0 } }}
       >
         <div className="flex flex-col h-full">
           <Menu

@@ -50,7 +50,7 @@ const FieldInfoCard: React.FC<FieldInfoCardProps> = ({ footballField }) => {
             <span>{footballField?.phone}</span>
           </p>
         </div>
-        <Link href={`/homepage/datSan/${footballField?._id}/detail`}>
+        <Link href={`/homepage/book-field/${footballField?._id}/detail`}>
           <Button
             type="primary"
             className="mt-4 w-full h-10 rounded-lg font-medium"

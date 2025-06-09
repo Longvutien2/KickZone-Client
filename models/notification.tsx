@@ -16,7 +16,11 @@ export type NotificationType =
     | 'new_order'
     | 'field_booking_failed'
     | 'field_registration_request'
-    | 'user_feedback';
+    | 'user_feedback'
+    | 'match_request'        // Yêu cầu tham gia trận đấu
+    | 'request_sent'         // Đã gửi yêu cầu
+    | 'request_accepted'     // Yêu cầu được chấp nhận
+    | 'request_rejected';    // Yêu cầu bị từ chối
 
 export interface Notification {
     _id?: string; // ID của thông báo
