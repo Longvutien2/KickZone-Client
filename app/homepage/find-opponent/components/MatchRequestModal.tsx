@@ -28,7 +28,7 @@ interface FormValues {
     teamLevel: string
     teamAgeGroup: string
     teamImage?: string
-    message?: string
+    description?: string
 }
 
 // Hàm tạo ảnh mặc định cho đội
@@ -84,11 +84,11 @@ const MatchRequestModal = ({ visible, onCancel, onSuccess, match, userId }: Matc
                     user: userId,
                     club_B: createdTeam._id,
                     targetUser: match.user._id,
-                    message: values.message
+                    description: values.description
                 }
 
                 const matchRequest = await dispatch(createMatchRequestSlice(requestData));
-                if (matchRequest.payload.message || !matchRequest.payload) {
+                if (matchRequest.payload.message) {
                     toast.warning(matchRequest.payload.message)
                     return
                 }
@@ -227,7 +227,7 @@ const MatchRequestModal = ({ visible, onCancel, onSuccess, match, userId }: Matc
 
                     <Form.Item
                         label="Tin nhắn cho đội chủ nhà (tùy chọn)"
-                        name="message"
+                        name="description"
                     >
                         <Input.TextArea
                             placeholder="Viết lời chào hoặc thông tin thêm về đội bóng của bạn..."

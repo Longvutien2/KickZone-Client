@@ -5,10 +5,10 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://server-do-an-to
 // PATCH /api/match-requests/[id]/status - Cập nhật trạng thái yêu cầu
 export async function PATCH(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = params;
+        const { id } = await params;
         const body = await request.json();
 
         // Validate status

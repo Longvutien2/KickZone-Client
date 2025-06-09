@@ -76,7 +76,7 @@ const matchSlice = createSlice({
     extraReducers: (builder) => {
         // 1. Xử lý khi lấy danh sách trận đấu thành công
         builder.addCase(getListMatchesSlice.fulfilled, (state: any, action) => {
-            state.value = action.payload;
+            state.value = [...action.payload, state.value];
         });
 
         builder.addCase(getListMatchByFootballFieldIdSlice.fulfilled, (state: any, action) => {
@@ -95,9 +95,8 @@ const matchSlice = createSlice({
 
         // 4. Xử lý khi cập nhật trận đấu thành công
         builder.addCase(updateMatchSlice.fulfilled, (state: any, action) => {
-            state.value = state.value.map((item: Match) =>
-                item._id === action.payload._id ? action.payload : item
-            );
+            state.value = state.value.map((item: any) => item._id === action.payload._id ? action.payload : item);
+            state.detail = action.payload;
         });
 
         // 5. Xử lý khi xóa trận đấu thành công

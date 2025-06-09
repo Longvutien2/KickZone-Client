@@ -5,10 +5,10 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://server-do-an-to
 // GET /api/match-requests/match/[matchId] - Lấy yêu cầu theo match ID
 export async function GET(
     request: NextRequest,
-    { params }: { params: { matchId: string } }
+    { params }: { params: Promise<{ matchId: string }> }
 ) {
     try {
-        const { matchId } = params;
+        const { matchId } = await params;
 
         if (!matchId) {
             return NextResponse.json(

@@ -1,4 +1,3 @@
-import { IUser } from '@/models/auth';
 import { API_NodeJS } from './utils/axios';
 import { MatchRequest } from '@/models/matchRequest';
 

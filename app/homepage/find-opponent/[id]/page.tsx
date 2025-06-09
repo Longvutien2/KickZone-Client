@@ -24,8 +24,7 @@ import { getMatchRequestsByMatchSlice } from '@/features/matchRequest.slice';
 
 const MatchDetail = () => {
     const match = useAppSelector((state: any) => state.match.detail)
-    const matchRequest = useAppSelector((state: any) => state.matchRequest.detail)
-    console.log("matchRequest11111111111", matchRequest);
+    const matchRequest = useAppSelector((state: any) => state.matchRequest.value)
 
     const auth = useAppSelector((state) => state.auth)
     const [dataTeam, setDataTeams] = useState<Team[]>();
@@ -116,25 +115,20 @@ const MatchDetail = () => {
                 <MatchRequestModal
                     visible={visible}
                     onCancel={handleCloseModal}
-                    onSuccess={() => {
-                        // Reload trang sau khi gửi yêu cầu thành công
-                        window.location.reload();
-                    }}
-                    // dataTeam={dataTeam || []}
                     match={match}
                     userId={auth.value.user._id as string}
+                    onSuccess={() => {
+                    }}
                 />
 
                 {/* Hiển thị yêu cầu tham gia nếu có */}
-                {matchRequest && matchRequest?.status === 'pending' && (
+                {matchRequest.length > 0 && matchRequest[0].status === 'pending' && (
                     <div>
                         <MatchRequestHandler
                             match={match}
                             requestedMatch={matchRequest}
                             isOwner={isMatchOwner}
-                            onRequestHandled={() => {
-                                // Reload trang sau khi xử lý yêu cầu
-                                window.location.reload();
+                            onRequestHandled={async () => {
                             }}
                         />
                     </div>
@@ -150,7 +144,7 @@ const MatchDetail = () => {
                                 <div className="flex items-center space-x-3">
                                     <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0">
                                         <Image
-                                            src={match?.club_A?.teamImage || "/images/default-team.png"}
+                                            src={match?.club_A?.teamImage || ""}
                                             className="rounded-full object-cover"
                                             layout="fill"
                                             alt="bg"
@@ -176,7 +170,7 @@ const MatchDetail = () => {
                                     <div className="flex items-center space-x-3">
                                         <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0">
                                             <Image
-                                                src={match?.club_A?.teamImage || "/images/default-team.png"}
+                                                src={match?.club_A?.teamImage || ""}
                                                 className="rounded-full object-cover"
                                                 layout="fill"
                                                 alt="bg"
@@ -209,7 +203,7 @@ const MatchDetail = () => {
                                 <div className="flex items-center space-x-3">
                                     <div className="relative w-20 h-20">
                                         <Image
-                                            src={match?.club_A?.teamImage || "/images/default-team.png"}
+                                            src={match?.club_A?.teamImage || ""}
                                             className="rounded-full object-cover"
                                             layout="fill"
                                             alt="bg"
@@ -234,7 +228,7 @@ const MatchDetail = () => {
                                         <div className="font-semibold text-sm">{match.club_B?.teamName}</div>
                                         <div className="relative w-20 h-20">
                                             <Image
-                                                src={match?.club_A?.teamImage || "/images/default-team.png"}
+                                                src={match?.club_A?.teamImage || ""}
                                                 className="rounded-full object-cover"
                                                 layout="fill"
                                                 alt="bg"

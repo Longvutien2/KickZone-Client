@@ -50,33 +50,32 @@ const MainContent = memo(() => {
         setSelectedTime(null);
     };
 
-    // Gộp tất cả API calls vào 1 useEffect duy nhất
-    useEffect(() => {
-        const fetchAllData = async () => {
-            setIsLoading(true);
-            try {
-                if (!matchState.value || matchState.value.length === 0) {
-                    const [matchData, timeSlotData, addressData] = await Promise.all([
-                        await dispatch(getListMatchesSlice()),
-                        await dispatch(getListTimeSlotsByFootballFieldId(footballFields._id as string)),
-                        await getFootballFieldAddress()
-                    ]);
+    // Hàm fetch data chung
+    const fetchAllData = async () => {
+        setIsLoading(true);
+        try {
+            // Luôn fetch data mới để đảm bảo cập nhật real-time
+            const [, , addressData] = await Promise.all([
+                await dispatch(getListMatchesSlice()),
+                await dispatch(getListTimeSlotsByFootballFieldId(footballFields._id as string)),
+                await getFootballFieldAddress()
+            ]);
 
-                    if (addressData) {
-                        // setTimeSlots(timeSlotData.payload as TimeSlot[]);
-                        setGroupedByAddress(addressData.data || []);
-                    }
-                }
-
-
-            } catch (error) {
-                console.error("Error fetching data:", error);
-                setGroupedByAddress([]);
-            } finally {
-                setIsLoading(false);
+            if (addressData) {
+                // setTimeSlots(timeSlotData.payload as TimeSlot[]);
+                setGroupedByAddress(addressData.data || []);
             }
-        };
 
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            setGroupedByAddress([]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Fetch data khi component mount
+    useEffect(() => {
         fetchAllData();
     }, [footballFields, dispatch]);
 

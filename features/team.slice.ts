@@ -41,7 +41,7 @@ export const addTeamSlice = createAsyncThunk(
 // Action để cập nhật thông tin đội
 export const updateTeamSlice = createAsyncThunk(
     "team/updateTeamSlice",
-    async (team: Team) => {
+    async (team: any) => {
         const { data } = await updateTeam(team._id, team);
         return data;
     }

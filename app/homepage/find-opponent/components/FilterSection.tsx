@@ -45,9 +45,9 @@ const FilterSection = memo(({
                             <span className="sm:hidden">Lọc</span>
                         </Button>
                         {(value || selectedDate || selectedTime) && (
-                            <Button 
-                                type="link" 
-                                onClick={clearFilters} 
+                            <Button
+                                type="link"
+                                onClick={clearFilters}
                                 className="text-orange-500 p-0 h-auto text-xs sm:text-sm"
                             >
                                 Xóa bộ lọc
