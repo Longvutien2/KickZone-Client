@@ -13,13 +13,9 @@ import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import dayjs from 'dayjs';
-import MatchRequestHandler from '../components/MatchRequestHandler';
-import MatchRequestModal from '../components/MatchRequestModal';
 import { getMatchRequestsByMatchSlice } from '@/features/matchRequest.slice';
-
-
-
-
+import MatchRequestModal from '@/components/find-opponent/MatchRequestModal';
+import MatchRequestHandler from '@/components/find-opponent/MatchRequestHandler';
 
 
 const MatchDetail = () => {
@@ -70,8 +66,6 @@ const MatchDetail = () => {
                 await dispatch(getMatchByIdSlice(id as string)),
                 await dispatch(getMatchRequestsByMatchSlice(id as string))
             ]);
-            console.log("matchRequestData", matchRequestData);
-            console.log("matchRequestData.payload", matchRequestData.payload);
         };
         fetchData();
 
@@ -135,37 +129,13 @@ const MatchDetail = () => {
                 )}
 
                 {/* Match list */}
-                <Card className="mt-6 sm:mt-8 space-y-4 mb-6 sm:mb-10 shadow rounded-lg sm:rounded-xl">
-                    <div key={match._id} className="bg-white">
-                        {/* Mobile Layout */}
-                        <div className="block sm:hidden">
-                            {/* Đội A */}
-                            <div className="mb-4">
-                                <div className="flex items-center space-x-3">
-                                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0">
-                                        <Image
-                                            src={match?.club_A?.teamImage || ""}
-                                            className="rounded-full object-cover"
-                                            layout="fill"
-                                            alt="bg"
-                                        />
-                                    </div>
-                                    <div>
-                                        <div className="font-semibold text-base">{match.club_A?.teamName}</div>
-                                        <div className='flex items-center flex-wrap gap-2 text-sm mt-1 text-orange-500'>
-                                            <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{match.club_A?.ageGroup}</span>
-                                            <span>{match.club_A?.level}</span>
-                                            <span>{match.club_A?.contact}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* VS */}
-                            <div className="text-center text-2xl font-bold my-4">VS</div>
-
-                            {/* Đội B */}
-                            {match.club_B ? (
+                <div className="mt-6 mb-6 sm:mb-10 bg-white border border-gray-200 rounded-lg sm:rounded-xl overflow-hidden">
+                    <div key={match._id}>
+                        {/* Phần trên: Thông tin 2 đội */}
+                        <div className="p-4 sm:p-6">
+                            {/* Mobile Layout */}
+                            <div className="block sm:hidden">
+                                {/* Đội A */}
                                 <div className="mb-4">
                                     <div className="flex items-center space-x-3">
                                         <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0">
@@ -177,55 +147,56 @@ const MatchDetail = () => {
                                             />
                                         </div>
                                         <div>
-                                            <div className="font-semibold text-base">{match.club_B?.teamName}</div>
+                                            <div className="font-semibold text-base">{match.club_A?.teamName}</div>
                                             <div className='flex items-center flex-wrap gap-2 text-sm mt-1 text-orange-500'>
-                                                <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{match.club_B?.ageGroup}</span>
+                                                <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{match.club_A?.ageGroup}</span>
                                                 <span>{match.club_A?.level}</span>
                                                 <span>{match.club_A?.contact}</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            ) : (
-                                <div className="flex flex-col items-center text-center mb-4">
-                                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gray-100 flex items-center justify-center text-lg text-gray-500">
-                                        ?
-                                    </div>
-                                    <div className="text-xs text-gray-400 mt-1">Chưa có đối thủ</div>
-                                </div>
-                            )}
-                        </div>
 
-                        {/* Desktop Layout */}
-                        <div className="hidden sm:grid sm:grid-cols-3 items-center mb-2">
-                            {/* Đội A */}
-                            <div>
-                                <div className="flex items-center space-x-3">
-                                    <div className="relative w-20 h-20">
-                                        <Image
-                                            src={match?.club_A?.teamImage || ""}
-                                            className="rounded-full object-cover"
-                                            layout="fill"
-                                            alt="bg"
-                                        />
+                                {/* VS */}
+                                <div className="text-center text-2xl font-bold my-4">VS</div>
+
+                                {/* Đội B */}
+                                {match.club_B ? (
+                                    <div className="mb-4">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0">
+                                                <Image
+                                                    src={match?.club_B?.teamImage || ""}
+                                                    className="rounded-full object-cover"
+                                                    layout="fill"
+                                                    alt="bg"
+                                                />
+                                            </div>
+                                            <div>
+                                                <div className="font-semibold text-base">{match.club_B?.teamName}</div>
+                                                <div className='flex items-center flex-wrap gap-2 text-sm mt-1 text-orange-500'>
+                                                    <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{match.club_B?.ageGroup}</span>
+                                                    <span>{match.club_B?.level}</span>
+                                                    <span>{match.club_B?.contact}</span>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="font-semibold text-sm">{match.club_A?.teamName}</div>
-                                </div>
-                                <div className='flex items-center space-x-3 text-sm mt-2 text-orange-500'>
-                                    <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{match.club_A?.ageGroup}</span>
-                                    <span>{match.club_A?.level}</span>
-                                    <span>{match.club_A?.contact}</span>
-                                </div>
+                                ) : (
+                                    <div className="flex flex-col items-center text-center mb-4">
+                                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gray-100 flex items-center justify-center text-lg text-gray-500">
+                                            ?
+                                        </div>
+                                        <div className="text-xs text-gray-400 mt-1">Chưa có đối thủ</div>
+                                    </div>
+                                )}
                             </div>
 
-                            {/* VS */}
-                            <div className="text-center text-3xl font-bold">VS</div>
-
-                            {/* Đội B nếu có */}
-                            {match.club_B ? (
+                            {/* Desktop Layout */}
+                            <div className="hidden sm:grid sm:grid-cols-3 items-center mb-2">
+                                {/* Đội A */}
                                 <div>
-                                    <div className="flex items-center justify-end space-x-3">
-                                        <div className="font-semibold text-sm">{match.club_B?.teamName}</div>
+                                    <div className="flex items-center space-x-3">
                                         <div className="relative w-20 h-20">
                                             <Image
                                                 src={match?.club_A?.teamImage || ""}
@@ -234,25 +205,52 @@ const MatchDetail = () => {
                                                 alt="bg"
                                             />
                                         </div>
+                                        <div className="font-semibold text-sm">{match.club_A?.teamName}</div>
                                     </div>
-                                    <div className='flex items-center justify-end space-x-3 text-sm mt-2 text-orange-500'>
-                                        <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{match.club_B?.ageGroup}</span>
+                                    <div className='flex items-center space-x-3 text-sm mt-2 text-orange-500'>
+                                        <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{match.club_A?.ageGroup}</span>
                                         <span>{match.club_A?.level}</span>
                                         <span>{match.club_A?.contact}</span>
                                     </div>
                                 </div>
-                            ) : (
-                                <div className="flex flex-col items-end text-right">
-                                    <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center text-lg text-gray-500">
-                                        ?
-                                    </div>
-                                    <div className="text-xs text-gray-400 mt-1">Chưa có đối thủ</div>
-                                </div>
-                            )}
-                        </div>
 
-                        {/* Time + location */}
-                        <div className="mt-3 text-xs sm:text-sm text-gray-700">
+                                {/* VS */}
+                                <div className="text-center text-3xl font-bold">VS</div>
+
+                                {/* Đội B nếu có */}
+                                {match.club_B ? (
+                                    <div>
+                                        <div className="flex items-center justify-end space-x-3">
+                                            <div className="font-semibold text-sm">{match.club_B?.teamName}</div>
+                                            <div className="relative w-20 h-20">
+                                                <Image
+                                                    src={match?.club_B?.teamImage || ""}
+                                                    className="rounded-full object-cover"
+                                                    layout="fill"
+                                                    alt="bg"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className='flex items-center justify-end space-x-3 text-sm mt-2 text-orange-500'>
+                                            <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{match.club_B?.ageGroup}</span>
+                                            <span>{match.club_B?.level}</span>
+                                            <span>{match.club_B?.contact}</span>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-end text-right">
+                                        <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center text-lg text-gray-500">
+                                            ?
+                                        </div>
+                                        <div className="text-xs text-gray-400 mt-1">Chưa có đối thủ</div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Đóng phần thông tin đội */}
+                        </div>
+                        {/* Phần dưới: Thông tin trận đấu với background màu cam nhẹ */}
+                        <div className="bg-orange-50 p-4 sm:p-6 text-xs sm:text-sm text-gray-700">
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
                                 <span className='capitalize text-sm sm:text-base font-medium'>
                                     {match.orderId?.timeStart} | {
@@ -330,7 +328,7 @@ const MatchDetail = () => {
                             </div>
                         </div>
                     </div>
-                </Card>
+                </div>
 
                 {/* Mô tả*/}
                 <div className="bg-white mx-auto">

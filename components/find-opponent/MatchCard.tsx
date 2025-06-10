@@ -39,16 +39,18 @@ const MatchCard = memo(({ match }: MatchCardProps) => {
     }
 
     return (
-        <div className="bg-white p-3 sm:p-4 shadow-md rounded-xl mx-0 sm:mx-0">
+        <div className="bg-white border border-gray-200 rounded-xl mx-0 sm:mx-0 overflow-hidden hover:border-orange-300 transition-colors duration-200">
             {/* Hiển thị trạng thái nếu có */}
             {match.status && match.status !== 'open' && (
-                <div className="mb-3">
+                <div className="p-3 sm:p-4 pb-0">
                     {getMatchStatusTag()}
                 </div>
             )}
 
             <Link href={`/homepage/find-opponent/${match._id}`}>
-                {/* Mobile Layout */}
+                {/* Phần trên: Thông tin 2 đội */}
+                <div className="p-3 sm:p-4">
+                    {/* Mobile Layout */}
                 <div className="block sm:hidden">
                     {/* Đội A */}
                     <div className="mb-3">
@@ -64,7 +66,7 @@ const MatchCard = memo(({ match }: MatchCardProps) => {
                                 />
                             </div>
                             <div>
-                                <div className="font-semibold text-base">{match.club_A?.teamName}</div>
+                                <div className="font-semibold text-base">{match.club_A?.teamName} 111111111111111111111</div>
                                 <div className='flex items-center flex-wrap gap-2 text-sm mt-1 text-orange-500'>
                                     <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">
                                         {match.club_A?.ageGroup}
@@ -178,8 +180,11 @@ const MatchCard = memo(({ match }: MatchCardProps) => {
                     )}
                 </div>
 
-                {/* Time + location */}
-                <div className="mt-3 text-xs sm:text-sm text-gray-700">
+                {/* Đóng phần thông tin đội */}
+                </div>
+
+                {/* Phần dưới: Thông tin trận đấu với background màu cam nhẹ */}
+                <div className="bg-orange-50 px-4 py-2 text-xs sm:text-sm text-gray-700">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
                         <span className='capitalize text-sm sm:text-base font-medium'>
                             {match.orderId?.timeStart} | {

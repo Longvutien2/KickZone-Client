@@ -21,7 +21,7 @@ const MainContent = memo(() => {
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [filtersVisible, setFiltersVisible] = useState(false);
     // const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
 
     moment.locale('vi');
     const dispatch = useAppDispatch();
@@ -88,12 +88,6 @@ const MainContent = memo(() => {
         // Lấy danh sách trận đấu từ Redux store
         const matchs = matchState.value;
 
-        // Kiểm tra matchs có phải là mảng không
-        if (!matchs || !Array.isArray(matchs)) {
-            console.warn("matchs is not an array:", matchs);
-            return [];
-        }
-
         try {
             // Áp dụng tất cả các bộ lọc
             let filtered = [...matchs];
@@ -155,11 +149,6 @@ const MainContent = memo(() => {
     const paginatedMatches = useMemo(() => {
         return filteredMatches.slice((currentPage - 1) * 5, currentPage * 5);
     }, [filteredMatches, currentPage]);
-
-    // Hiển thị loading khi đang tải dữ liệu
-    if (isLoading) {
-        return <div className="text-center py-10">Đang tải dữ liệu...</div>;
-    }
 
     return (
         <>

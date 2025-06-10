@@ -1,10 +1,10 @@
 'use client'
+import MainContent from '@/components/find-opponent/MainContent'
+import MyTeamTab from '@/components/find-opponent/MyTeamTab'
 import { setBreadcrumb } from '@/features/breadcrumb.slice'
 import { useAppDispatch } from '@/store/hook'
 import { Tabs, Select } from 'antd'
 import { useEffect } from 'react'
-import MainContent from './components/MainContent'
-import MyTeamTab from './components/MyTeamTab'
 
 export default function Home() {
     const dispatch = useAppDispatch();

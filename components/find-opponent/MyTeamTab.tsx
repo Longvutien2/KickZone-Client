@@ -9,6 +9,7 @@ import moment from 'moment'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useMemo, memo } from 'react'
 import MatchCard from './MatchCard'
+import { toast } from 'react-toastify'
 
 const MyTeamTab = memo(() => {
     const router = useRouter()
@@ -32,7 +33,7 @@ const MyTeamTab = memo(() => {
             if (data.data.length > 0) {
                 // Lấy tất cả ID của các đội của người dùng
                 const myTeamIds = data.data.map(team => team._id);
-
+                
                 // Lọc bỏ các trận đấu trong quá khứ - chỉ lấy từ ngày hiện tại trở đi
                 const today = moment().startOf('day');
                 const futureMatches = matchs?.filter((match: Match) => {
@@ -51,7 +52,6 @@ const MyTeamTab = memo(() => {
                 const matchesForMyTeamsAway = futureMatches.filter((item: Match) =>
                     item.club_B && myTeamIds.includes(item.club_B._id)
                 );
-
                 setMatchsHome(matchesForMyTeamsHome);
                 setMatchsAway(matchesForMyTeamsAway);
                 setmyTeam(data.data[0]); // Vẫn giữ đội đầu tiên làm đội mặc định
@@ -94,7 +94,7 @@ const MyTeamTab = memo(() => {
         </div>
     ));
 
-    const MatchList = memo(({ matches, title }: { matches: Match[], title: string }) => (
+    const MatchList = memo(({ matches, title, totalMatches }: { matches: Match[], title: string, totalMatches: number }) => (
         <div>
             {auth.isLoggedIn ? (
                 <div>
@@ -106,7 +106,7 @@ const MyTeamTab = memo(() => {
                         <div className="flex justify-center mt-4">
                             <Pagination
                                 current={currentPage}
-                                total={matches.length}
+                                total={totalMatches}
                                 pageSize={5}
                                 onChange={(page) => setCurrentPage(page)}
                                 hideOnSinglePage={true}
@@ -131,12 +131,12 @@ const MyTeamTab = memo(() => {
                     {
                         key: 'home',
                         label: <span className="text-xs sm:text-sm font-medium">Vai Trò Đội Nhà</span>,
-                        children: <MatchList matches={paginatedHomeMatches} title="Đội Nhà" />
+                        children: <MatchList matches={paginatedHomeMatches} title="Đội Nhà" totalMatches={matchsHome.length} />
                     },
                     {
                         key: 'away',
                         label: <span className="text-xs sm:text-sm font-medium">Vai Trò Đội Khách</span>,
-                        children: <MatchList matches={paginatedAwayMatches} title="Đội Khách" />
+                        children: <MatchList matches={paginatedAwayMatches} title="Đội Khách" totalMatches={matchsAway.length} />
                     }
                 ]}
             />

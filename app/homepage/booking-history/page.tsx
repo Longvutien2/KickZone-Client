@@ -35,6 +35,7 @@ const BookingHistoryPage = () => {
     const footballField = useAppSelector(state => state.footballField.detail) as FootballField;
     const user = useAppSelector(state => state.auth.value);
     const dispatch = useAppDispatch();
+    console.log("orders", orders);
 
     const [bookingFilter, setBookingFilter] = useState<BookingFilterType>('upcoming');
 
@@ -46,115 +47,51 @@ const BookingHistoryPage = () => {
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
     useEffect(() => {
-        const getData = async () => {
-            setLoading(true);
-            try {
-                // Chỉ fetch nếu chưa có data hoặc data cũ
-                if (!orders || orders.length === 0) {
-                    // Sử dụng API tối ưu chỉ lấy orders của user hiện tại
-                    if (user?.user?._id) {
-                        await dispatch(getOrdersByUserIdSlice(user.user._id)).unwrap();
-                    }
-                }
-                dispatch(setBreadcrumb([
-                    { name: 'Home', url: '/' },
-                    { name: 'Lịch đặt sân', url: '/homepage/booking-history' },
-                ]));
-            } catch (error) {
-                console.error("Error fetching orders:", error);
-                message.error("Không thể tải dữ liệu đặt sân. Vui lòng thử lại sau.");
-            } finally {
-                setLoading(false);
-            }
-        };
 
         if (user?.user?._id) {
             getData();
-        } else {
+        }
+    }, [dispatch, user?.user?._id]);
+    
+    const getData = async () => {
+        setLoading(true);
+        try {
+            if (user.user?._id) {
+                await dispatch(getOrdersByUserIdSlice(user.user._id)).unwrap();
+            }
+            dispatch(setBreadcrumb([
+                { name: 'Home', url: '/' },
+                { name: 'Lịch đặt sân', url: '/homepage/booking-history' },
+            ]));
+        } catch (error) {
+            console.error("Error fetching orders:", error);
+            message.error("Không thể tải dữ liệu đặt sân. Vui lòng thử lại sau.");
+        } finally {
             setLoading(false);
         }
-    }, [dispatch, user?.user?._id]); // Bỏ orders khỏi dependency để tránh infinite loop
+    };
 
-    // Memoized filtering logic để tối ưu performance
+    // Tối ưu filtering logic - đơn giản hóa để giảm loading time
     const filteredOrders = useMemo(() => {
-        if (!orders || !Array.isArray(orders) || orders.length === 0) {
-            return [];
-        }
+        if (!orders?.length) return [];
 
         try {
-            // Lấy ngày hiện tại ở đầu ngày (00:00:00)
-            const today = dayjs().startOf('day');
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
 
-            // Lọc đơn đặt sân đã thanh toán thành công (API đã filter theo userId)
-            let filtered = orders.filter((order: Order) => {
-                return order.paymentStatus === "success";
-            });
+            // Lọc nhanh chỉ orders thành công và có date
+            return orders.filter((order: Order) => {
+                if (order.paymentStatus !== "success" || !order.date) return false;
 
-            // Lọc theo tab đang chọn
-            switch (bookingFilter) {
-                case 'upcoming':
-                    // Các đơn đặt sân sắp tới (từ hôm nay trở đi)
-                    filtered = filtered.filter((order: Order) => {
-                        if (!order.date) return false;
+                // Parse date nhanh hơn với native Date
+                const [day, month, year] = order.date.split('-').map(Number);
+                const orderDate = new Date(year, month - 1, day);
+                orderDate.setHours(0, 0, 0, 0);
 
-                        // Chuyển đổi chuỗi ngày từ định dạng "DD-MM-YYYY" sang đối tượng dayjs
-                        const dateParts = order.date.split('-');
-                        if (dateParts.length !== 3) return false;
-
-                        // Tạo đối tượng Date từ các phần của ngày (chú ý thứ tự: năm, tháng-1, ngày)
-                        const orderDate = dayjs(new Date(
-                            parseInt(dateParts[2]), // Năm
-                            parseInt(dateParts[1]) - 1, // Tháng (0-11)
-                            parseInt(dateParts[0]) // Ngày
-                        )).startOf('day');
-
-                        // So sánh với ngày hiện tại
-                        const isUpcoming = orderDate.isAfter(today) || orderDate.isSame(today);
-                        return isUpcoming;
-                    });
-                    break;
-                case 'history':
-                    // Lịch sử đặt sân (trước hôm nay)
-                    filtered = filtered.filter((order: Order) => {
-                        if (!order.date) return false;
-
-                        // Chuyển đổi chuỗi ngày từ định dạng "DD-MM-YYYY" sang đối tượng dayjs
-                        const dateParts = order.date.split('-');
-                        if (dateParts.length !== 3) return false;
-
-                        // Tạo đối tượng Date từ các phần của ngày (chú ý thứ tự: năm, tháng-1, ngày)
-                        const orderDate = dayjs(new Date(
-                            parseInt(dateParts[2]), // Năm
-                            parseInt(dateParts[1]) - 1, // Tháng (0-11)
-                            parseInt(dateParts[0]) // Ngày
-                        )).startOf('day');
-
-                        // So sánh với ngày hiện tại
-                        const isHistory = orderDate.isBefore(today);
-                        return isHistory;
-                    });
-                    break;
-            }
-
-            // Sắp xếp theo ngày, gần nhất lên đầu
-            return filtered.sort((a: any, b: any) => {
-                // Chuyển đổi chuỗi ngày từ định dạng "DD-MM-YYYY" sang đối tượng dayjs
-                const datePartsA = a.date?.split('-');
-                const datePartsB = b.date?.split('-');
-
-                const dateA = dayjs(new Date(
-                    parseInt(datePartsA[2]), // Năm
-                    parseInt(datePartsA[1]) - 1, // Tháng (0-11)
-                    parseInt(datePartsA[0]) // Ngày
-                ));
-
-                const dateB = dayjs(new Date(
-                    parseInt(datePartsB[2]), // Năm
-                    parseInt(datePartsB[1]) - 1, // Tháng (0-11)
-                    parseInt(datePartsB[0]) // Ngày
-                ));
-
-                return dateB.diff(dateA);
+                // Lọc theo tab
+                return bookingFilter === 'upcoming'
+                    ? orderDate >= today
+                    : orderDate < today;
             });
         } catch (error) {
             console.error("Error filtering orders:", error);
@@ -238,9 +175,7 @@ const BookingHistoryPage = () => {
                     onChange={setBookingFilter}
                 />
 
-                {loading ? (
-                    <OrderSkeleton />
-                ) : filteredOrders.length > 0 ? (
+                {filteredOrders.length > 0 ? (
                     <div className="space-y-3 sm:space-y-4">
                         {filteredOrders.slice((currentPage - 1) * 5, currentPage * 5).map((order: any) => (
                             <OrderCard
