@@ -35,7 +35,6 @@ const BookingHistoryPage = () => {
     const footballField = useAppSelector(state => state.footballField.detail) as FootballField;
     const user = useAppSelector(state => state.auth.value);
     const dispatch = useAppDispatch();
-    console.log("orders", orders);
 
     const [bookingFilter, setBookingFilter] = useState<BookingFilterType>('upcoming');
 

@@ -6,20 +6,12 @@ import {
     CheckCircleOutlined,
     EnvironmentOutlined,
     ClockCircleOutlined,
-    DollarOutlined,
-    CreditCardOutlined,
-    UserOutlined,
-    MailOutlined,
     PhoneOutlined,
     TeamOutlined,
     CloseCircleOutlined,
-    ExclamationCircleOutlined,
     AppstoreOutlined,
     SearchOutlined,
-    PlusCircleOutlined,
     CalendarOutlined,
-    TrophyOutlined,
-    FileTextOutlined,
     AimOutlined
 } from '@ant-design/icons';
 import { useParams, useRouter } from 'next/navigation';

@@ -57,10 +57,6 @@ const HomePage = () => {
           {/* Logo */}
           <div className="flex items-center">
             <div className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-              {/* <div>
-                <span className="text-3xl">⚽</span>
-                <span className="text-[#2DA1EE]">Kick</span><span className="text-gray-800">Zone</span>
-              </div> */}
               <div>
                 <img src="../222.png" alt="" width={150} />
               </div>
@@ -465,20 +461,3 @@ const HomePage = () => {
 };
 
 export default HomePage;
-
-// export default function Home() {
-//   return (
-// {/* <div className="flex justify-center items-center min-h-screen">
-//   <div className=" relative w-80 h-80 flex justify-center items-center">
-//     {/* Sử dụng lớp gradient-bg với hiệu ứng border-gradient */}
-//     <div className="gradient-bg1 w-full h-full absolute top-0 left-0 rounded-full p-6 ">
-//       {/* Ảnh cầu thủ */}
-//       <img
-//         src="https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/fooooot-1.png"
-//         alt="Soccer Player"
-//       />
-//     </div>
-//   </div>
-// </div> */}
-//   )
-// }
