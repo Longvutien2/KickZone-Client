@@ -34,10 +34,6 @@ const MatchDetail = () => {
     // Kiểm tra xem user hiện tại có phải là chủ trận đấu không
     const isMatchOwner = auth.value?.user?._id === match?.user?._id;
 
-    // Tìm team đã gửi yêu cầu
-    // const requestedTeam = dataTeam?.find((team: Team) => team._id === match?.requestedBy);
-
-
     const handleOpenModal = () => {
         if (!auth.isLoggedIn) {
             toast.warning("Bạn cần đăng nhập để tiếp tục !")
@@ -55,9 +51,6 @@ const MatchDetail = () => {
     const handleCloseModal = () => {
         setVisible(false);
     };
-
-
-
 
     moment.locale('vi');
     useEffect(() => {
@@ -140,7 +133,7 @@ const MatchDetail = () => {
                                     <div className="flex items-center space-x-3">
                                         <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0">
                                             <Image
-                                                src={match?.club_A?.teamImage || ""}
+                                                src={match.club_A?.teamImage || ""}
                                                 className="rounded-full object-cover"
                                                 layout="fill"
                                                 alt="bg"

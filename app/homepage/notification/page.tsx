@@ -13,12 +13,12 @@ import { API_NodeJS } from '@/api/utils/axios';
 const { Title } = Typography;
 
 const NotificationPage = () => {
-     const [filter, setFilter] = useState<'all' | 'unread'>('all');
+    const [filter, setFilter] = useState<'all' | 'unread'>('all');
     const [activeNotification, setActiveNotification] = useState<string>();
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize] = useState(10); // Tối đa 10 items mỗi page
-    
+
     const user = useAppSelector(state => state.auth.value);
     const notifications = useAppSelector(state => state.notification.value);
     const dispatch = useAppDispatch();
@@ -30,13 +30,13 @@ const NotificationPage = () => {
             try {
                 // 🔧 KEY: Chỉ fetch nếu chưa có data hoặc data cũ
                 if (!notifications || notifications.length === 0) {
-                    // Sử dụng API tối ưu chỉ lấy notifications của user hiện tại
-                    if (user?.user?._id) {
-                        await dispatch(getListNotificationSlice({ 
-                            id: user.user._id, 
-                            role: "user" 
-                        })).unwrap();
-                    }
+                // Sử dụng API tối ưu chỉ lấy notifications của user hiện tại
+                if (user?.user?._id) {
+                    await dispatch(getListNotificationSlice({
+                        id: user.user._id,
+                        role: "user"
+                    })).unwrap();
+                }
                 }
                 dispatch(setBreadcrumb([
                     { name: 'Home', url: '/' },
@@ -102,7 +102,7 @@ const NotificationPage = () => {
 
     // 🚀 MEMOIZED: Unread count
     const unreadCount = useMemo(() => {
-        return notifications?.filter((n: Notification) =>
+        return notifications && notifications?.filter((n: Notification) =>
             n.actor === "user" &&
             n.targetUser === user.user._id &&
             !n.read
@@ -227,13 +227,18 @@ const NotificationPage = () => {
             return <CheckCircleOutlined style={{ color: '#52c41a', fontSize: '20px' }} />;
         } else if (item.notificationType === 'field_booking_failed') {
             return <CloseCircleOutlined style={{ color: '#f5222d', fontSize: '20px' }} />;
-        } else if (item.notificationType === 'opponent_found') {
+        } else if (item.notificationType === 'opponent_found' || item.notificationType === "request_accepted") {
             return <TeamOutlined style={{ color: '#722ed1', fontSize: '20px' }} />;
         } else if (item.notificationType === 'posted_opponent') {
             return <SearchOutlined style={{ color: '#fa8c16', fontSize: '20px' }} />;
         } else if (item.notificationType === 'field_created') {
             return <PlusCircleOutlined style={{ color: '#13c2c2', fontSize: '20px' }} />;
-        } else {
+        } else if ((item.notificationType === 'match_request' || item.notificationType === 'request_sent')) {
+            return <TeamOutlined style={{ color: '#1890ff', fontSize: '20px' }} />;
+        }else if (item.notificationType === 'request_rejected') {
+            return <CloseCircleOutlined style={{ color: '#f5222d', fontSize: '20px' }} />;
+        }
+        else {
             return <BellOutlined style={{ color: '#1890ff', fontSize: '20px' }} />;
         }
     };

@@ -101,6 +101,7 @@ const MatchRequestModal = ({ visible, onCancel, onSuccess, match, userId }: Matc
                     content: `Bạn đã gửi yêu cầu tham gia trận đấu thành công với đội "${match.club_A?.teamName}". Vui lòng chờ đội bóng khác liên hệ để xác nhận.`,
                     club_A: match.club_A,
                     club_B: createdTeam,
+                    orderId: match.orderId,
                     targetUser: userId,
                     match: match,
                 };
@@ -113,6 +114,7 @@ const MatchRequestModal = ({ visible, onCancel, onSuccess, match, userId }: Matc
                     content: `Đội "${createdTeam.teamName}" muốn tham gia trận đấu của bạn. Vui lòng xem chi tiết và xác nhận.`,
                     club_A: match.club_A,
                     club_B: createdTeam,
+                    orderId: match.orderId,
                     targetUser: match.user._id,
                     match: match,
                 };

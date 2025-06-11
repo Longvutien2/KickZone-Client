@@ -41,7 +41,7 @@ const CreateMatchPage = () => {
         const bookingResponse = await getOrdersByUserId(user.value.user._id as string);
         // Lọc chỉ lấy các đặt sân đã xác nhận và chưa diễn ra
         if (bookingResponse) {
-          const confirmedBookings = bookingResponse.data.orders.filter((booking: Order) => {
+          const confirmedBookings = bookingResponse.data.filter((booking: Order) => {
             // Kiểm tra trạng thái đặt sân
             if (booking.paymentStatus !== "success") return false;
 

@@ -67,7 +67,22 @@ const MatchRequestHandler = ({ match, requestedMatch, isOwner, onRequestHandled 
                     match: match,
                     orderId: match.orderId
                 }
+
+                  // Gửi thông báo cho team chủ sân
+                const acceptNotification2: Notification = {
+                    actor: 'user',
+                    notificationType: 'opponent_found',
+                    title: 'Đã tìm thấy đối thủ!',
+                    content: `Đã tìm thấy đối thủ cho trận đấu của bạn. Hãy chuẩn bị cho trận đấu!`,
+                    footballfield: match.footballField,
+                    club_A: match.club_A,
+                    club_B: currentItem.club_B,
+                    targetUser: match.user._id,
+                    match: match,
+                    orderId: match.orderId
+                }
                 await dispatch(addNotificationSlice(acceptNotification))
+                await dispatch(addNotificationSlice(acceptNotification2))
 
                 toast.success('Đã chấp nhận yêu cầu tham gia!')
                 onRequestHandled?.()
@@ -137,14 +152,14 @@ const MatchRequestHandler = ({ match, requestedMatch, isOwner, onRequestHandled 
                                         <Tag color="orange">Yêu cầu tham gia</Tag>
                                     </div>
                                     <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <PhoneOutlined />
-                                        <span>{item.club_B?.teamName?.contact || 'Không có thông tin'}</span>
+                                        Liên hệ: 
+                                        <span>{item.club_B?.contact || 'Không có thông tin'}</span>
                                     </div>
                                     <div className="text-xs text-gray-500 mt-1">
-                                        Trình độ: {item.club_B?.teamName?.level || ''} | Độ tuổi: {item.club_B?.teamName?.ageGroup || ''}
+                                        Trình độ: {item.club_B?.level || ''} | Độ tuổi: {item.club_B?.ageGroup || ''}
                                     </div>
                                     {item?.description && (
-                                        <div className="text-xs text-purple-600 mt-2 ">
+                                        <div className="text-xs text-purple-600 mt-1">
                                             Lời nhắn: {item.description}
                                         </div>
                                     )}
