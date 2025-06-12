@@ -36,11 +36,11 @@ const DateSelector: React.FC<DateSelectorProps> = ({
       return {
         key: date.format("D/M/YYYY"),
         label: (
-          <div className={`flex flex-col items-center justify-center py-2 sm:py-3 transition-all flex-shrink-0 ${isSelected
+          <div className={`flex flex-col items-center justify-center py-2 sm:py-3 transition-all w-full ${isSelected
             ? 'bg-[#FE6900] text-white shadow-md'
             : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-            } w-[80px] sm:w-[100px] md:w-[120px] h-[60px] sm:h-[75px] md:h-[90px]`}>
-            <div className="text-sm sm:text-base md:text-lg font-medium">{date.format("D/M")}</div>
+            } h-[60px] sm:h-[75px] md:h-[90px]`}>
+            <div className="text-xs sm:text-base md:text-lg font-medium">{date.format("D/M")}</div>
             <div className={`text-xs sm:text-sm md:text-base ${isSelected ? 'text-white' : 'text-gray-500'}`}>
               {getVietnameseDay(date.day())}
             </div>
@@ -56,15 +56,15 @@ const DateSelector: React.FC<DateSelectorProps> = ({
         📅 Chọn ngày đặt sân
       </h2>
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-3 lg:gap-4">
         {/* Hiển thị ngày responsive */}
-        <div className=" overflow-x-auto">
-          <div className="flex rounded-lg border overflow-hidden border-gray-200 min-w-max">
+        <div className="w-full lg:flex-1 overflow-hidden">
+          <div className="flex rounded-lg border border-gray-200 overflow-hidden">
             {dates.slice(0, 7).map((date) => (
               <div
                 key={date.key}
                 onClick={() => onDateChange(date.key)}
-                className="cursor-pointer flex-shrink-0"
+                className="cursor-pointer flex-1 min-w-0"
               >
                 {date.label}
               </div>
@@ -78,13 +78,13 @@ const DateSelector: React.FC<DateSelectorProps> = ({
             setTempSelectedDate(selectedDate);
             setShowCalendar(!showCalendar);
           }}
-          className={`my-auto cursor-pointer flex-shrink-0 flex flex-col items-center justify-center py-3 px-4 transition-all duration-200 w-full sm:w-[100px] min-w-[100px] h-[60px] sm:h-[90px] rounded-lg border-2 border-dashed ${showCalendar
+          className={`cursor-pointer flex-shrink-0 flex flex-col items-center justify-center py-3 px-2 lg:px-4 transition-all duration-200 w-full lg:w-[100px] h-[60px] lg:h-[90px] rounded-lg border-2 border-dashed ${showCalendar
             ? 'border-[#FE6900] bg-orange-50'
             : 'bg-gray-100 text-gray-600  border-gray-300 hover:border-[#FE6900]'
             }`}
         >
-          <CalendarOutlined className="text-lg sm:text-xl mb-1" />
-          <div className="text-xs sm:text-sm font-medium">Khác</div>
+          <CalendarOutlined className="text-sm lg:text-xl mb-1" />
+          <div className="text-xs lg:text-sm font-medium">Khác</div>
         </div>
       </div>
     </div>

@@ -160,6 +160,23 @@ const Detail = () => {
                   Danh sách sân ({selectedDate.format("DD/MM/YYYY")})
                 </h2>
               </div>
+
+              {/* Menu filter trạng thái */}
+              <div className="flex flex-wrap gap-6 mb-6 text-sm justify-center">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-blue-100 border border-blue-300 rounded"></div>
+                  <span>Trống</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-orange-200 border border-orange-300 rounded"></div>
+                  <span>Đã đặt</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-gray-100 border border-gray-200 rounded"></div>
+                  <span>Đã qua</span>
+                </div>
+              </div>
+
                   <FieldsList
                     fields={fields}
                     filteredFields={filteredFields}
