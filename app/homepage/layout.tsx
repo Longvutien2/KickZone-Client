@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { AimOutlined, BellOutlined, CalendarOutlined, HomeOutlined, LoginOutlined, LogoutOutlined, ThunderboltOutlined, TrophyOutlined, UserOutlined, MenuOutlined, CloseOutlined } from "@ant-design/icons";
 import { Breadcrumb, Dropdown, Layout, Menu, theme, Drawer, Button } from 'antd';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useDispatch, useSelector } from 'react-redux';
 import { signout } from '@/features/auth.slice';
 import { RootStateType } from '@/models/type';
@@ -99,15 +100,9 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
         Quản lý sân bóng
       </div>,
       icon: <UserOutlined />,
-      path: "/manager/quanLiSanBong",
+      path: "/manager/orders-schedule",
       className: 'bg-red-50 border-l-4 border-red-500 hover:bg-red-100'
     },
-    // user.value.user?.role === 2 && {
-    //   key: "admin",
-    //   label: "Admin",
-    //   icon: <UserOutlined />,
-    //   path: "/admin",
-    // },
   ]
   // Tạo mảng items chứa thông tin menu
   const items = [
@@ -143,16 +138,31 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
     <Layout style={{ minHeight: '100vh' }}>
       {/* Desktop Sidebar */}
       <Sider
-        width={"15%"}
+        width={"13%"}
         collapsible
         collapsed={collapsed}
         onCollapse={setCollapsed}
         style={{ backgroundColor: "white" }}
         className="bg-white hidden lg:block"
       >
-        <div className="flex items-center gap-2 py-4 px-6">
+        <div className={`py-4 ${collapsed ? 'px-2 flex justify-center' : 'px-6'}`}>
           <Link href={`/`}>
-            <img src="/newPts.png" alt="" className="h-12" />
+            {collapsed ?
+              <Image
+                src="/logo.jpg"
+                alt="KichZone Logo"
+                width={32}
+                height={32}
+              />
+              :
+              <Image
+                src="/newPts.png"
+                alt="KichZone Logo"
+                width={150}
+                height={150}
+              />
+
+            }
           </Link>
         </div>
         <div className="flex flex-col h-full">
@@ -243,6 +253,18 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
       </Drawer>
 
       <Layout>
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            /* Đổi màu trigger button của Sider thành cam */
+            .ant-layout-sider-trigger {
+              background-color: #E5E7EB !important;
+              color: black !important;
+            }
+            .ant-layout-sider-trigger:hover {
+              background-color: #D1D5DC !important;
+            }
+          `
+        }} />
         <Header className="bg-white px-4 lg:px-8 flex items-center justify-between">
           {/* Mobile Menu Button */}
           <Button

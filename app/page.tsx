@@ -58,7 +58,7 @@ const HomePage = () => {
           <div className="flex items-center">
             <div className="text-2xl font-bold text-gray-800 flex items-center gap-2">
               <div>
-                <img src="../222.png" alt="" width={150} />
+                <Image src="/newPts.png" alt="" width={150} height={150} />
               </div>
             </div>
           </div>

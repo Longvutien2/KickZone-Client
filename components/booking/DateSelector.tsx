@@ -58,7 +58,7 @@ const DateSelector: React.FC<DateSelectorProps> = ({
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         {/* Hiển thị ngày responsive */}
-        <div className="w-full overflow-x-auto">
+        <div className=" overflow-x-auto">
           <div className="flex rounded-lg border overflow-hidden border-gray-200 min-w-max">
             {dates.slice(0, 7).map((date) => (
               <div
@@ -78,7 +78,7 @@ const DateSelector: React.FC<DateSelectorProps> = ({
             setTempSelectedDate(selectedDate);
             setShowCalendar(!showCalendar);
           }}
-          className={`cursor-pointer flex-shrink-0 flex flex-col items-center justify-center py-3 px-4 transition-all duration-200 w-full sm:w-[100px] min-w-[100px] h-[60px] sm:h-[90px] rounded-lg border-2 border-dashed ${showCalendar
+          className={`my-auto cursor-pointer flex-shrink-0 flex flex-col items-center justify-center py-3 px-4 transition-all duration-200 w-full sm:w-[100px] min-w-[100px] h-[60px] sm:h-[90px] rounded-lg border-2 border-dashed ${showCalendar
             ? 'border-[#FE6900] bg-orange-50'
             : 'bg-gray-100 text-gray-600  border-gray-300 hover:border-[#FE6900]'
             }`}

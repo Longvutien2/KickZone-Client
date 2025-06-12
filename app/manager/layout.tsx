@@ -87,9 +87,9 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
             path: "/manager/myField"
         },
         {
-            key: "quanLiSanBong",
-            label: <Link href="/manager/quanLiSanBong"><FieldTimeOutlined /> Lịch đặt sân</Link>,
-            path: "/manager/quanLiSanBong"
+            key: "orders-schedule",
+            label: <Link href="/manager/orders-schedule"><FieldTimeOutlined /> Lịch đặt sân</Link>,
+            path: "/manager/orders-schedule"
         },
         {
             key: "orders",
@@ -100,13 +100,15 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
             key: "notification",
             label: (
                 <Link href="/manager/notification" className="flex items-center gap-2">
-                    <BellOutlined />
-                    <span>Thông báo</span>
+                    <div className="flex">
+                        <BellOutlined />
+                        <div className="ml-1">Thông báo</div>
+                    </div>
                     {notification?.filter((item: any) =>
                         item.actor === "manager" &&
                         !item.read
                     ).length > 0 && (
-                            <span className="ml-1 text-white bg-red-500 text-xs font-bold rounded-full px-2 py-0.5">
+                            <span className=" text-white bg-red-500 text-xs font-bold rounded-full px-2 py-0.5">
                                 {notification.filter((item: any) =>
                                     item.actor === "manager" &&
                                     !item.read
@@ -117,11 +119,6 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
             ),
             path: "/manager/notification"
         },
-        // {
-        //     key: "doiCuaToi",
-        //     label: <Link href="/manager/doiCuaToi"><TeamOutlined /> Quản lý nhân viên</Link>,
-        //     path: "/manager/doiCuaToi"
-        // },
     ];
 
     // Tìm key hiện tại dựa theo pathname
@@ -130,23 +127,26 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
     return (
         <Layout className="min-h-screen">
             <Sider width={220} className="bg-white text-gray-800 shadow-md">
-                <div className="p-5 text-lg font-bold text-blue-600 border-b border-gray-100">KichZone</div>
+                <Link href="/">
+                    <div className="p-5 text-lg font-bold text-blue-600 border-b border-gray-100 hover:text-[#FE6900]">KichZone</div>
+                </Link>
                 <Menu
                     theme="light"
                     mode="inline"
                     selectedKeys={[selectedKey || "/"]}
                     items={items}
-                    className="border-r-0"
+                    className="border-r-0 custom-menu"
                     style={{
                         borderRight: 'none',
                     }}
                 />
             </Sider>
             <Layout>
-                <Header className="bg-white shadow-sm px-8">
-                    <div className="text-right text-[16px]">
-                        <UserOutlined className="mr-2" /> Vũ Tiến Long
-                    </div>
+                <Header className="bg-white shadow-sm px-8 text-right">
+                    <Link href="/homepage/profile">
+                        <UserOutlined className="mr-2" />
+                        {user.value.user?.name}
+                    </Link>
                 </Header>
                 {children}
             </Layout>
