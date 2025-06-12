@@ -248,7 +248,7 @@ const OccupancyChart: React.FC<OccupancyChartProps> = ({
                                             bookedSlots: item.bookedSlots,
                                             totalSlots: item.totalSlots
                                         }))}
-                                        margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                                        margin={{ top: 20, right: 30, left: 20}}
                                     >
                                         <CartesianGrid strokeDasharray="3 3" />
                                         <XAxis 
@@ -301,14 +301,14 @@ const OccupancyChart: React.FC<OccupancyChartProps> = ({
                                             bookedSlots: item.bookedSlots,
                                             totalSlots: item.totalSlots
                                         }))}
-                                        margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                                        margin={{ top: 20, right: 30, left: 20}}
                                     >
                                         <CartesianGrid strokeDasharray="3 3" />
                                         <XAxis 
                                             dataKey="week"
                                             angle={-45}
                                             textAnchor="end"
-                                            height={80}
+                                            height={60}
                                             interval={0}
                                             fontSize={12}
                                         />
@@ -354,14 +354,14 @@ const OccupancyChart: React.FC<OccupancyChartProps> = ({
                                             bookedSlots: item.bookedSlots,
                                             totalSlots: item.totalSlots
                                         }))}
-                                        margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                                        margin={{ top: 20, right: 30, left: 20}}
                                     >
                                         <CartesianGrid strokeDasharray="3 3" />
                                         <XAxis 
                                             dataKey="month"
                                             angle={-45}
                                             textAnchor="end"
-                                            height={80}
+                                            height={60}
                                             interval={0}
                                             fontSize={12}
                                         />

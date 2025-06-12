@@ -257,7 +257,7 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
                                             date: item.formattedDate,
                                             revenue: item.revenue
                                         }))}
-                                        margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                                        margin={{ top: 20, right: 30, left: 20}}
                                     >
                                         <CartesianGrid strokeDasharray="3 3" />
                                         <XAxis 
@@ -294,14 +294,14 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
                                             week: item.week.replace('Tuần ', 'T'),
                                             revenue: item.revenue
                                         }))}
-                                        margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                                        margin={{ top: 20, right: 30, left: 20}}
                                     >
                                         <CartesianGrid strokeDasharray="3 3" />
                                         <XAxis 
                                             dataKey="week"
                                             angle={-45}
                                             textAnchor="end"
-                                            height={80}
+                                            height={60}
                                             interval={0}
                                             fontSize={12}
                                         />
@@ -331,14 +331,14 @@ const RevenueChart: React.FC<RevenueChartProps> = ({
                                             month: item.month.replace('Tháng ', 'T'),
                                             revenue: item.revenue
                                         }))}
-                                        margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                                        margin={{ top: 20, right: 30, left: 20}}
                                     >
                                         <CartesianGrid strokeDasharray="3 3" />
                                         <XAxis 
                                             dataKey="month"
                                             angle={-45}
                                             textAnchor="end"
-                                            height={80}
+                                            height={60}
                                             interval={0}
                                             fontSize={12}
                                         />
