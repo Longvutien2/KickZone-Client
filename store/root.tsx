@@ -7,7 +7,6 @@ import timeSlotSlice from '../features/timeSlot.slice';
 import teamSlice from '../features/team.slice';
 import matchSlice from '../features/match.slice';
 import breadcrumbSlice from '../features/breadcrumb.slice';
-import bookingSlice from '../features/booking.slice';
 import userSlice from '../features/user.slice';
 import orderSlice from '../features/order.slice';
 import matchRequestSlice from '../features/matchRequest.slice';
@@ -23,7 +22,6 @@ const rootReducer = combineReducers({
     match: matchSlice,
     matchRequest: matchRequestSlice,
     breadcrumb: breadcrumbSlice,
-    booking:bookingSlice,
     user: userSlice,
     order: orderSlice
 });

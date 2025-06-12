@@ -19,7 +19,6 @@ import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getListNotificationManagerSlice, getListNotificationSlice } from "@/features/notification.slice";
-import { getListBookingsSlice } from "@/features/booking.slice";
 import { toast } from "react-toastify";
 import { io } from "socket.io-client";
 
@@ -29,7 +28,6 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
     const pathname = usePathname();
     const user = useAppSelector(state => state.auth)
     const notifications = useAppSelector(state => state.notification.value);
-    const bookings = useAppSelector(state => state.booking.value);
     const dispatch = useAppDispatch();
     const [notification, setNotification] = useState<any>([]);
 
@@ -58,7 +56,6 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
         const getData = async () => {
             if (user.isLoggedIn) {
                 const data = await dispatch(getListNotificationManagerSlice("manager"))
-                await dispatch(getListBookingsSlice())
                 setNotification(data.payload);
             }
         }

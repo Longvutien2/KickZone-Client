@@ -13,7 +13,6 @@ import { AppDispatch } from '@/store/store';
 import { Header } from 'antd/es/layout/layout';
 import CustomBreadcrumb from '@/components/Breadcrumb';
 import { useAppSelector } from '@/store/hook';
-import { getListBookingsSlice } from '@/features/booking.slice';
 import io from 'socket.io-client';
 import { toast } from 'react-toastify';
 
@@ -57,7 +56,6 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
     const getData = async () => {
       if (user.isLoggedIn) {
         const data = await dispatch(getListNotificationSlice({ id: user.value.user._id as string, role: "user" }))
-        await dispatch(getListBookingsSlice())
         setNotification(data.payload);
       }
     }
