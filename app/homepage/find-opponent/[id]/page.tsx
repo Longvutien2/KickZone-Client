@@ -16,15 +16,14 @@ import dayjs from 'dayjs';
 import { getMatchRequestsByMatchSlice } from '@/features/matchRequest.slice';
 import MatchRequestModal from '@/components/find-opponent/MatchRequestModal';
 import MatchRequestHandler from '@/components/find-opponent/MatchRequestHandler';
+import CommentSection from '@/components/comments/CommentSection';
 
 
 const MatchDetail = () => {
     const match = useAppSelector((state: any) => state.match.detail)
     const matchRequest = useAppSelector((state: any) => state.matchRequest.value)
-
     const auth = useAppSelector((state) => state.auth)
     const [dataTeam, setDataTeams] = useState<Team[]>();
-
 
     const { id } = useParams();
     const dispatch = useAppDispatch();
@@ -393,16 +392,11 @@ const MatchDetail = () => {
                 </div>
 
                 {/* Bình luận */}
-                <div className="mt-6">
-                    <h3 className="font-semibold text-lg">Bình luận (0)</h3>
-                    <div className="flex items-center justify-between mt-2">
-                        <input
-                            type="text"
-                            className="w-full p-2 border border-gray-300 rounded-md text-sm"
-                            placeholder="Viết bình luận ..."
-                        />
-                    </div>
-                </div>
+                <CommentSection
+                    matchId={id as string}
+                    isLoggedIn={auth.isLoggedIn}
+                    currentUser={auth.value?.user}
+                />
             </div>
         )
     );

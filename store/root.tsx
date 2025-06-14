@@ -10,6 +10,7 @@ import breadcrumbSlice from '../features/breadcrumb.slice';
 import userSlice from '../features/user.slice';
 import orderSlice from '../features/order.slice';
 import matchRequestSlice from '../features/matchRequest.slice';
+import commentSlice from '../features/comment.slice';
 
 
 const rootReducer = combineReducers({
@@ -21,6 +22,7 @@ const rootReducer = combineReducers({
     team: teamSlice,
     match: matchSlice,
     matchRequest: matchRequestSlice,
+    comment: commentSlice,
     breadcrumb: breadcrumbSlice,
     user: userSlice,
     order: orderSlice

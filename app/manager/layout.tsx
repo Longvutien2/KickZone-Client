@@ -31,8 +31,8 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
     const dispatch = useAppDispatch();
     const [notification, setNotification] = useState<any>([]);
 
-    const socket = io(process.env.NEXT_PUBLIC_API_BACKEND_IO);
     useEffect(() => {
+        const socket = io(process.env.NEXT_PUBLIC_API_BACKEND_IO);
         socket.on('pushNotification', (data: any) => {
             data && setNotification((prev: any) => [...prev, data]);
         });

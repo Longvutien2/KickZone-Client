@@ -33,8 +33,8 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
     // Xử lý đăng xuất tại đây (xóa token, điều hướng, v.v.)
   };
 
-  const socket = io(process.env.NEXT_PUBLIC_API_BACKEND_IO);
   useEffect(() => {
+    const socket = io(process.env.NEXT_PUBLIC_API_BACKEND_IO);
     socket.on('pushNotification', (data: any) => {
       notifications.filter((item: any) => item.targetUser === data.targetUser).length > 0 && setNotification((prev: any) => [...prev, data]);
     });
@@ -136,7 +136,7 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
     <Layout style={{ minHeight: '100vh' }}>
       {/* Desktop Sidebar */}
       <Sider
-        width={"13%"}
+        width={"15%"}
         collapsible
         collapsed={collapsed}
         onCollapse={setCollapsed}
