@@ -48,8 +48,8 @@ const Register = () => {
               <Image src="/222.png" alt="KichZone Logo" width={180} height={90} priority className="h-20 w-auto filter brightness-0 invert" />
             </div>
 
-            <h1 className="text-xl md:text-2xl lg:text-3xl font-bold mb-2">Tham gia KichZone ngay hôm nay</h1>
-            <p className="text-orange-100 mb-4 md:mb-6 lg:mb-8 text-sm md:text-base lg:text-lg">Khởi đầu hành trình bóng đá của bạn</p>
+            <h1 className="text-xl md:text-2xl lg:text-3xl font-bold mb-2">Gia nhập cộng đồng KichZone</h1>
+            <p className="text-orange-100 mb-4 md:mb-6 lg:mb-8 text-sm md:text-base lg:text-lg">Bắt đầu hành trình đặt sân và tìm đối thủ</p>
 
             <div className="space-y-4 md:space-y-6">
               <div className="flex items-start space-x-4">
@@ -57,8 +57,8 @@ const Register = () => {
                   <span className="text-white font-bold">✓</span>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-xl mb-1">Tìm sân nhanh chóng</h3>
-                  <p className="text-orange-100">Hệ thống tìm kiếm thông minh, đặt sân chỉ trong vài phút</p>
+                  <h3 className="font-semibold text-xl mb-1">Đặt sân mọi lúc</h3>
+                  <p className="text-orange-100">Tìm kiếm và đặt sân bóng đá 24/7 trên toàn quốc</p>
                 </div>
               </div>
 
@@ -67,8 +67,8 @@ const Register = () => {
                   <span className="text-white font-bold">✓</span>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-xl mb-1">Tìm đối thủ phù hợp</h3>
-                  <p className="text-orange-100">Kết nối với các đội bóng cùng trình độ trong khu vực</p>
+                  <h3 className="font-semibold text-xl mb-1">Thách đấu đối thủ</h3>
+                  <p className="text-orange-100">Tìm kiếm và thách đấu với hàng nghìn đội bóng</p>
                 </div>
               </div>
 
@@ -77,8 +77,8 @@ const Register = () => {
                   <span className="text-white font-bold">✓</span>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-xl mb-1">Hệ thống xếp hạng chuyên nghiệp</h3>
-                  <p className="text-orange-100">Theo dõi thành tích và nhận thưởng hấp dẫn</p>
+                  <h3 className="font-semibold text-xl mb-1">Cộng đồng sôi động</h3>
+                  <p className="text-orange-100">Tham gia cộng đồng bóng đá lớn nhất Việt Nam</p>
                 </div>
               </div>
             </div>

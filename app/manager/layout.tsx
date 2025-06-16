@@ -89,6 +89,11 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
             path: "/manager/orders-schedule"
         },
         {
+            key: "matches",
+            label: <Link href="/manager/matches"><TeamOutlined /> Quản lý trận đấu</Link>,
+            path: "/manager/matches"
+        },
+        {
             key: "orders",
             label: <Link href="/manager/orders"><ShoppingCartOutlined /> Quản lý đơn hàng</Link>,
             path: "/manager/orders"

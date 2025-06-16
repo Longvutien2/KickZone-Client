@@ -75,6 +75,7 @@ const QuanLiSanBong = () => {
         const isToday = date.isSame(dayjs(), 'day');
         const isSelected = date.format('YYYY-MM-DD') === selectedDate.format('YYYY-MM-DD');
         const isCurrentMonth = date.month() === dayjs(selectedDate).month();
+        const isPastDate = date.isBefore(dayjs(), 'day'); // Kiểm tra ngày đã qua
 
         return (
             <div
@@ -83,6 +84,7 @@ const QuanLiSanBong = () => {
                     ${isSelected ? 'bg-blue-500 text-white shadow-md' : ''}
                     ${isToday && !isSelected ? 'border-2 border-blue-400 bg-blue-50' : ''}
                     ${!isCurrentMonth ? 'opacity-40' : ''}
+                    ${isPastDate && !isSelected ? 'opacity-50' : ''}
                     hover:shadow-md hover:border-blue-300
                 `}
                 onClick={() => handleDateChange(date)}

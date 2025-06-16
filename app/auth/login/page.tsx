@@ -61,8 +61,8 @@ const LoginPage = () => {
               <Image src="/222.png" alt="KichZone Logo" width={180} height={90} priority className="h-20 w-auto filter brightness-0 invert" />
             </div>
 
-            <h1 className="text-xl md:text-2xl lg:text-3xl font-bold mb-2">Chào mừng đến với KichZone</h1>
-            <p className="text-orange-100 mb-4 md:mb-6 lg:mb-8 text-sm md:text-base lg:text-lg">Nền tảng đặt sân bóng đá hàng đầu Việt Nam</p>
+            <h1 className="text-xl md:text-2xl lg:text-3xl font-bold mb-2">Chào mừng trở lại KichZone</h1>
+            <p className="text-orange-100 mb-4 md:mb-6 lg:mb-8 text-sm md:text-base lg:text-lg">Nền tảng đặt sân và tìm đối thủ hàng đầu Việt Nam</p>
 
             <div className="space-y-4 md:space-y-6">
               <div className="flex items-start space-x-4">
@@ -70,8 +70,8 @@ const LoginPage = () => {
                   <span className="text-wihite font-bold text-xl">✓</span>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg mb-1">Tìm sân nhanh chóng</h3>
-                  <p className="text-orange-100">Hệ thống tìm kiếm thông minh, đặt sân chỉ trong vài phút</p>
+                  <h3 className="font-semibold text-lg mb-1">Đặt sân dễ dàng</h3>
+                  <p className="text-orange-100">Tìm kiếm và đặt sân bóng đá chỉ trong vài phút</p>
                 </div>
               </div>
 
@@ -80,8 +80,8 @@ const LoginPage = () => {
                   <span className="text-wihite font-bold text-xl">✓</span>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg mb-1">Tìm đối thủ phù hợp</h3>
-                  <p className="text-orange-100">Kết nối với các đội bóng cùng trình độ trong khu vực</p>
+                  <h3 className="font-semibold text-lg mb-1">Kết nối đối thủ</h3>
+                  <p className="text-orange-100">Tìm và thách đấu với các đội bóng cùng trình độ</p>
                 </div>
               </div>
 
@@ -90,8 +90,8 @@ const LoginPage = () => {
                   <span className="text-wihite font-bold text-xl">✓</span>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg mb-1">Hệ thống xếp hạng chuyên nghiệp</h3>
-                  <p className="text-orange-100">Theo dõi thành tích và nhận thưởng hấp dẫn</p>
+                  <h3 className="font-semibold text-lg mb-1">Quản lý trận đấu</h3>
+                  <p className="text-orange-100">Theo dõi lịch thi đấu của đội bóng</p>
                 </div>
               </div>
             </div>
@@ -148,7 +148,7 @@ const LoginPage = () => {
                   iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
                 />
               </Form.Item>
-
+              {/* 
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 space-y-2 sm:space-y-0">
                 <Form.Item name="remember" valuePropName="checked" noStyle>
                   <Checkbox className="text-gray-600">
@@ -158,7 +158,7 @@ const LoginPage = () => {
                 <Link href="#" className="text-xs sm:text-sm text-orange-400 hover:text-orange-500 font-medium">
                   Quên mật khẩu?
                 </Link>
-              </div>
+              </div> */}
 
               <Form.Item className="mb-4 sm:mb-6">
                 <Button
