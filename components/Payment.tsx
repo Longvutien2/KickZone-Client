@@ -256,7 +256,7 @@ const PaymentQR: FC<PaymentQRProps> = ({
                                     <tr>
                                         <td className="py-2 font-medium">Số tài khoản:</td>
                                         <td className="font-mono">
-                                            {'VQRQACMYR4474'}
+                                            {'29777777729'}
                                         </td>
                                     </tr>
                                     <tr>

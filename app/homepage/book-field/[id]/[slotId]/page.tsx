@@ -134,7 +134,7 @@ const BookingPage = () => {
 
             const orderId = `${Date.now()}`;
             // Tạo URL VietQR
-            const vietQrUrl = `https://qr.sepay.vn/img?acc=VQRQACMYR4474&bank=MBBank&amount=${amount}&des=DH${description}`;
+            const vietQrUrl = `https://qr.sepay.vn/img?acc=29777777729&bank=MBBank&amount=${amount}&des=DH${description}`;
             setOrderId(orderId);
             setQrContent(vietQrUrl);
         }
@@ -206,7 +206,7 @@ const BookingPage = () => {
                         timeStart: fieldData.timeStart,
                         date: fieldData.date,
                         gateway: "MBBank", // Cả banking và QR đều dùng MBBank
-                        accountNumber: selectedPayment === "qr" ? "29777777729" : "VQRQACMYR4474",
+                        accountNumber: "29777777729",
                         amount: fieldData.price as number,
                         content: `${fieldData.field} ${fieldData.date} ${fieldData.timeStart} ${values.phone}`,
                         paymentStatus: "pending" as PaymentStatus,
@@ -487,7 +487,7 @@ const BookingPage = () => {
                                                                         <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
                                                                             <span className="font-medium text-gray-700">Số tài khoản:</span>
                                                                             <div className="flex items-center gap-2">
-                                                                                <span className="font-mono font-semibold text-lg bg-gray-100 px-2 py-1 rounded">VQRQACMYR4474</span>
+                                                                                <span className="font-mono font-semibold text-lg bg-gray-100 px-2 py-1 rounded">29777777729</span>
                                                                             </div>
                                                                         </div>
                                                                         <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
@@ -507,7 +507,7 @@ const BookingPage = () => {
                                                                     <ol className="text-sm text-blue-700 space-y-1 list-decimal list-inside">
                                                                         <li>Mở ứng dụng MBBank hoặc Internet Banking</li>
                                                                         <li>Chọn chuyển khoản đến tài khoản MBBank</li>
-                                                                        <li>Nhập số tài khoản: <strong>VQRQACMYR4474</strong></li>
+                                                                        <li>Nhập số tài khoản: <strong>29777777729</strong></li>
                                                                         <li>Nhập số tiền: <strong>{fieldData?.price?.toLocaleString()} VNĐ</strong></li>
                                                                         <li>Nhập nội dung: <strong>{fieldData?.field} {fieldData?.date} {fieldData?.timeStart}</strong></li>
                                                                         <li>Xác nhận và hoàn tất giao dịch</li>
