@@ -228,9 +228,6 @@ const BookingPage = () => {
         setConfirmModalVisible(false);
     };
 
-    // Auto cleanup orders pending khi component mount
-    useOrderCleanup(true);
-
     useEffect(() => {
         if (id && slotId) {
             const getData = async () => {

@@ -20,17 +20,17 @@ export const performOrderCleanup = async () => {
 };
 
 /**
- * Setup interval để tự động cleanup mỗi 5 phút
+ * Setup interval để tự động cleanup mỗi 24h
  * Chỉ nên chạy ở một nơi (ví dụ: layout chính)
  */
 export const setupAutoCleanup = () => {
   // Cleanup ngay khi setup
   performOrderCleanup();
   
-  // Setup interval cleanup mỗi 5 phút
+  // Setup interval cleanup mỗi 24h
   const intervalId = setInterval(() => {
     performOrderCleanup();
-  }, 5 * 60 * 1000); // 5 phút
+  }, 24 * 60 * 60 * 1000);
 
   // Return function để clear interval khi cần
   return () => clearInterval(intervalId);

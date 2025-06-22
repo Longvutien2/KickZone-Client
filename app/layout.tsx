@@ -11,11 +11,9 @@ import { setupAutoCleanup } from '@/utils/orderCleanup';
 import { SWRConfig } from 'swr';
 
 function AppContent({ children }: { children: ReactNode }) {
-  // Setup auto-cleanup cho toàn bộ app
+  // ✅ Setup auto-cleanup thông minh - 1 lần/ngày
   useEffect(() => {
     const cleanup = setupAutoCleanup();
-
-    // Cleanup khi component unmount
     return cleanup;
   }, []);
 

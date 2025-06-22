@@ -46,7 +46,7 @@ export function useFieldPageData(footballFieldId: string | undefined) {
     };
 
     loadData();
-  }, [footballFieldId, dispatch, reduxFields.length, reduxTimeSlots.length, reduxOrders.length]); // Chỉ depend vào footballFieldId và dispatch
+  }, [footballFieldId]); // ✅ Chỉ depend vào footballFieldId để tránh infinite re-renders
 
 
 

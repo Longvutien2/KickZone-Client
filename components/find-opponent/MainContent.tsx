@@ -73,10 +73,14 @@ const MainContent = memo(() => {
         }
     };
 
-    // Fetch data khi component mount
+    // ✅ Fetch data với debouncing để tránh spam calls
     useEffect(() => {
-        fetchAllData();
-    }, [footballFields, dispatch]);
+        const timeoutId = setTimeout(() => {
+            fetchAllData();
+        }, 300); // Debounce 300ms
+
+        return () => clearTimeout(timeoutId);
+    }, [footballFields._id]); // Chỉ depend vào ID, không phải toàn bộ object
 
 
     // Lọc trận đấu dựa trên các bộ lọc - Optimized with useMemo

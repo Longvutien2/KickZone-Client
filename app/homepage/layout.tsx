@@ -34,33 +34,58 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    const socket = io(process.env.NEXT_PUBLIC_API_BACKEND_IO);
-    socket.on('pushNotification', (data: any) => {
-      notifications.filter((item: any) => item.targetUser === data.targetUser).length > 0 && setNotification((prev: any) => [...prev, data]);
-    });
-    socket.on('updateNotification', (data: any) => {
-      setNotification((prev: any) =>
-        prev.map((item: any) =>
-          item._id === data._id ? data : item
-        )
-      );
-    });
+    // ✅ Chỉ tạo socket connection khi user đã login và có ID
+    if (!user.isLoggedIn || !user.value.user._id) return;
 
-    return () => {
-      socket.off('pushNotification');
-      socket.off('updateNotification');
-    };
-  }, []);
+    // ✅ Debounce socket connection để tránh tạo nhiều connection
+    const timeoutId = setTimeout(() => {
+      const socket = io(process.env.NEXT_PUBLIC_API_BACKEND_IO, {
+        // ✅ Tối ưu socket connection
+        transports: ['websocket'], // Chỉ dùng websocket, không fallback
+        upgrade: false,
+        rememberUpgrade: false,
+        timeout: 20000,
+        forceNew: false, // Reuse existing connection
+        query: {
+          userId: user.value.user._id // Gửi userId để server biết
+        }
+      });
+
+      socket.on('pushNotification', (data: any) => {
+        if (data.targetUser === user.value.user._id) {
+          setNotification((prev: any) => [...prev, data]);
+        }
+      });
+
+      socket.on('updateNotification', (data: any) => {
+        setNotification((prev: any) =>
+          prev.map((item: any) =>
+            item._id === data._id ? data : item
+          )
+        );
+      });
+
+      // ✅ Store socket reference for cleanup
+      return () => {
+        socket.off('pushNotification');
+        socket.off('updateNotification');
+        socket.disconnect();
+      };
+    }, 500); // Debounce 500ms
+
+    // ✅ Cleanup timeout nếu component unmount trước khi socket được tạo
+    return () => clearTimeout(timeoutId);
+  }, [user.isLoggedIn, user.value.user._id]); // Chỉ depend vào login status và user ID
 
   useEffect(() => {
     const getData = async () => {
-      if (user.isLoggedIn) {
+      if (user.isLoggedIn && user.value.user._id) {
         const data = await dispatch(getListNotificationSlice({ id: user.value.user._id as string, role: "user" }))
         setNotification(data.payload);
       }
     }
     getData();
-  }, [user]);
+  }, [user.isLoggedIn, user.value.user._id]); // ✅ Chỉ depend vào login status và user ID
 
   const {
     token: { colorBgContainer, borderRadiusLG },
