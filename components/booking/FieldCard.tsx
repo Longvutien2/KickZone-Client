@@ -37,6 +37,9 @@ interface FieldCardProps {
   orders: Order[];
   selectedDate: Dayjs;
   isLoggedIn: boolean;
+  selectedTimeSlot?: string | null;
+  priceRange?: [number, number];
+  showAvailableOnly?: boolean;
 }
 
 const FieldCard: React.FC<FieldCardProps> = ({
@@ -44,8 +47,36 @@ const FieldCard: React.FC<FieldCardProps> = ({
   timeslots,
   orders,
   selectedDate,
-  isLoggedIn
+  isLoggedIn,
+  selectedTimeSlot,
+  priceRange,
+  showAvailableOnly
 }) => {
+  // Filter timeSlots theo điều kiện
+  const filteredTimeSlots = timeslots.filter((slot: TimeSlot) => {
+    // Lọc theo khung giờ
+    if (selectedTimeSlot && slot.time !== selectedTimeSlot) return false;
+
+    // Lọc theo giá
+    if (priceRange) {
+      const price = parseInt(slot.price);
+      if (price < priceRange[0] || price > priceRange[1]) return false;
+    }
+
+    // Lọc chỉ hiển thị sân trống
+    if (showAvailableOnly) {
+      const isBooked = Array.isArray(orders) && orders.length > 0 && orders.some(
+        (o: Order) =>
+          o.date === selectedDate.format('DD-MM-YYYY') &&
+          o.fieldName === field.name &&
+          o.timeStart === slot.time &&
+          o.paymentStatus === "success"
+      );
+      if (isBooked) return false;
+    }
+
+    return true;
+  });
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
       <Collapse
@@ -83,10 +114,10 @@ const FieldCard: React.FC<FieldCardProps> = ({
                     </p>
                   </div>
                 ) : (
-                  Array.isArray(timeslots) && timeslots.length > 0 ? (
+                  Array.isArray(filteredTimeSlots) && filteredTimeSlots.length > 0 ? (
                     <div>
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 p-1">
-                        {timeslots.map((slot: TimeSlot, idx: number) => {
+                        {filteredTimeSlots.map((slot: TimeSlot, idx: number) => {
                           // Check if slot is already booked
                           const isBooked = Array.isArray(orders) && orders.length > 0 && orders.some(
                             (o: Order) =>

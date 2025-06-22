@@ -13,6 +13,9 @@ interface FieldsListProps {
   selectedDate: Dayjs;
   isLoggedIn: boolean;
   isLoading: boolean;
+  selectedTimeSlot?: string | null;
+  priceRange?: [number, number];
+  showAvailableOnly?: boolean;
 }
 
 const FieldsList: React.FC<FieldsListProps> = ({
@@ -22,7 +25,10 @@ const FieldsList: React.FC<FieldsListProps> = ({
   orders,
   selectedDate,
   isLoggedIn,
-  isLoading
+  isLoading,
+  selectedTimeSlot,
+  priceRange,
+  showAvailableOnly
 }) => {
 
   // Nếu có data nhưng filteredFields rỗng
@@ -39,16 +45,23 @@ const FieldsList: React.FC<FieldsListProps> = ({
   // Render fields list
   return (
     <div className="space-y-4">
-      {filteredFields.map((field: Field, index: number) => (
-        <FieldCard
-          key={field._id || index}
-          field={field}
-          timeslots={timeslots}
-          orders={orders}
-          selectedDate={selectedDate}
-          isLoggedIn={isLoggedIn}
-        />
-      ))}
+      {filteredFields.map((field: Field, index: number) => {
+        // Vì timeSlots không có fieldId, truyền tất cả timeSlots cho FieldCard
+        // FieldCard sẽ tự filter theo field.name hoặc logic khác
+        return (
+          <FieldCard
+            key={field._id || index}
+            field={field}
+            timeslots={timeslots}
+            orders={orders}
+            selectedDate={selectedDate}
+            isLoggedIn={isLoggedIn}
+            selectedTimeSlot={selectedTimeSlot}
+            priceRange={priceRange}
+            showAvailableOnly={showAvailableOnly}
+          />
+        );
+      })}
     </div>
   );
 };

@@ -228,12 +228,15 @@ const BookingPage = () => {
         setConfirmModalVisible(false);
     };
 
+    // Auto cleanup orders pending khi component mount
+    useOrderCleanup(true);
+
     useEffect(() => {
         if (id && slotId) {
             const getData = async () => {
                 try {
-                    const fieldResponse = field.find((field:Field) => field._id === id) as any;
-                    const timeslotResponse = timeSlot.find((timeSlot:TimeSlot) => timeSlot._id === slotId) as any;
+                    const fieldResponse = field.find((field: Field) => field._id === id) as any;
+                    const timeslotResponse = timeSlot.find((timeSlot: TimeSlot) => timeSlot._id === slotId) as any;
 
                     if (fieldResponse && timeslotResponse) {
                         const mockData = {

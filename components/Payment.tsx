@@ -11,6 +11,7 @@ import { toast } from 'react-toastify';
 import { useAppDispatch } from '@/store/hook';
 import { BankOutlined } from '@ant-design/icons';
 import { checkOrderExists } from '@/utils/orderUtils';
+import { getListOrdersSlice } from '@/features/order.slice';
 
 interface PaymentQRProps {
     amount: number;
@@ -132,7 +133,7 @@ const PaymentQR: FC<PaymentQRProps> = ({
 
                             // Gửi thông báo khi thanh toán thành công
                             await sendNotifications();
-
+                            await dispatch(getListOrdersSlice())
                             // Thông báo cho component cha
                             if (onSuccess) onSuccess(true);
 

@@ -270,7 +270,7 @@ const ListField = () => {
                                             className="border border-gray-200"
                                             columns={columns}
                                             dataSource={filteredData}
-                                            pagination={{ pageSize: 5 }}
+                                            pagination={{ pageSize: 10 }}
                                         />
                                     </div>
                                 ),
@@ -289,7 +289,7 @@ const ListField = () => {
                                             className="border border-gray-200 mb-2"
                                             columns={subColumns}
                                             dataSource={timeSLotData || []}
-                                            pagination={{ pageSize: 5 }} />
+                                            pagination={{ pageSize: 10 }} />
                                     </div>
                                 ),
                             },

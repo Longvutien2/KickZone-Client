@@ -12,7 +12,7 @@ import { useFieldPageData } from "@/hooks/useFieldDataPure";
 
 // Import components - Core components (always needed)
 import DateSelector from "@/components/booking/DateSelector";
-import FieldTypeFilter from "@/components/booking/FieldTypeFilter";
+import CompactFilter from "@/components/booking/CompactFilter";
 
 // Sidebar components - load ngay (data đơn giản)
 import FieldInfoCard from "@/components/booking/FieldInfoCard";
@@ -52,6 +52,11 @@ const Detail = () => {
   const [showCalendar, setShowCalendar] = useState(false); // Hiển thị calendar inline
   const [tempSelectedDate, setTempSelectedDate] = useState<Dayjs>(dayjs()); // Ngày tạm chọn trong calendar
 
+  // Thêm state cho filter mới
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null); // Lọc theo khung giờ
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000000]); // Lọc theo giá
+  const [showAvailableOnly, setShowAvailableOnly] = useState<boolean>(false); // Chỉ hiển thị sân trống
+
   dayjs.locale("vi"); // Thiết lập ngôn ngữ cho Dayjs
 
   // 🚀 Error handling
@@ -84,11 +89,75 @@ const Detail = () => {
 
 
 
-  // 🚀 MEMOIZED FILTERED FIELDS - Chỉ tính toán lại khi fields hoặc selectedFieldType thay đổi
+  // 🚀 Tính maxPrice từ timeSlots
+  const maxPrice = useMemo(() => {
+    if (!timeslots || timeslots.length === 0) return 1000000;
+    return Math.max(...timeslots.map((slot: any) => slot.price || 0));
+  }, [timeslots]);
+
+  // 🚀 Cập nhật priceRange khi maxPrice thay đổi
+  useEffect(() => {
+    setPriceRange([0, maxPrice]);
+  }, [maxPrice]);
+
+
+
+  // 🚀 MEMOIZED FILTERED FIELDS - Lọc field có timeSlot phù hợp
   const filteredFields = useMemo(() => {
-    if (selectedFieldType === "all") return fields;
-    return fields.filter((field: Field) => field.people.toString() === selectedFieldType);
-  }, [fields, selectedFieldType]);
+    let filtered = fields;
+
+    // Lọc theo loại sân
+    if (selectedFieldType !== "all") {
+      filtered = filtered.filter((field: Field) => field.people.toString() === selectedFieldType);
+    }
+
+    // Chỉ áp dụng filter timeSlot khi user thực sự đã chọn filter
+    const hasActiveFilters = selectedTimeSlot ||
+                            priceRange[0] > 0 ||
+                            priceRange[1] < maxPrice ||
+                            showAvailableOnly;
+
+    if (hasActiveFilters) {
+      // Kiểm tra xem có timeSlots nào thỏa mãn điều kiện không
+      const hasValidTimeSlots = timeslots.some((slot: any) => {
+        // Lọc theo khung giờ
+        if (selectedTimeSlot && slot.time !== selectedTimeSlot) return false;
+
+        // Lọc theo giá
+        if (slot.price < priceRange[0] || slot.price > priceRange[1]) return false;
+
+        return true;
+      });
+
+      // Nếu không có timeSlot nào thỏa mãn, ẩn tất cả fields
+      if (!hasValidTimeSlots) {
+        filtered = [];
+      }
+
+      // Nếu có filter "chỉ hiển thị sân trống", filter theo field
+      if (showAvailableOnly && hasValidTimeSlots) {
+        filtered = filtered.filter((field: Field) => {
+          // Kiểm tra field này có ít nhất 1 timeSlot trống không
+          return timeslots.some((slot: any) => {
+            // Lọc theo khung giờ và giá trước
+            if (selectedTimeSlot && slot.time !== selectedTimeSlot) return false;
+            if (slot.price < priceRange[0] || slot.price > priceRange[1]) return false;
+
+            // Kiểm tra timeSlot này có trống cho field này không
+            const isBooked = orders.some((order: any) =>
+              order.date === selectedDate.format('DD-MM-YYYY') &&
+              order.fieldName === field.name &&
+              order.timeStart === slot.time &&
+              order.paymentStatus === "success"
+            );
+            return !isBooked;
+          });
+        });
+      }
+    }
+
+    return filtered;
+  }, [fields, selectedFieldType, selectedTimeSlot, priceRange, maxPrice, showAvailableOnly, timeslots, orders, selectedDate]);
 
 
 
@@ -147,10 +216,18 @@ const Detail = () => {
               />
             )}
 
-            {/* Bộ lọc loại sân responsive */}
-            <FieldTypeFilter
+            {/* Bộ lọc compact */}
+            <CompactFilter
               selectedFieldType={selectedFieldType}
               onFieldTypeChange={setSelectedFieldType}
+              selectedTimeSlot={selectedTimeSlot}
+              onTimeSlotChange={setSelectedTimeSlot}
+              priceRange={priceRange}
+              onPriceRangeChange={setPriceRange}
+              showAvailableOnly={showAvailableOnly}
+              onAvailableOnlyChange={setShowAvailableOnly}
+              timeSlots={timeslots}
+              maxPrice={maxPrice}
             />
 
             {/* Danh sách sân responsive */}
@@ -185,6 +262,9 @@ const Detail = () => {
                     selectedDate={selectedDate}
                     isLoggedIn={auth.isLoggedIn}
                     isLoading={isLoading}
+                    selectedTimeSlot={selectedTimeSlot}
+                    priceRange={priceRange}
+                    showAvailableOnly={showAvailableOnly}
                   />
             </div>
           </div>
