@@ -24,12 +24,20 @@ export function useFieldPageData(footballFieldId: string | undefined) {
       }
 
       try {
-        // Call tất cả API mỗi lần vào page
-        await Promise.all([
-          dispatch(getListFieldsSlice(footballFieldId)),
-          dispatch(getListTimeSlotsByFootballFieldId(footballFieldId)),
-          dispatch(getListOrdersSlice())
-        ]);
+        // Kiểm tra xem dữ liệu đã có trong Redux chưa
+        if (reduxFields.length === 0) {
+          await dispatch(getListFieldsSlice(footballFieldId));
+        }
+        
+        // Chỉ tải timeSlots khi cần
+        if (reduxTimeSlots.length === 0) {
+          await dispatch(getListTimeSlotsByFootballFieldId(footballFieldId));
+        }
+        
+        // Chỉ tải orders khi cần
+        if (reduxOrders.length === 0) {
+          await dispatch(getListOrdersSlice());
+        }
       } catch (error) {
         console.error('Error loading data:', error);
       } finally {
@@ -38,7 +46,7 @@ export function useFieldPageData(footballFieldId: string | undefined) {
     };
 
     loadData();
-  }, [footballFieldId, dispatch]); // Chỉ depend vào footballFieldId và dispatch
+  }, [footballFieldId, dispatch, reduxFields.length, reduxTimeSlots.length, reduxOrders.length]); // Chỉ depend vào footballFieldId và dispatch
 
 
 
@@ -166,3 +174,4 @@ export function useOrders() {
     refetch: loadOrders
   };
 }
+
