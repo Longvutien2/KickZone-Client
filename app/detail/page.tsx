@@ -75,10 +75,6 @@ const AboutUs = () => {
                 {/* Logo */}
                 <div className="flex items-center">
                     <div className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                        {/* <div>
-                <span className="text-3xl">⚽</span>
-                <span className="text-[#2DA1EE]">Kick</span><span className="text-gray-800">Zone</span>
-              </div> */}
                         <div>
                             <img src="../222.png" alt="" width={150} />
                         </div>
