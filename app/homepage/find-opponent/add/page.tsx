@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react'
 import { Team } from '@/models/team'
 import { FootballField } from '@/models/football_field'
 import { addMatchSlice, getListMatchByFootballFieldIdSlice } from '@/features/match.slice'
-import moment from 'moment';
+import { startOfDay, parse, isAfter, isSameDay } from 'date-fns';
 import { toast } from 'react-toastify'
 import { useRouter } from 'next/navigation'
 import { Notification } from '@/models/notification'
@@ -45,14 +45,15 @@ const CreateMatchPage = () => {
             // Kiểm tra trạng thái đặt sân
             if (booking.paymentStatus !== "success") return false;
 
-            // Chuyển đổi chuỗi ngày từ định dạng "DD-MM-YYYY" sang moment
-            const bookingDate = moment(booking.date, "DD-MM-YYYY");
+            // Chuyển đổi chuỗi ngày từ định dạng "DD-MM-YYYY" sang date-fns
+            if (!booking.date) return false;
+            const bookingDate = startOfDay(parse(booking.date, "dd-MM-yyyy", new Date()));
 
             // Lấy ngày hiện tại (đầu ngày)
-            const today = moment().startOf('day');
+            const today = startOfDay(new Date());
 
             // So sánh ngày đặt với ngày hiện tại
-            return bookingDate.isSameOrAfter(today);
+            return isAfter(bookingDate, today) || isSameDay(bookingDate, today);
           });
           setMyOrders(confirmedBookings);
         }

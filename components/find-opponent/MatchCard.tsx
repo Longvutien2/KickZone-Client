@@ -4,7 +4,8 @@ import { ClockCircleOutlined } from '@ant-design/icons'
 import { Tag } from 'antd'
 import Image from 'next/image'
 import Link from 'next/link'
-import moment from 'moment'
+import { format, parse, startOfDay, isSameDay, differenceInDays } from 'date-fns'
+import { vi } from 'date-fns/locale'
 import { memo } from 'react'
 
 interface MatchCardProps {
@@ -57,12 +58,15 @@ const MatchCard = memo(({ match }: MatchCardProps) => {
                         <div className="flex items-center space-x-3">
                             <div className="relative w-14 h-14 flex-shrink-0">
                                 <Image
-                                    src={match.club_A?.teamImage || ""}
+                                    src={match.club_A?.teamImage || "/default-team.png"}
                                     className="rounded-full object-cover"
                                     fill
                                     alt={match.club_A?.teamName || "Team"}
                                     sizes="56px"
                                     priority={false}
+                                    placeholder="blur"
+                                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+                                    loading="lazy"
                                 />
                             </div>
                             <div>
@@ -87,12 +91,15 @@ const MatchCard = memo(({ match }: MatchCardProps) => {
                             <div className="flex items-center space-x-3">
                                 <div className="relative w-14 h-14 flex-shrink-0">
                                     <Image
-                                        src={match.club_B?.teamImage || ""}
+                                        src={match.club_B?.teamImage || "/default-team.png"}
                                         className="rounded-full object-cover"
                                         fill
                                         alt={match.club_B?.teamName || "Team"}
                                         sizes="56px"
                                         priority={false}
+                                        placeholder="blur"
+                                        blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+                                        loading="lazy"
                                     />
                                 </div>
                                 <div>
@@ -189,23 +196,25 @@ const MatchCard = memo(({ match }: MatchCardProps) => {
                         <span className='capitalize text-sm sm:text-base font-medium'>
                             {match.orderId?.timeStart} | {
                                 match.orderId?.date ?
-                                    moment(match.orderId.date, "DD-MM-YYYY")
-                                        .locale('vi')
-                                        .format('dddd, DD-MM-YYYY')
-                                    : moment(match.date).format('dddd, DD/MM/YYYY')
+                                    format(
+                                        parse(match.orderId.date, "dd-MM-yyyy", new Date()),
+                                        'EEEE, dd-MM-yyyy',
+                                        { locale: vi }
+                                    )
+                                    : format(new Date(match.date), 'EEEE, dd/MM/yyyy', { locale: vi })
                             }
                         </span>
                         {(() => {
                             // Chuyển đổi ngày trận đấu sang định dạng chuẩn
-                            const matchDate = moment(match.orderId.date, "DD-MM-YYYY").startOf('day');
+                            const matchDate = startOfDay(parse(match.orderId.date, "dd-MM-yyyy", new Date()));
                             // Lấy ngày hiện tại ở đầu ngày (00:00:00)
-                            const today = moment().startOf('day');
+                            const today = startOfDay(new Date());
 
                             // So sánh ngày
-                            const isSameDay = matchDate.isSame(today, 'day');
-                            const diffDays = matchDate.diff(today, 'day');
+                            const isToday = isSameDay(matchDate, today);
+                            const diffDays = differenceInDays(matchDate, today);
 
-                            if (isSameDay) {
+                            if (isToday) {
                                 // Nếu là ngày hôm nay và chưa có đối thủ
                                 if (!match.club_B) {
                                     return (

@@ -7,7 +7,8 @@ import { Team } from '@/models/team';
 import { useAppDispatch, useAppSelector } from '@/store/hook';
 import { CalendarOutlined, ClockCircleOutlined, EditOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { Button, Card } from 'antd';
-import moment from 'moment';
+import { format, parse, startOfDay, isSameDay, differenceInDays } from 'date-fns';
+import { vi } from 'date-fns/locale';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -51,7 +52,6 @@ const MatchDetail = () => {
         setVisible(false);
     };
 
-    moment.locale('vi');
     useEffect(() => {
         const fetchData = async () => {
             const [matchData, matchRequestData] = await Promise.all([
@@ -247,10 +247,12 @@ const MatchDetail = () => {
                                 <span className='capitalize text-sm sm:text-base font-medium'>
                                     {match.orderId?.timeStart} | {
                                         match.orderId?.date ?
-                                            moment(match.orderId.date, "DD-MM-YYYY")
-                                                .locale('vi')
-                                                .format('dddd, DD-MM-YYYY')
-                                            : moment(match.date).format('dddd, DD/MM/YYYY')
+                                            format(
+                                                parse(match.orderId.date, "dd-MM-yyyy", new Date()),
+                                                'EEEE, dd-MM-yyyy',
+                                                { locale: vi }
+                                            )
+                                            : format(new Date(match.date), 'EEEE, dd/MM/yyyy', { locale: vi })
                                     }
                                 </span>
                                 {(() => {
@@ -264,15 +266,15 @@ const MatchDetail = () => {
                                     }
 
                                     // Chuyển đổi ngày trận đấu sang định dạng chuẩn
-                                    const matchDate = moment(match.orderId.date, "DD-MM-YYYY").startOf('day');
+                                    const matchDate = startOfDay(parse(match.orderId.date, "dd-MM-yyyy", new Date()));
                                     // Lấy ngày hiện tại ở đầu ngày (00:00:00)
-                                    const today = moment().startOf('day');
+                                    const today = startOfDay(new Date());
 
                                     // So sánh ngày
-                                    const isSameDay = matchDate.isSame(today, 'day');
-                                    const diffDays = matchDate.diff(today, 'day');
+                                    const isToday = isSameDay(matchDate, today);
+                                    const diffDays = differenceInDays(matchDate, today);
 
-                                    if (isSameDay) {
+                                    if (isToday) {
                                         // Nếu là ngày hôm nay và chưa có đối thủ
                                         if (!match.club_B) {
                                             return (
@@ -334,10 +336,12 @@ const MatchDetail = () => {
                                     <strong>Thời gian: </strong>
                                     {match.orderId?.timeStart} | {
                                         match.orderId?.date ?
-                                            moment(match.orderId.date, "DD-MM-YYYY")
-                                                .locale('vi')
-                                                .format('dddd, DD-MM-YYYY')
-                                            : moment(match.date).format('dddd, DD/MM/YYYY')
+                                            format(
+                                                parse(match.orderId.date, "dd-MM-yyyy", new Date()),
+                                                'EEEE, dd-MM-yyyy',
+                                                { locale: vi }
+                                            )
+                                            : format(new Date(match.date), 'EEEE, dd/MM/yyyy', { locale: vi })
                                     }
                                 </span>
                             </div>

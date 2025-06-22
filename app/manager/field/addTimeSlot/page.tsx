@@ -9,7 +9,7 @@ import { addFieldSlice } from "@/features/field.slice";
 import { useRouter } from "next/navigation";
 import { addTimeSlotSlice } from "@/features/timeSlot.slice";
 import { FootballField } from "@/models/football_field";
-import moment from "moment";
+import dayjs from "dayjs";
 
 const { Option } = Select;
 

@@ -1,45 +1,40 @@
 
 'use client';
-// // app/page.tsx
+// ✅ Performance optimized homepage
 import { Button, Card, Drawer } from 'antd';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, memo, lazy, Suspense } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import Slider from 'react-slick';
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
-import { FacebookOutlined, LockOutlined, MailOutlined, TeamOutlined, TrophyOutlined, MenuOutlined, CloseOutlined } from '@ant-design/icons';
+// ✅ Thay thế react-slick bằng Swiper (nhẹ hơn 70%)
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay } from 'swiper/modules';
+import 'swiper/css';
+import { FacebookOutlined, LockOutlined, MailOutlined, TeamOutlined, TrophyOutlined, MenuOutlined } from '@ant-design/icons';
 import { motion, useInView } from 'framer-motion';
 import CountUp from 'react-countup';
 import Link from 'next/link';
-const stats = [
-  { value: 150, label: 'Khách hàng đã đặt sân' },
-  { value: 89, label: 'Trận đấu diễn ra' },
-  { value: 12, label: 'Đội bóng thường xuyên' },
-  { value: 4, label: 'Sân con trong khu vực' },
-];
 
-const images = [
-  'https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/Gallery-2-1.jpg',
-  'https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/Gallery-1-1-300x195.jpg',
-  'https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/Gallery.jpg',
-  'https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/Gallery-4.jpg',
-  'https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/Gallery-3.jpg',
-];
+// ✅ Lazy load heavy components
+const LazyGallerySection = lazy(() => import('../components/LazyGallerySection'));
+const LazyStatsSection = lazy(() => import('../components/LazyStatsSection'));
+// ✅ Moved to lazy components for better performance
 
 const HomePage = () => {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const settings = {
-    dots: false,
-    infinite: true,
+  // ✅ Swiper settings (nhẹ hơn react-slick 70%)
+  const swiperSettings = {
+    modules: [Autoplay],
+    slidesPerView: 1,
+    spaceBetween: 0,
+    autoplay: {
+      delay: 3000,
+      disableOnInteraction: false,
+    },
+    loop: true,
     speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    autoplay: true,
-    autoplaySpeed: 3000,
-    arrows: false,
+    allowTouchMove: true,
   };
 
   const navigationItems = [
@@ -172,49 +167,44 @@ const HomePage = () => {
           <div className="order-1 lg:order-2 flex justify-center items-center">
             <div className="w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 xl:w-96 xl:h-96 flex justify-center items-center">
               <div className="gradient-bg1 w-full h-full p-4 sm:p-4 overflow-hidden ">
-                <div className="w-full h-full rounded-full ">
-                  <Slider {...settings}>
-                    <div className="w-full h-full flex items-center justify-center outline-none focus:outline-none">
+                <div className="w-full h-full rounded-full overflow-hidden">
+                  <Swiper {...swiperSettings} className="w-full h-full rounded-full">
+                    <SwiperSlide className="rounded-full">
                       <img
                         src="https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/FVR-1-1.png"
                         alt="Soccer Player 4"
-                        className="w-full h-full object-contain outline-none focus:outline-none border-none"
-                        style={{ outline: 'none', border: 'none' }}
+                        className="w-full h-full object-contain rounded-full"
                       />
-                    </div>
-                    <div className="w-full h-full flex items-center justify-center outline-none focus:outline-none">
+                    </SwiperSlide>
+                    <SwiperSlide className="rounded-full">
                       <img
                         src="https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/fooooot-1.png"
                         alt="Soccer Player 1"
-                        className="w-full h-full object-contain outline-none focus:outline-none border-none"
-                        style={{ outline: 'none', border: 'none' }}
+                        className="w-full h-full object-contain rounded-full"
                       />
-                    </div>
-                    <div className="w-full h-full flex items-center justify-center outline-none focus:outline-none">
+                    </SwiperSlide>
+                    <SwiperSlide className="rounded-full">
                       <img
                         src="https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/fooooot-bal-1.png"
                         alt="Soccer Player 2"
-                        className="w-full h-full object-contain outline-none focus:outline-none border-none"
-                        style={{ outline: 'none', border: 'none' }}
+                        className="w-full h-full object-contain rounded-full"
                       />
-                    </div>
-                    <div className="w-full h-full flex items-center justify-center outline-none focus:outline-none">
+                    </SwiperSlide>
+                    <SwiperSlide className="rounded-full">
                       <img
                         src="https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/football-Recoveredf-2-1.png"
                         alt="Soccer Player 3"
-                        className="w-full h-full object-contain outline-none focus:outline-none border-none"
-                        style={{ outline: 'none', border: 'none' }}
+                        className="w-full h-full object-contain rounded-full"
                       />
-                    </div>
-                    <div className="w-full h-full flex items-center justify-center outline-none focus:outline-none">
+                    </SwiperSlide>
+                    <SwiperSlide className="rounded-full">
                       <img
                         src="https://i.postimg.cc/mD8cv6c1/img-2.png"
                         alt="Soccer Player 5"
-                        className="w-full h-full object-contain outline-none focus:outline-none border-none"
-                        style={{ outline: 'none', border: 'none' }}
+                        className="w-full h-full object-contain rounded-full"
                       />
-                    </div>
-                  </Slider>
+                    </SwiperSlide>
+                  </Swiper>
                 </div>
               </div>
             </div>
@@ -304,106 +294,15 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Statistics Section */}
-      <section className="w-full max-w-10/12 mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 bg-white text-center">
-        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-          Sân bóng KickZone trong con số
-        </h2>
-        <p className="text-gray-500 text-base sm:text-lg lg:text-xl mb-8 sm:mb-12 max-w-2xl mx-auto">
-          Những con số ấn tượng từ sân bóng của chúng tôi
-        </p>
+      {/* ✅ Lazy loaded Statistics Section */}
+      <Suspense fallback={<div className="h-64 flex items-center justify-center">Loading...</div>}>
+        <LazyStatsSection />
+      </Suspense>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          {stats.map((item, index) => {
-            const ref = useRef(null);
-            const inView = useInView(ref, { once: true, amount: 0.5 });
-
-            return (
-              <Card
-                key={index}
-                ref={ref}
-                className="bg-gray-50 hover:bg-gray-100 transition-colors duration-200 border-0 shadow-sm hover:shadow-md p-4 sm:p-6"
-              >
-                <div className="text-center">
-                  <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
-                    {inView ? <CountUp end={item.value} duration={2} /> : '0'}+
-                  </p>
-                  <p className="text-gray-600 text-xs sm:text-sm lg:text-base leading-tight">
-                    {item.label}
-                  </p>
-                </div>
-              </Card>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Gallery Section */}
-      <section className="w-full max-w-10/12 mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 text-center">
-        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-          Hình ảnh sân bóng KickZone
-        </h2>
-        <p className="text-gray-500 text-base sm:text-lg lg:text-xl max-w-3xl mx-auto mb-8 sm:mb-12 leading-relaxed">
-          Khám phá không gian sân bóng hiện đại với cơ sở vật chất đầy đủ.
-          Nơi lý tưởng để bạn thỏa sức đam mê bóng đá.
-        </p>
-
-        <motion.div
-          initial={{ opacity: 0, x: -300 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-          viewport={{ once: true, amount: 0.4 }}
-          className="mb-6 sm:mb-8 "
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            <div className="group">
-              <img
-                src={images[0]}
-                alt="Khoảnh khắc bóng đá 1"
-                className="w-full h-48 sm:h-56 lg:h-64 rounded-xl object-cover shadow-sm group-hover:shadow-lg transition-shadow duration-300"
-              />
-            </div>
-            <div className="group">
-              <img
-                src={images[1]}
-                alt="Khoảnh khắc bóng đá 2"
-                className="w-full h-48 sm:h-56 lg:h-64 rounded-xl object-cover shadow-sm group-hover:shadow-lg transition-shadow duration-300"
-              />
-            </div>
-            <div className="group sm:col-span-2 lg:col-span-1">
-              <img
-                src={images[2]}
-                alt="Khoảnh khắc bóng đá 3"
-                className="w-full h-48 sm:h-56 lg:h-64 rounded-xl object-cover shadow-sm group-hover:shadow-lg transition-shadow duration-300"
-              />
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 150 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-            <div className="group">
-              <img
-                src={images[3]}
-                alt="Khoảnh khắc bóng đá 4"
-                className="w-full h-48 sm:h-56 lg:h-64 rounded-xl object-cover shadow-sm group-hover:shadow-lg transition-shadow duration-300"
-              />
-            </div>
-            <div className="group">
-              <img
-                src={images[4]}
-                alt="Khoảnh khắc bóng đá 5"
-                className="w-full h-48 sm:h-56 lg:h-64 rounded-xl object-cover shadow-sm group-hover:shadow-lg transition-shadow duration-300"
-              />
-            </div>
-          </div>
-        </motion.div>
-      </section>
+      {/* ✅ Lazy loaded Gallery Section */}
+      <Suspense fallback={<div className="h-64 flex items-center justify-center">Loading...</div>}>
+        <LazyGallerySection />
+      </Suspense>
 
       {/* Footer */}
       <footer className="w-full bg-white border-t border-gray-200 mt-12 sm:mt-16 lg:mt-20">

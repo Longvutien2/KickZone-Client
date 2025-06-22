@@ -5,7 +5,7 @@ import { Team } from '@/models/team'
 import { useAppSelector } from '@/store/hook'
 import { PlusOutlined } from '@ant-design/icons'
 import { Button, Pagination, Tabs } from 'antd'
-import moment from 'moment'
+import { startOfDay, parse, isAfter, isSameDay } from 'date-fns'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useMemo, memo } from 'react'
 import MatchCard from './MatchCard'
@@ -35,12 +35,12 @@ const MyTeamTab = memo(() => {
                 const myTeamIds = data.data.map(team => team._id);
                 
                 // Lọc bỏ các trận đấu trong quá khứ - chỉ lấy từ ngày hiện tại trở đi
-                const today = moment().startOf('day');
+                const today = startOfDay(new Date());
                 const futureMatches = matchs?.filter((match: Match) => {
                     // Nếu có orderId.date, sử dụng nó
                     if (match.orderId?.date) {
-                        const matchDate = moment(match.orderId.date, "DD-MM-YYYY").startOf('day');
-                        return matchDate.isSameOrAfter(today);
+                        const matchDate = startOfDay(parse(match.orderId.date, "dd-MM-yyyy", new Date()));
+                        return isAfter(matchDate, today) || isSameDay(matchDate, today);
                     }
                     return false; // Nếu không có ngày, loại bỏ
                 });

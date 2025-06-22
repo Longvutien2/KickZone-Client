@@ -10,7 +10,7 @@ import { CalendarOutlined, ClockCircleOutlined, DownOutlined, EditOutlined, Envi
 import { Tabs, Select, Button, Pagination, Card, Modal, Form, Input, Upload } from 'antd'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
 import 'antd/dist/reset.css'
-import moment from 'moment'
+import { format } from 'date-fns'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -451,7 +451,7 @@ const { Option } = Select;
 //                       {/* Time + location */}
 //                       <div className="mt-4">
 //                         <div><strong>Thành viên: </strong>{team?.members.length}</div>
-//                         <div><strong>Ngày thành lập: </strong>{moment(team?.createdAt).format('DD/MM/YYYY')}</div>
+//                         <div><strong>Ngày thành lập: </strong>{format(new Date(team?.createdAt), 'dd/MM/yyyy')}</div>
 
 //                       </div>
 //                     </Link>

@@ -7,7 +7,7 @@ import { Match } from '@/models/match'
 import { TimeSlot } from '@/models/field'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { Pagination } from 'antd'
-import moment from 'moment'
+import { startOfDay, parse, isAfter, isSameDay } from 'date-fns'
 import { useEffect, useState, useMemo, memo } from 'react'
 import FilterSection from './FilterSection'
 import MatchCard from './MatchCard'
@@ -23,7 +23,6 @@ const MainContent = memo(() => {
     // const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
-    moment.locale('vi');
     const dispatch = useAppDispatch();
     const [value, setValue] = useState<string>(''); // State lưu giá trị khu vực được chọn
 
@@ -83,7 +82,7 @@ const MainContent = memo(() => {
     // Lọc trận đấu dựa trên các bộ lọc - Optimized with useMemo
     const filteredMatchesMemo = useMemo(() => {
         // Lấy ngày hiện tại ở đầu ngày (00:00:00)
-        const today = moment().startOf('day');
+        const today = startOfDay(new Date());
 
         // Lấy danh sách trận đấu từ Redux store
         const matchs = matchState.value;
@@ -96,8 +95,8 @@ const MainContent = memo(() => {
             filtered = filtered.filter((match: Match) => {
                 // Nếu có orderId.date, sử dụng nó
                 if (match?.orderId?.date) {
-                    const matchDate = moment(match.orderId.date, "DD-MM-YYYY").startOf('day');
-                    return matchDate.isSameOrAfter(today);
+                    const matchDate = startOfDay(parse(match.orderId.date, "dd-MM-yyyy", new Date()));
+                    return isAfter(matchDate, today) || isSameDay(matchDate, today);
                 }
                 return false; // Nếu không có ngày, loại bỏ
             });
@@ -105,12 +104,12 @@ const MainContent = memo(() => {
             // Lọc theo ngày được chọn
             if (selectedDate) {
                 filtered = filtered.filter((match: Match) => {
-                    const selectedDateMoment = moment(selectedDate.$d || selectedDate).startOf('day');
+                    const selectedDateParsed = startOfDay(selectedDate.$d || selectedDate);
 
                     // Nếu có orderId.date, sử dụng nó
                     if (match?.orderId?.date) {
-                        const matchDate = moment(match.orderId.date, "DD-MM-YYYY").startOf('day');
-                        return matchDate.isSame(selectedDateMoment, 'day');
+                        const matchDate = startOfDay(parse(match.orderId.date, "dd-MM-yyyy", new Date()));
+                        return isSameDay(matchDate, selectedDateParsed);
                     }
                     return false; // Nếu không có ngày, loại bỏ
                 });

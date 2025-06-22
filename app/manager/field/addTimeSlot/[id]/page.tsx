@@ -8,7 +8,7 @@ import { updateFieldSlice } from "@/features/field.slice";
 import { useEffect } from "react";
 import { getListTimeSlots, getListTimeSlotsByFootballFieldId, updateTimeSlotSlice } from "@/features/timeSlot.slice";
 import { FootballField } from "@/models/football_field";
-import moment from "moment";
+import dayjs from "dayjs";
 
 
 const EditTimeSlotPage = () => {
@@ -48,8 +48,8 @@ const EditTimeSlotPage = () => {
 
         const [startStr, endStr] = timeString.split(' - ');
         return {
-            startTime: moment(startStr, 'HH:mm'),
-            endTime: moment(endStr, 'HH:mm')
+            startTime: dayjs(startStr, 'HH:mm'),
+            endTime: dayjs(endStr, 'HH:mm')
         };
     };
 

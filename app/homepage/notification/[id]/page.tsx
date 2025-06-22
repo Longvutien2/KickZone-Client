@@ -19,7 +19,8 @@ import { useAppDispatch, useAppSelector } from '@/store/hook';
 import { updateNotificationSlice } from '@/features/notification.slice';
 import { Notification } from '@/models/notification';
 import Image from 'next/image';
-import moment from 'moment';
+import { format, parse, startOfDay, isSameDay, differenceInDays } from 'date-fns';
+import { vi } from 'date-fns/locale';
 import { FootballField } from '@/models/football_field';
 
 const { Title, Text } = Typography;
@@ -318,10 +319,12 @@ const NotificationDetailPage = () => {
                                             <span className='capitalize text-sm sm:text-base font-medium'>
                                                 {notification.orderId?.timeStart} | {
                                                     notification.orderId?.date ?
-                                                        moment(notification.orderId.date, "DD-MM-YYYY")
-                                                            .locale('vi')
-                                                            .format('dddd, DD-MM-YYYY')
-                                                        : moment(notification.date).format('dddd, DD/MM/YYYY')
+                                                        format(
+                                                            parse(notification.orderId.date, "dd-MM-yyyy", new Date()),
+                                                            'EEEE, dd-MM-yyyy',
+                                                            { locale: vi }
+                                                        )
+                                                        : format(new Date(notification.date), 'EEEE, dd/MM/yyyy', { locale: vi })
                                                 }
                                             </span>
                                             {(() => {
@@ -335,15 +338,15 @@ const NotificationDetailPage = () => {
                                                 }
 
                                                 // Chuyển đổi ngày trận đấu sang định dạng chuẩn
-                                                const matchDate = moment(notification.orderId.date, "DD-MM-YYYY").startOf('day');
+                                                const matchDate = startOfDay(parse(notification.orderId.date, "dd-MM-yyyy", new Date()));
                                                 // Lấy ngày hiện tại ở đầu ngày (00:00:00)
-                                                const today = moment().startOf('day');
+                                                const today = startOfDay(new Date());
 
                                                 // So sánh ngày
-                                                const isSameDay = matchDate.isSame(today, 'day');
-                                                const diffDays = matchDate.diff(today, 'day');
+                                                const isToday = isSameDay(matchDate, today);
+                                                const diffDays = differenceInDays(matchDate, today);
 
-                                                if (isSameDay) {
+                                                if (isToday) {
                                                     // Nếu là ngày hôm nay và chưa có đối thủ
                                                     if (!notification.club_B) {
                                                         return (
@@ -768,10 +771,12 @@ const NotificationDetailPage = () => {
                                             <span className='capitalize text-sm sm:text-base font-medium'>
                                                 {notification.orderId?.timeStart} | {
                                                     notification.orderId?.date ?
-                                                        moment(notification.orderId.date, "DD-MM-YYYY")
-                                                            .locale('vi')
-                                                            .format('dddd, DD-MM-YYYY')
-                                                        : moment(notification.date).format('dddd, DD/MM/YYYY')
+                                                        format(
+                                                            parse(notification.orderId.date, "dd-MM-yyyy", new Date()),
+                                                            'EEEE, dd-MM-yyyy',
+                                                            { locale: vi }
+                                                        )
+                                                        : format(new Date(notification.date), 'EEEE, dd/MM/yyyy', { locale: vi })
                                                 }
                                             </span>
                                             {(() => {
@@ -785,15 +790,15 @@ const NotificationDetailPage = () => {
                                                 }
 
                                                 // Chuyển đổi ngày trận đấu sang định dạng chuẩn
-                                                const matchDate = moment(notification.orderId.date, "DD-MM-YYYY").startOf('day');
+                                                const matchDate = startOfDay(parse(notification.orderId.date, "dd-MM-yyyy", new Date()));
                                                 // Lấy ngày hiện tại ở đầu ngày (00:00:00)
-                                                const today = moment().startOf('day');
+                                                const today = startOfDay(new Date());
 
                                                 // So sánh ngày
-                                                const isSameDay = matchDate.isSame(today, 'day');
-                                                const diffDays = matchDate.diff(today, 'day');
+                                                const isToday = isSameDay(matchDate, today);
+                                                const diffDays = differenceInDays(matchDate, today);
 
-                                                if (isSameDay) {
+                                                if (isToday) {
                                                     // Nếu là ngày hôm nay và chưa có đối thủ
                                                     if (!notification.club_B) {
                                                         return (
@@ -901,7 +906,7 @@ const NotificationDetailPage = () => {
                                             <div>
                                                 <Text>{notification?.orderId?.timeStart || notification?.match?.time} </Text>
                                                 <span className='ml-2'> / </span>
-                                                <Text className='ml-2'> {notification?.orderId?.date || (notification?.match?.date ? moment(notification.match.date).format('DD-MM-YYYY') : '')}</Text>
+                                                <Text className='ml-2'> {notification?.orderId?.date || (notification?.match?.date ? format(new Date(notification.match.date), 'dd-MM-yyyy') : '')}</Text>
                                             </div>
                                         </div>
                                     </Col>

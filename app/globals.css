@@ -2,9 +2,18 @@
 @tailwind utilities;
 @import 'tailwindcss';  /* Use this instead of @tailwind base */
 
+/* ✅ Critical CSS variables - Load first */
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --primary-blue: #2DA1EE;
+  --primary-orange: #FE6900;
+  --shadow-light: rgba(45, 161, 238, 0.4);
+  --shadow-medium: rgba(45, 161, 238, 0.5);
+  --shadow-heavy: rgba(45, 161, 238, 0.6);
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -14,10 +23,34 @@
   }
 }
 
+/* ✅ Optimized body styles for performance */
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeSpeed;
+  overflow-x: hidden;
+}
+
+/* ✅ Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ✅ Performance optimizations */
+* {
+  box-sizing: border-box;
+}
+
+/* ✅ GPU acceleration for animations */
+.gradient-bg1,
+.swiper,
+.swiper-slide {
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 /* Mobile-first responsive gradient background */
@@ -93,30 +126,49 @@ a:focus,
   outline-offset: 2px;
 }
 
-/* Remove all borders and outlines from slider images */
-.slick-slider img,
-.slick-slide img,
-.slick-track img {
+/* ✅ Swiper styles - Thay thế react-slick */
+.swiper {
+  width: 100% !important;
+  height: 100% !important;
+  position: relative;
+}
+
+.swiper-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.swiper-slide {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.swiper-slide img {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.swiper-slide *:focus {
   outline: none !important;
   border: none !important;
   box-shadow: none !important;
 }
 
-.slick-slider *:focus,
-.slick-slide *:focus,
-.slick-track *:focus {
-  outline: none !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-/* Remove focus outline from slider containers */
-.slick-slider,
-.slick-slide,
-.slick-track,
-.slick-list {
-  outline: none !important;
-  border: none !important;
+/* Đảm bảo container có kích thước cố định */
+.gradient-bg1 {
+  position: relative;
+  overflow: hidden;
 }
 
 /* Remove any default browser focus styles */
