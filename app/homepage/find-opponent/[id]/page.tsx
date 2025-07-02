@@ -409,6 +409,13 @@ const MatchDetail = () => {
                                 </span>
                             </div>
 
+                                 <div className="flex items-start sm:items-center space-x-3">
+                                <ClockCircleOutlined className="text-orange-500 mt-0.5 sm:mt-0 flex-shrink-0" />
+                                <span className="text-xs sm:text-sm text-gray-700 break-words">
+                                    <strong>Giá tiền: </strong>{`${match.orderId?.amount?.toLocaleString()} VNĐ` || "Không có thông tin"}
+                                </span>
+                            </div>
+
                             {/* Sân bóng */}
                             <div className="flex items-start sm:items-center space-x-3">
                                 <EnvironmentOutlined className="text-orange-500 mt-0.5 sm:mt-0 flex-shrink-0" />
