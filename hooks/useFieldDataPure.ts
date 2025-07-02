@@ -1,20 +1,27 @@
 // 🚀 Pure Redux approach - Simple, hiệu quả, không duplicate calls
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hook';
 import { getListTimeSlotsByFootballFieldId } from '@/features/timeSlot.slice';
 import { getListOrdersSlice } from '@/features/order.slice';
 import { getListFieldsSlice } from '@/features/field.slice';
 
-// 🚀 Hook tổng hợp với Pure Redux
+// 🚀 Hook tổng hợp với Pure Redux + Smart Polling
 export function useFieldPageData(footballFieldId: string | undefined) {
   const dispatch = useAppDispatch();
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const isActiveRef = useRef(true);
 
   // 🚀 Redux data - Single source of truth
   const reduxFields = useAppSelector(state => state.field.value);
   const reduxTimeSlots = useAppSelector(state => state.timeSlot.value);
   const reduxOrders = useAppSelector(state => state.order.value);
-  
+
+  // 🚀 Smart polling chỉ orders (nhẹ nhất) - DEFINE FIRST
+  const refreshOrders = useCallback(async () => {
+    if (!footballFieldId || !isActiveRef.current) return;
+    await dispatch(getListOrdersSlice());
+  }, [footballFieldId, dispatch]);
+
   // 🚀 Simple - Call API mỗi khi vào page
   useEffect(() => {
     const loadData = async () => {
@@ -28,12 +35,12 @@ export function useFieldPageData(footballFieldId: string | undefined) {
         if (reduxFields.length === 0) {
           await dispatch(getListFieldsSlice(footballFieldId));
         }
-        
+
         // Chỉ tải timeSlots khi cần
         if (reduxTimeSlots.length === 0) {
           await dispatch(getListTimeSlotsByFootballFieldId(footballFieldId));
         }
-        
+
         // Chỉ tải orders khi cần
         if (reduxOrders.length === 0) {
           await dispatch(getListOrdersSlice());
@@ -48,6 +55,23 @@ export function useFieldPageData(footballFieldId: string | undefined) {
     loadData();
   }, [footballFieldId]); // ✅ Chỉ depend vào footballFieldId để tránh infinite re-renders
 
+  // 🚀 Visibility API - pause polling khi user không active
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      isActiveRef.current = document.visibilityState === 'visible';
+
+      // Refresh ngay khi user quay lại tab
+      if (isActiveRef.current) {
+        refreshOrders();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [refreshOrders]);
 
 
   // 🚀 Return data từ Redux

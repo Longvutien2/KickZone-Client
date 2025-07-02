@@ -11,7 +11,6 @@ import { Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import { FacebookOutlined, LockOutlined, MailOutlined, TeamOutlined, TrophyOutlined, MenuOutlined } from '@ant-design/icons';
 import { motion, useInView } from 'framer-motion';
-import CountUp from 'react-countup';
 import Link from 'next/link';
 
 // ✅ Lazy load heavy components

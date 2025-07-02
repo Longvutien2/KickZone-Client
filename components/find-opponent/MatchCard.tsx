@@ -194,53 +194,64 @@ const MatchCard = memo(({ match }: MatchCardProps) => {
                 <div className="bg-orange-50 px-4 py-2 text-xs sm:text-sm text-gray-700">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
                         <span className='capitalize text-sm sm:text-base font-medium'>
-                            {match.orderId?.timeStart} | {
+                            {match.orderId?.timeStart || 'N/A'} | {
                                 match.orderId?.date ?
                                     format(
                                         parse(match.orderId.date, "dd-MM-yyyy", new Date()),
                                         'EEEE, dd-MM-yyyy',
                                         { locale: vi }
                                     )
-                                    : format(new Date(match.date), 'EEEE, dd/MM/yyyy', { locale: vi })
+                                    : match.date ?
+                                        format(new Date(match.date), 'EEEE, dd/MM/yyyy', { locale: vi })
+                                        : 'Không có thông tin ngày'
                             }
                         </span>
                         {(() => {
+                            // Kiểm tra xem match.orderId?.date có tồn tại không
+                            if (!match.orderId?.date) {
+                                return (
+                                    <span className="bg-orange-100 text-orange-500 rounded-md px-2 py-1 text-xs self-start sm:self-center">
+                                        Không có thông tin ngày
+                                    </span>
+                                );
+                            }
+
                             // Chuyển đổi ngày trận đấu sang định dạng chuẩn
                             const matchDate = startOfDay(parse(match.orderId.date, "dd-MM-yyyy", new Date()));
                             // Lấy ngày hiện tại ở đầu ngày (00:00:00)
                             const today = startOfDay(new Date());
 
-                            // So sánh ngày
-                            const isToday = isSameDay(matchDate, today);
-                            const diffDays = differenceInDays(matchDate, today);
+                                // So sánh ngày
+                                const isToday = isSameDay(matchDate, today);
+                                const diffDays = differenceInDays(matchDate, today);
 
-                            if (isToday) {
-                                // Nếu là ngày hôm nay và chưa có đối thủ
-                                if (!match.club_B) {
-                                    return (
-                                        <span className="bg-red-100 text-red-600 rounded-md px-2 py-1 text-xs font-bold flex items-center self-start sm:self-center">
-                                            <ClockCircleOutlined className="mr-1" />
-                                            <span className="hidden sm:inline">Hôm nay, {match.orderId?.timeStart || match.time}</span>
-                                            <span className="sm:hidden">Hôm nay</span>
-                                        </span>
-                                    );
+                                if (isToday) {
+                                    // Nếu là ngày hôm nay và chưa có đối thủ
+                                    if (!match.club_B) {
+                                        return (
+                                            <span className="bg-red-100 text-red-600 rounded-md px-2 py-1 text-xs font-bold flex items-center self-start sm:self-center">
+                                                <ClockCircleOutlined className="mr-1" />
+                                                <span className="hidden sm:inline">Hôm nay, {match.orderId?.timeStart || match.time}</span>
+                                                <span className="sm:hidden">Hôm nay</span>
+                                            </span>
+                                        );
+                                    } else {
+                                        // Nếu là ngày hôm nay nhưng đã có đối thủ
+                                        return (
+                                            <span className="bg-orange-100 text-orange-500 rounded-md px-2 py-1 text-xs self-start sm:self-center">
+                                                <span className="hidden sm:inline">Hôm nay, {match.orderId?.timeStart || match.time}</span>
+                                                <span className="sm:hidden">Hôm nay</span>
+                                            </span>
+                                        );
+                                    }
                                 } else {
-                                    // Nếu là ngày hôm nay nhưng đã có đối thủ
+                                    // Nếu là ngày khác, hiển thị số ngày còn lại
                                     return (
                                         <span className="bg-orange-100 text-orange-500 rounded-md px-2 py-1 text-xs self-start sm:self-center">
-                                            <span className="hidden sm:inline">Hôm nay, {match.orderId?.timeStart || match.time}</span>
-                                            <span className="sm:hidden">Hôm nay</span>
+                                            {diffDays} ngày nữa
                                         </span>
                                     );
                                 }
-                            } else {
-                                // Nếu là ngày khác, hiển thị số ngày còn lại
-                                return (
-                                    <span className="bg-orange-100 text-orange-500 rounded-md px-2 py-1 text-xs self-start sm:self-center">
-                                        {diffDays} ngày nữa
-                                    </span>
-                                );
-                            }
                         })()}
                     </div>
                     <div className="mt-2 text-xs sm:text-sm text-gray-600 break-words">

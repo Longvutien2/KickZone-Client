@@ -116,7 +116,6 @@ const MatchRequestHandler = ({ match, requestedMatch, isOwner, onRequestHandled 
             }
             await dispatch(addNotificationSlice(rejectNotification))
 
-            toast.success('Đã từ chối yêu cầu tham gia!')
             onRequestHandled?.()
         } catch (error) {
             console.error('Lỗi khi từ chối yêu cầu:', error)

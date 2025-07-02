@@ -1,9 +1,7 @@
 
 'use client'
-import { getTeamByUserId } from '@/api/team';
 import { addBreadcrumb } from '@/features/breadcrumb.slice';
 import { getMatchByIdSlice } from '@/features/match.slice';
-import { Team } from '@/models/team';
 import { useAppDispatch, useAppSelector } from '@/store/hook';
 import { CalendarOutlined, ClockCircleOutlined, EditOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { Button, Card } from 'antd';
@@ -24,7 +22,6 @@ const MatchDetail = () => {
     const match = useAppSelector((state: any) => state.match.detail)
     const matchRequest = useAppSelector((state: any) => state.matchRequest.value)
     const auth = useAppSelector((state) => state.auth)
-    const [dataTeam, setDataTeams] = useState<Team[]>();
 
     const { id } = useParams();
     const dispatch = useAppDispatch();
@@ -54,15 +51,64 @@ const MatchDetail = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            const [matchData, matchRequestData] = await Promise.all([
-                await dispatch(getMatchByIdSlice(id as string)),
-                await dispatch(getMatchRequestsByMatchSlice(id as string))
+            await Promise.all([
+                dispatch(getMatchByIdSlice(id as string)),
+                dispatch(getMatchRequestsByMatchSlice(id as string))
             ]);
         };
         fetchData();
 
         dispatch(addBreadcrumb({ name: 'Trận Đấu', url: `/homepage/find-opponent/${id}` }));
     }, [id, auth.isLoggedIn]);
+
+    // 🔥 Lắng nghe realtime events từ layout để refresh data
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const handleNewMatchRequest = (event: any) => {
+            const data = event.detail;
+            if (data.matchRequest?.match?._id === id) {
+                dispatch(getMatchRequestsByMatchSlice(id as string));
+            }
+        };
+
+        const handleMatchRequestStatusUpdate = (event: any) => {
+            const data = event.detail;
+            if (data.matchRequest?.match?._id === id) {
+                dispatch(getMatchRequestsByMatchSlice(id as string));
+                dispatch(getMatchByIdSlice(id as string));
+            }
+        };
+
+        const handleMatchRequestUpdate = (event: any) => {
+            const data = event.detail;
+            if (data.matchRequest?.match?._id === id) {
+                dispatch(getMatchRequestsByMatchSlice(id as string));
+                dispatch(getMatchByIdSlice(id as string));
+            }
+        };
+
+        const handleMatchRequestDeleted = (event: any) => {
+            const data = event.detail;
+            if (data.matchId === id) {
+                dispatch(getMatchRequestsByMatchSlice(id as string));
+            }
+        };
+
+        // Thêm event listeners
+        window.addEventListener('newMatchRequest', handleNewMatchRequest);
+        window.addEventListener('matchRequestStatusUpdate', handleMatchRequestStatusUpdate);
+        window.addEventListener('matchRequestUpdate', handleMatchRequestUpdate);
+        window.addEventListener('matchRequestDeleted', handleMatchRequestDeleted);
+
+        // Cleanup
+        return () => {
+            window.removeEventListener('newMatchRequest', handleNewMatchRequest);
+            window.removeEventListener('matchRequestStatusUpdate', handleMatchRequestStatusUpdate);
+            window.removeEventListener('matchRequestUpdate', handleMatchRequestUpdate);
+            window.removeEventListener('matchRequestDeleted', handleMatchRequestDeleted);
+        };
+    }, [id, dispatch]);
 
     return (
         match && (
@@ -104,6 +150,9 @@ const MatchDetail = () => {
                     match={match}
                     userId={auth.value.user._id as string}
                     onSuccess={() => {
+                        // Refresh dữ liệu sau khi gửi yêu cầu thành công
+                        dispatch(getMatchRequestsByMatchSlice(id as string));
+                        dispatch(getMatchByIdSlice(id as string));
                     }}
                 />
 
@@ -115,6 +164,9 @@ const MatchDetail = () => {
                             requestedMatch={matchRequest}
                             isOwner={isMatchOwner}
                             onRequestHandled={async () => {
+                                // Refresh dữ liệu sau khi xử lý yêu cầu
+                                dispatch(getMatchRequestsByMatchSlice(id as string));
+                                dispatch(getMatchByIdSlice(id as string));
                             }}
                         />
                     </div>
@@ -245,14 +297,16 @@ const MatchDetail = () => {
                         <div className="bg-orange-50 p-4 sm:p-6 text-xs sm:text-sm text-gray-700">
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
                                 <span className='capitalize text-sm sm:text-base font-medium'>
-                                    {match.orderId?.timeStart} | {
+                                    {match.orderId?.timeStart || 'N/A'} | {
                                         match.orderId?.date ?
                                             format(
                                                 parse(match.orderId.date, "dd-MM-yyyy", new Date()),
                                                 'EEEE, dd-MM-yyyy',
                                                 { locale: vi }
                                             )
-                                            : format(new Date(match.date), 'EEEE, dd/MM/yyyy', { locale: vi })
+                                            : match.date ?
+                                                format(new Date(match.date), 'EEEE, dd/MM/yyyy', { locale: vi })
+                                                : 'Không có thông tin ngày'
                                     }
                                 </span>
                                 {(() => {
@@ -334,14 +388,16 @@ const MatchDetail = () => {
                                 <CalendarOutlined className="text-orange-500 mt-0.5 sm:mt-0 flex-shrink-0" />
                                 <span className="text-xs sm:text-sm text-gray-700 capitalize break-words">
                                     <strong>Thời gian: </strong>
-                                    {match.orderId?.timeStart} | {
+                                    {match.orderId?.timeStart || 'N/A'} | {
                                         match.orderId?.date ?
                                             format(
                                                 parse(match.orderId.date, "dd-MM-yyyy", new Date()),
                                                 'EEEE, dd-MM-yyyy',
                                                 { locale: vi }
                                             )
-                                            : format(new Date(match.date), 'EEEE, dd/MM/yyyy', { locale: vi })
+                                            : match.date ?
+                                                format(new Date(match.date), 'EEEE, dd/MM/yyyy', { locale: vi })
+                                                : 'Không có thông tin ngày'
                                     }
                                 </span>
                             </div>

@@ -265,7 +265,7 @@ const BookingPage = () => {
     // Nếu đã đặt sân thành công, hiển thị trang kết quả
     if (isSuccess && formValues) {
         return (
-            <div className="container mx-auto py-6 px-4">
+            <div className="container mx-auto px-4">
                 <SuccessResult
                     status="success"
                     title="Đặt sân thành công!"
@@ -307,11 +307,14 @@ const BookingPage = () => {
                                     </div>
                                     <div className="flex">
                                         <span className="font-medium text-gray-600 w-20 flex-shrink-0">Giá:</span>
-                                        <span className="text-red-600 font-bold">{fieldData?.price?.toLocaleString()} VNĐ</span>
+                                        <span className="text-red-600 font-bold">{fieldData?.price ? fieldData.price.toLocaleString() : '0'} VNĐ</span>
                                     </div>
                                     <div className="flex">
                                         <span className="font-medium text-gray-600 w-20 flex-shrink-0">Thời gian đặt:</span>
-                                        <span className="text-gray-800">{new Date().toLocaleString('vi-VN')}</span>
+                                        <span className="text-gray-800">{(() => {
+                                            const now = new Date();
+                                            return `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+                                        })()}</span>
                                     </div>
                                 </div>
                             </div>
@@ -429,7 +432,7 @@ const BookingPage = () => {
                                         <div className="border-t border-orange-200 pt-3 mt-3">
                                             <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
                                                 <div className="font-medium text-gray-700">Giá tiền:</div>
-                                                <div className="text-xl font-bold text-orange-600">{fieldData?.price?.toLocaleString()} VNĐ</div>
+                                                <div className="text-xl font-bold text-orange-600">{fieldData?.price ? fieldData.price.toLocaleString() : '0'} VNĐ</div>
                                             </div>
                                         </div>
                                     </div>
@@ -496,7 +499,7 @@ const BookingPage = () => {
                                                                         </div>
                                                                         <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
                                                                             <span className="font-medium text-gray-700">Số tiền:</span>
-                                                                            <span className="font-bold text-xl text-red-600">{fieldData?.price?.toLocaleString()} VNĐ</span>
+                                                                            <span className="font-bold text-xl text-red-600">{fieldData?.price ? fieldData.price.toLocaleString() : '0'} VNĐ</span>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -508,7 +511,7 @@ const BookingPage = () => {
                                                                         <li>Mở ứng dụng MBBank hoặc Internet Banking</li>
                                                                         <li>Chọn chuyển khoản đến tài khoản MBBank</li>
                                                                         <li>Nhập số tài khoản: <strong>29777777729</strong></li>
-                                                                        <li>Nhập số tiền: <strong>{fieldData?.price?.toLocaleString()} VNĐ</strong></li>
+                                                                        <li>Nhập số tiền: <strong>{fieldData?.price ? fieldData.price.toLocaleString() : '0'} VNĐ</strong></li>
                                                                         <li>Nhập nội dung: <strong>{fieldData?.field} {fieldData?.date} {fieldData?.timeStart}</strong></li>
                                                                         <li>Xác nhận và hoàn tất giao dịch</li>
                                                                     </ol>
@@ -637,7 +640,7 @@ const BookingPage = () => {
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-center">
                                             <span className="text-gray-700 font-medium">Giá sân:</span>
-                                            <span className="font-semibold text-gray-900">{fieldData?.price?.toLocaleString()} VNĐ</span>
+                                            <span className="font-semibold text-gray-900">{fieldData?.price ? fieldData.price.toLocaleString() : '0'} VNĐ</span>
                                         </div>
                                         <div className="flex justify-between items-center">
                                             <span className="text-gray-700 font-medium">Phí dịch vụ:</span>
@@ -645,7 +648,7 @@ const BookingPage = () => {
                                         </div>
                                         <div className="border-t border-gray-300 pt-4 flex justify-between items-center">
                                             <span className="text-lg font-bold text-gray-900">Tổng cộng:</span>
-                                            <span className="text-xl font-bold text-orange-600">{fieldData?.price?.toLocaleString()} VNĐ</span>
+                                            <span className="text-xl font-bold text-orange-600">{fieldData?.price ? fieldData.price.toLocaleString() : '0'} VNĐ</span>
                                         </div>
                                     </div>
                                 </div>

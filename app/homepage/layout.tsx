@@ -13,8 +13,7 @@ import { AppDispatch } from '@/store/store';
 import { Header } from 'antd/es/layout/layout';
 import CustomBreadcrumb from '@/components/Breadcrumb';
 import { useAppSelector } from '@/store/hook';
-import io from 'socket.io-client';
-import { toast } from 'react-toastify';
+import useRealtimeNotifications from '@/hooks/useRealtimeNotifications';
 
 const { Content, Sider } = Layout;
 
@@ -27,55 +26,36 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
 
-  const handleLogout = () => {
-    console.log("Đăng xuất...");
-    dispatch(signout())
-    // Xử lý đăng xuất tại đây (xóa token, điều hướng, v.v.)
-  };
 
-  useEffect(() => {
-    // ✅ Chỉ tạo socket connection khi user đã login và có ID
-    if (!user.isLoggedIn || !user.value.user._id) return;
+  // Sử dụng hook realtime notifications cho tất cả các loại thông báo (chỉ âm thanh + toast, không có dropdown)
+  useRealtimeNotifications({
+    userId: user.isLoggedIn ? user.value.user._id : undefined,
+    onNewMatchRequest: (data) => {
+      // Dispatch custom event để các page có thể lắng nghe và refresh data
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('newMatchRequest', { detail: data }));
+      }
+    },
+    onMatchRequestStatusUpdate: (data) => {
+      // Dispatch custom event để các page có thể lắng nghe và refresh data
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('matchRequestStatusUpdate', { detail: data }));
+      }
+    },
+    onMatchRequestUpdate: (data) => {
+      // Dispatch custom event để các page có thể lắng nghe và refresh data
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('matchRequestUpdate', { detail: data }));
+      }
+    },
+    onMatchRequestDeleted: (data) => {
+      // Dispatch custom event để các page có thể lắng nghe và refresh data
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('matchRequestDeleted', { detail: data }));
+      }
+    },
+  });
 
-    // ✅ Debounce socket connection để tránh tạo nhiều connection
-    const timeoutId = setTimeout(() => {
-      const socket = io(process.env.NEXT_PUBLIC_API_BACKEND_IO, {
-        // ✅ Tối ưu socket connection
-        transports: ['websocket'], // Chỉ dùng websocket, không fallback
-        upgrade: false,
-        rememberUpgrade: false,
-        timeout: 20000,
-        forceNew: false, // Reuse existing connection
-        query: {
-          userId: user.value.user._id // Gửi userId để server biết
-        }
-      });
-
-      socket.on('pushNotification', (data: any) => {
-        if (data.targetUser === user.value.user._id) {
-          setNotification((prev: any) => [...prev, data]);
-        }
-      });
-
-      socket.on('updateNotification', (data: any) => {
-        setNotification((prev: any) =>
-          prev.map((item: any) =>
-            item._id === data._id ? data : item
-          )
-        );
-      });
-
-      // ✅ Store socket reference for cleanup
-      return () => {
-        socket.off('pushNotification');
-        socket.off('updateNotification');
-        socket.disconnect();
-      };
-    }, 500); // Debounce 500ms
-
-    // ✅ Cleanup timeout nếu component unmount trước khi socket được tạo
-    return () => clearTimeout(timeoutId);
-  }, [user.isLoggedIn, user.value.user._id]); // Chỉ depend vào login status và user ID
 
   useEffect(() => {
     const getData = async () => {
