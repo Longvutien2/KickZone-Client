@@ -1,50 +1,472 @@
-import React from "react";
-import { Metadata } from "next";
-import { getMatchById } from "@/api/match";
-import MatchDetailClient from "@/components/find-opponent/MatchDetailClient";
 
-// ✅ SEO Metadata for find opponent page
-export const metadata: Metadata = {
-  title: 'Chi Tiết Trận Đấu | KickZone',
-  description: 'Tìm đối thủ và đội bóng để thi đấu tại KickZone. Kết nối với cộng đồng bóng đá, tạo trận đấu và tham gia giải đấu.',
-  keywords: 'tìm đối thủ, đội bóng, trận đấu, cộng đồng bóng đá, KickZone, thi đấu bóng đá',
-  openGraph: {
-    title: 'Chi Tiết Trận Đấu - KickZone',
-    description: 'Kết nối với cộng đồng bóng đá, tìm đối thủ và tạo trận đấu tại KickZone',
-    images: ['/logo.jpg'],
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Chi Tiết Trận Đấu - KickZone',
-    description: 'Kết nối với cộng đồng bóng đá, tìm đối thủ và tạo trận đấu tại KickZone',
-    images: ['/logo.jpg'],
-  }
+'use client'
+import { addBreadcrumb } from '@/features/breadcrumb.slice';
+import { getMatchByIdSlice } from '@/features/match.slice';
+import { useAppDispatch, useAppSelector } from '@/store/hook';
+import { CalendarOutlined, ClockCircleOutlined, EditOutlined, EnvironmentOutlined } from '@ant-design/icons';
+import { Button, Card } from 'antd';
+import { format, parse, startOfDay, isSameDay, differenceInDays } from 'date-fns';
+import { vi } from 'date-fns/locale';
+import Image from 'next/image';
+import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
+import dayjs from 'dayjs';
+import { getMatchRequestsByMatchSlice } from '@/features/matchRequest.slice';
+import MatchRequestModal from '@/components/find-opponent/MatchRequestModal';
+import MatchRequestHandler from '@/components/find-opponent/MatchRequestHandler';
+import CommentSection from '@/components/comments/CommentSection';
+
+
+const MatchDetail = () => {
+    const match = useAppSelector((state: any) => state.match.detail)
+    const matchRequest = useAppSelector((state: any) => state.matchRequest.value)
+    const auth = useAppSelector((state) => state.auth)
+
+    const { id } = useParams();
+    const dispatch = useAppDispatch();
+    const [visible, setVisible] = useState(false);
+    dayjs.locale("vi");
+
+    // Kiểm tra xem user hiện tại có phải là chủ trận đấu không
+    const isMatchOwner = auth.value?.user?._id === match?.user?._id;
+
+    const handleOpenModal = () => {
+        if (!auth.isLoggedIn) {
+            toast.warning("Bạn cần đăng nhập để tiếp tục !")
+        } else if (match?.club_B) {
+            toast.warning("Đã đủ đội tham gia, không thể gửi yêu cầu!")
+        } else if (match?.status === 'pending') {
+            toast.warning("Trận đấu đang có yêu cầu chờ xử lý!")
+        } else if (isMatchOwner) {
+            toast.warning("Bạn không thể gửi yêu cầu cho trận đấu của chính mình!")
+        } else {
+            setVisible(true);
+        }
+    };
+
+    const handleCloseModal = () => {
+        setVisible(false);
+    };
+
+    useEffect(() => {
+        const fetchData = async () => {
+            await Promise.all([
+                dispatch(getMatchByIdSlice(id as string)),
+                dispatch(getMatchRequestsByMatchSlice(id as string))
+            ]);
+        };
+        fetchData();
+
+        dispatch(addBreadcrumb({ name: 'Trận Đấu', url: `/homepage/find-opponent/${id}` }));
+    }, [id, auth.isLoggedIn]);
+
+    // 🔥 Lắng nghe realtime events từ layout để refresh data
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const handleNewMatchRequest = (event: any) => {
+            const data = event.detail;
+            if (data.matchRequest?.match?._id === id) {
+                dispatch(getMatchRequestsByMatchSlice(id as string));
+            }
+        };
+
+        const handleMatchRequestStatusUpdate = (event: any) => {
+            const data = event.detail;
+            if (data.matchRequest?.match?._id === id) {
+                dispatch(getMatchRequestsByMatchSlice(id as string));
+                dispatch(getMatchByIdSlice(id as string));
+            }
+        };
+
+        const handleMatchRequestUpdate = (event: any) => {
+            const data = event.detail;
+            if (data.matchRequest?.match?._id === id) {
+                dispatch(getMatchRequestsByMatchSlice(id as string));
+                dispatch(getMatchByIdSlice(id as string));
+            }
+        };
+
+        const handleMatchRequestDeleted = (event: any) => {
+            const data = event.detail;
+            if (data.matchId === id) {
+                dispatch(getMatchRequestsByMatchSlice(id as string));
+            }
+        };
+
+        // Thêm event listeners
+        window.addEventListener('newMatchRequest', handleNewMatchRequest);
+        window.addEventListener('matchRequestStatusUpdate', handleMatchRequestStatusUpdate);
+        window.addEventListener('matchRequestUpdate', handleMatchRequestUpdate);
+        window.addEventListener('matchRequestDeleted', handleMatchRequestDeleted);
+
+        // Cleanup
+        return () => {
+            window.removeEventListener('newMatchRequest', handleNewMatchRequest);
+            window.removeEventListener('matchRequestStatusUpdate', handleMatchRequestStatusUpdate);
+            window.removeEventListener('matchRequestUpdate', handleMatchRequestUpdate);
+            window.removeEventListener('matchRequestDeleted', handleMatchRequestDeleted);
+        };
+    }, [id, dispatch]);
+
+    return (
+        match && (
+            <div className="bg-white mx-auto px-4 sm:px-0">
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 sm:mb-4 gap-3 sm:gap-0">
+                    <h2 className="text-xl sm:text-2xl font-semibold">Trận Đấu</h2>
+                    <div className="flex items-center space-x-2 w-full sm:w-auto">
+                        {/* Chỉ hiển thị nút gửi yêu cầu khi phù hợp */}
+                        {!match?.club_B && match?.status !== 'pending' && !isMatchOwner && (
+                            <Button
+                                type="primary"
+                                className="bg-orange-500 text-white w-full sm:w-auto"
+                                onClick={handleOpenModal}
+                                size="large"
+                            >
+                                <span className="hidden sm:inline">Gửi yêu cầu</span>
+                                <span className="sm:hidden">Gửi yêu cầu tham gia</span>
+                            </Button>
+                        )}
+
+                        {/* Hiển thị trạng thái nếu có */}
+                        {match?.status === 'pending' && (
+                            <div className="text-orange-600 text-sm">
+                                Đang chờ xác nhận yêu cầu tham gia
+                            </div>
+                        )}
+
+                        {match?.club_B && (
+                            <div className="text-green-600 text-sm">
+                                Trận đấu đã đủ đội
+                            </div>
+                        )}
+                    </div>
+                </div>
+                <MatchRequestModal
+                    visible={visible}
+                    onCancel={handleCloseModal}
+                    match={match}
+                    userId={auth.value.user._id as string}
+                    onSuccess={() => {
+                        // Refresh dữ liệu sau khi gửi yêu cầu thành công
+                        dispatch(getMatchRequestsByMatchSlice(id as string));
+                        dispatch(getMatchByIdSlice(id as string));
+                    }}
+                />
+
+                {/* Hiển thị yêu cầu tham gia nếu có */}
+                {matchRequest.length > 0 && matchRequest[0].status === 'pending' && (
+                    <div>
+                        <MatchRequestHandler
+                            match={match}
+                            requestedMatch={matchRequest}
+                            isOwner={isMatchOwner}
+                            onRequestHandled={async () => {
+                                // Refresh dữ liệu sau khi xử lý yêu cầu
+                                dispatch(getMatchRequestsByMatchSlice(id as string));
+                                dispatch(getMatchByIdSlice(id as string));
+                            }}
+                        />
+                    </div>
+                )}
+
+                {/* Match list */}
+                <div className="mt-6 mb-6 sm:mb-10 bg-white border border-gray-200 rounded-lg sm:rounded-xl overflow-hidden">
+                    <div key={match._id}>
+                        {/* Phần trên: Thông tin 2 đội */}
+                        <div className="p-4 sm:p-6">
+                            {/* Mobile Layout */}
+                            <div className="block sm:hidden">
+                                {/* Đội A */}
+                                <div className="mb-4">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0">
+                                            <Image
+                                                src={match.club_A?.teamImage || ""}
+                                                className="rounded-full object-cover"
+                                                layout="fill"
+                                                alt="bg"
+                                            />
+                                        </div>
+                                        <div>
+                                            <div className="font-semibold text-base">{match.club_A?.teamName}</div>
+                                            <div className='flex items-center flex-wrap gap-2 text-sm mt-1 text-orange-500'>
+                                                <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{match.club_A?.ageGroup}</span>
+                                                <span>{match.club_A?.level}</span>
+                                                <span>{match.club_A?.contact}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* VS */}
+                                <div className="text-center text-2xl font-bold my-4">VS</div>
+
+                                {/* Đội B */}
+                                {match.club_B ? (
+                                    <div className="mb-4">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0">
+                                                <Image
+                                                    src={match?.club_B?.teamImage || ""}
+                                                    className="rounded-full object-cover"
+                                                    layout="fill"
+                                                    alt="bg"
+                                                />
+                                            </div>
+                                            <div>
+                                                <div className="font-semibold text-base">{match.club_B?.teamName}</div>
+                                                <div className='flex items-center flex-wrap gap-2 text-sm mt-1 text-orange-500'>
+                                                    <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{match.club_B?.ageGroup}</span>
+                                                    <span>{match.club_B?.level}</span>
+                                                    <span>{match.club_B?.contact}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-center text-center mb-4">
+                                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gray-100 flex items-center justify-center text-lg text-gray-500">
+                                            ?
+                                        </div>
+                                        <div className="text-xs text-gray-400 mt-1">Chưa có đối thủ</div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Desktop Layout */}
+                            <div className="hidden sm:grid sm:grid-cols-3 items-center mb-2">
+                                {/* Đội A */}
+                                <div>
+                                    <div className="flex items-center space-x-3">
+                                        <div className="relative w-20 h-20">
+                                            <Image
+                                                src={match?.club_A?.teamImage || ""}
+                                                className="rounded-full object-cover"
+                                                layout="fill"
+                                                alt="bg"
+                                            />
+                                        </div>
+                                        <div className="font-semibold text-sm">{match.club_A?.teamName}</div>
+                                    </div>
+                                    <div className='flex items-center space-x-3 text-sm mt-2 text-orange-500'>
+                                        <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{match.club_A?.ageGroup}</span>
+                                        <span>{match.club_A?.level}</span>
+                                        <span>{match.club_A?.contact}</span>
+                                    </div>
+                                </div>
+
+                                {/* VS */}
+                                <div className="text-center text-3xl font-bold">VS</div>
+
+                                {/* Đội B nếu có */}
+                                {match.club_B ? (
+                                    <div>
+                                        <div className="flex items-center justify-end space-x-3">
+                                            <div className="font-semibold text-sm">{match.club_B?.teamName}</div>
+                                            <div className="relative w-20 h-20">
+                                                <Image
+                                                    src={match?.club_B?.teamImage || ""}
+                                                    className="rounded-full object-cover"
+                                                    layout="fill"
+                                                    alt="bg"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className='flex items-center justify-end space-x-3 text-sm mt-2 text-orange-500'>
+                                            <span className="border border-orange-400 rounded-full px-2 py-0.5 text-xs">{match.club_B?.ageGroup}</span>
+                                            <span>{match.club_B?.level}</span>
+                                            <span>{match.club_B?.contact}</span>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-end text-right">
+                                        <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center text-lg text-gray-500">
+                                            ?
+                                        </div>
+                                        <div className="text-xs text-gray-400 mt-1">Chưa có đối thủ</div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Đóng phần thông tin đội */}
+                        </div>
+                        {/* Phần dưới: Thông tin trận đấu với background màu cam nhẹ */}
+                        <div className="bg-orange-50 p-4 sm:p-6 text-xs sm:text-sm text-gray-700">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+                                <span className='capitalize text-sm sm:text-base font-medium'>
+                                    {match.orderId?.timeStart || 'N/A'} | {
+                                        match.orderId?.date ?
+                                            format(
+                                                parse(match.orderId.date, "dd-MM-yyyy", new Date()),
+                                                'EEEE, dd-MM-yyyy',
+                                                { locale: vi }
+                                            )
+                                            : match.date ?
+                                                format(new Date(match.date), 'EEEE, dd/MM/yyyy', { locale: vi })
+                                                : 'Không có thông tin ngày'
+                                    }
+                                </span>
+                                {(() => {
+                                    // Kiểm tra xem match.orderId có tồn tại không
+                                    if (!match.orderId?.date) {
+                                        return (
+                                            <span className="bg-orange-100 text-orange-500 rounded-md px-2 py-1 text-xs self-start sm:self-center">
+                                                Không có thông tin ngày
+                                            </span>
+                                        );
+                                    }
+
+                                    // Chuyển đổi ngày trận đấu sang định dạng chuẩn
+                                    const matchDate = startOfDay(parse(match.orderId.date, "dd-MM-yyyy", new Date()));
+                                    // Lấy ngày hiện tại ở đầu ngày (00:00:00)
+                                    const today = startOfDay(new Date());
+
+                                    // So sánh ngày
+                                    const isToday = isSameDay(matchDate, today);
+                                    const diffDays = differenceInDays(matchDate, today);
+
+                                    if (isToday) {
+                                        // Nếu là ngày hôm nay và chưa có đối thủ
+                                        if (!match.club_B) {
+                                            return (
+                                                <span className="bg-red-100 text-red-600 rounded-md px-2 py-1 text-xs font-bold flex items-center self-start sm:self-center">
+                                                    <ClockCircleOutlined className="mr-1" />
+                                                    <span className="hidden sm:inline">Hôm nay, {match.orderId?.timeStart || match.time}</span>
+                                                    <span className="sm:hidden">Hôm nay</span>
+                                                </span>
+                                            );
+                                        } else {
+                                            // Nếu là ngày hôm nay nhưng đã có đối thủ
+                                            return (
+                                                <span className="bg-orange-100 text-orange-500 rounded-md px-2 py-1 text-xs self-start sm:self-center">
+                                                    <span className="hidden sm:inline">Hôm nay, {match.orderId?.timeStart || match.time}</span>
+                                                    <span className="sm:hidden">Hôm nay</span>
+                                                </span>
+                                            );
+                                        }
+                                    } else if (diffDays > 0) {
+                                        // Nếu là ngày trong tương lai
+                                        return (
+                                            <span className="bg-orange-100 text-orange-500 rounded-md px-2 py-1 text-xs self-start sm:self-center">
+                                                {diffDays} ngày nữa
+                                            </span>
+                                        );
+                                    } else {
+                                        // Nếu là ngày trong quá khứ
+                                        return (
+                                            <span className="bg-gray-100 text-gray-500 rounded-md px-2 py-1 text-xs self-start sm:self-center">
+                                                Đã diễn ra
+                                            </span>
+                                        );
+                                    }
+                                })()}
+                            </div>
+                            <div className="mt-2 text-xs sm:text-sm text-gray-600 break-words">
+                                {match.footballField?.name || "Không có thông tin sân"}
+                                {match.footballField ?
+                                    (`, ${match.footballField?.address?.detail ? `${match.footballField?.address?.detail}, ` : ""}
+                                    ${match.footballField?.address?.ward || ""},
+                                    ${match.footballField?.address?.district || ""},
+                                    ${match.footballField?.address?.province || ""}`) :
+                                    ", Không có thông tin địa chỉ"
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Mô tả*/}
+                <div className="bg-white mx-auto">
+                    <Card className="text-left rounded-lg sm:rounded-xl">
+                        <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Thông tin</h3>
+                        <div className="space-y-3 sm:space-y-4">
+                            {/* Ngày và Thời gian */}
+                            <div className="flex items-start sm:items-center space-x-3">
+                                <CalendarOutlined className="text-orange-500 mt-0.5 sm:mt-0 flex-shrink-0" />
+                                <span className="text-xs sm:text-sm text-gray-700 capitalize break-words">
+                                    <strong>Thời gian: </strong>
+                                    {match.orderId?.timeStart || 'N/A'} | {
+                                        match.orderId?.date ?
+                                            format(
+                                                parse(match.orderId.date, "dd-MM-yyyy", new Date()),
+                                                'EEEE, dd-MM-yyyy',
+                                                { locale: vi }
+                                            )
+                                            : match.date ?
+                                                format(new Date(match.date), 'EEEE, dd/MM/yyyy', { locale: vi })
+                                                : 'Không có thông tin ngày'
+                                    }
+                                </span>
+                            </div>
+
+                            <div className="flex items-start sm:items-center space-x-3">
+                                <ClockCircleOutlined className="text-orange-500 mt-0.5 sm:mt-0 flex-shrink-0" />
+                                <span className="text-xs sm:text-sm text-gray-700 break-words">
+                                    <strong>Giờ đá: </strong>{match.orderId?.timeStart || "Không có thông tin"}
+                                </span>
+                            </div>
+
+                                 <div className="flex items-start sm:items-center space-x-3">
+                                <ClockCircleOutlined className="text-orange-500 mt-0.5 sm:mt-0 flex-shrink-0" />
+                                <span className="text-xs sm:text-sm text-gray-700 break-words">
+                                    <strong>Giá tiền: </strong>{`${match.orderId?.amount?.toLocaleString()} VNĐ` || "Không có thông tin"}
+                                </span>
+                            </div>
+
+                            {/* Sân bóng */}
+                            <div className="flex items-start sm:items-center space-x-3">
+                                <EnvironmentOutlined className="text-orange-500 mt-0.5 sm:mt-0 flex-shrink-0" />
+                                <span className="text-xs sm:text-sm text-gray-700 break-words">
+                                    <strong>Sân bóng: </strong>{match.footballField?.name || "Không có thông tin"}
+                                </span>
+                            </div>
+
+                            {/* Địa điểm */}
+                            <div className="flex items-start sm:items-center space-x-3">
+                                <EnvironmentOutlined className="text-orange-500 mt-0.5 sm:mt-0 flex-shrink-0" />
+                                <span className="text-xs sm:text-sm text-gray-700 break-words">
+                                    <strong>Địa chỉ: </strong>
+                                    {match.footballField?.address ?
+                                        (`${match.footballField?.address.detail ? `${match.footballField?.address.detail}, ` : ""}
+                                        ${match.footballField?.address.ward || ""},
+                                        ${match.footballField?.address.district || ""},
+                                        ${match.footballField?.address.province || ""}`) :
+                                        "Không có thông tin địa chỉ"
+                                    }
+                                </span>
+                            </div>
+
+                            {/* Liên hệ */}
+                            <div className="flex items-start sm:items-center space-x-3">
+                                <EditOutlined className="text-orange-500 mt-0.5 sm:mt-0 flex-shrink-0" />
+                                <span className="text-xs sm:text-sm text-gray-700 break-words">
+                                    <strong>Liên hệ: </strong> {match.club_A?.contact || "Không có thông tin"}
+                                </span>
+                            </div>
+
+                            <div className="flex items-start sm:items-center space-x-3">
+                                <EditOutlined className="text-orange-500 mt-0.5 sm:mt-0 flex-shrink-0" />
+                                <span className="text-xs sm:text-sm text-gray-700 break-words">
+                                    <strong>Mô tả: </strong> {match?.description || "Không có mô tả"}
+                                </span>
+                            </div>
+                        </div>
+                    </Card>
+
+                </div>
+
+                {/* Bình luận */}
+                <CommentSection
+                    matchId={id as string}
+                    isLoggedIn={auth.isLoggedIn}
+                    currentUser={auth.value?.user}
+                />
+            </div>
+        )
+    );
 };
 
-// ✅ OPTIMIZED SSR - Parallel API calls for better performance
-export default async function FindOpponentPage() {
-  try {
-    // ✅ Return Client Component with pre-fetched data
-    return (
-      <MatchDetailClient/>
-    );
-
-  } catch (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Lỗi tải dữ liệu</h2>
-          <p className="text-gray-600 mb-4">Không thể tải dữ liệu từ server. Vui lòng thử lại.</p>
-          <a
-            href="/homepage/find-opponent"
-            className="bg-[#FE6900] text-white px-6 py-2 rounded-lg hover:bg-[#e55a00] inline-block"
-          >
-            Thử lại
-          </a>
-        </div>
-      </div>
-    );
-  }
-}
+export default MatchDetail;
