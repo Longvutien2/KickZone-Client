@@ -27,7 +27,7 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
   const dispatch = useDispatch<AppDispatch>();
 
 
-  // Sử dụng hook realtime notifications cho tất cả các loại thông báo (chỉ âm thanh + toast, không có dropdown)
+  // Sử dụng hook realtime notifications cho tất cả các loại thông báo
   useRealtimeNotifications({
     userId: user.isLoggedIn ? user.value.user._id : undefined,
     onNewMatchRequest: (data) => {

@@ -72,7 +72,14 @@ const matchSlice = createSlice({
         detail: {},   // Chi tiết trận đấu
         breadcrumb: "", // Breadcrumb (dẫn đường)
     },
-    reducers: {},
+    reducers: {
+        // ✅ Set initial data from SSR
+        setInitialData: (state: any, action) => {
+            if (action.payload && action.payload.length > 0) {
+                state.value = action.payload;
+            }
+        }
+    },
     extraReducers: (builder) => {
         // 1. Xử lý khi lấy danh sách trận đấu thành công
         builder.addCase(getListMatchesSlice.fulfilled, (state: any, action) => {

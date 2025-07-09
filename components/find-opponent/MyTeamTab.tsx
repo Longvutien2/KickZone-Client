@@ -11,9 +11,17 @@ import { useEffect, useState, useMemo, memo } from 'react'
 import MatchCard from './MatchCard'
 import { toast } from 'react-toastify'
 
-const MyTeamTab = memo(() => {
+interface MyTeamTabProps {
+    initialData?: {
+        matches: any[];
+        addresses: any[];
+        timeSlots: any[];
+    };
+}
+
+const MyTeamTab = memo(({ initialData }: MyTeamTabProps) => {
     const router = useRouter()
-    const matchs = useAppSelector(state => state.match.value)
+    const matchs = useAppSelector(state => state.match.value) || initialData?.matches || []
     const auth = useAppSelector(state => state.auth)
     const [myTeam, setmyTeam] = useState<Team>();
     const [matchsHome, setMatchsHome] = useState<Match[]>([]);

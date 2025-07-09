@@ -12,24 +12,47 @@ import { useEffect, useState, useMemo, memo } from 'react'
 import FilterSection from './FilterSection'
 import MatchCard from './MatchCard'
 
-const MainContent = memo(() => {
+interface MainContentProps {
+    initialData?: {
+        matches: any[];
+        addresses: any[];
+        timeSlots: any[];
+    };
+}
+
+const MainContent = memo(({ initialData }: MainContentProps) => {
     // Khởi tạo state với mảng rỗng
     const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
-    const [groupedByAddress, setGroupedByAddress] = useState<any>([]);
+    const [groupedByAddress, setGroupedByAddress] = useState<any>(initialData?.addresses || []);
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedDate, setSelectedDate] = useState<any>(null);
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [filtersVisible, setFiltersVisible] = useState(false);
-    // const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
     const dispatch = useAppDispatch();
     const [value, setValue] = useState<string>(''); // State lưu giá trị khu vực được chọn
 
-    // Lấy dữ liệu từ Redux store một cách an toàn
+    // Lấy dữ liệu từ Redux store một cách an toàn, fallback to initialData
     const matchState = useAppSelector(state => state.match);
     const footballFields = useAppSelector(state => state.footballField.detail) as FootballField;
-    const timeSlots = useAppSelector(state => state.timeSlot.value) as TimeSlot[];
+    const timeSlotsFromRedux = useAppSelector(state => state.timeSlot.value) as TimeSlot[];
+
+    // ✅ Ensure timeSlots is always an array
+    const timeSlots = Array.isArray(timeSlotsFromRedux)
+        ? timeSlotsFromRedux
+        : (Array.isArray(initialData?.timeSlots) ? initialData.timeSlots : []);
+
+    // ✅ Initialize Redux store with server data if available
+    useEffect(() => {
+        if (initialData && initialData.matches.length > 0) {
+            // Dispatch initial data to Redux store
+            dispatch({ type: 'match/setInitialData', payload: initialData.matches });
+        }
+        if (initialData && initialData.timeSlots.length > 0) {
+            dispatch({ type: 'timeSlot/setInitialData', payload: initialData.timeSlots });
+        }
+    }, [initialData, dispatch]);
 
     const handleDateChange = (date: any) => {
         setSelectedDate(date);
@@ -53,16 +76,19 @@ const MainContent = memo(() => {
     const fetchAllData = async () => {
         setIsLoading(true);
         try {
-            // Luôn fetch data mới để đảm bảo cập nhật real-time
-            const [, , addressData] = await Promise.all([
-                await dispatch(getListMatchesSlice()),
-                await dispatch(getListTimeSlotsByFootballFieldId(footballFields._id as string)),
-                await getFootballFieldAddress()
-            ]);
+            // ✅ Only fetch if we don't have initial data or need to refresh
+            if (!initialData || !initialData.matches.length) {
+                const footballFieldId = footballFields?._id || "67ce9ea74c79326f98b8bf8e";
 
-            if (addressData) {
-                // setTimeSlots(timeSlotData.payload as TimeSlot[]);
-                setGroupedByAddress(addressData.data || []);
+                const [, , addressData] = await Promise.all([
+                    await dispatch(getListMatchesSlice()),
+                    await dispatch(getListTimeSlotsByFootballFieldId(footballFieldId)),
+                    await getFootballFieldAddress()
+                ]);
+
+                if (addressData) {
+                    setGroupedByAddress(addressData.data || []);
+                }
             }
 
         } catch (error) {
@@ -73,14 +99,16 @@ const MainContent = memo(() => {
         }
     };
 
-    // ✅ Fetch data với debouncing để tránh spam calls
+    // ✅ Fetch data với debouncing để tránh spam calls - only if no initial data
     useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            fetchAllData();
-        }, 300); // Debounce 300ms
+        if (!initialData || !initialData.matches.length) {
+            const timeoutId = setTimeout(() => {
+                fetchAllData();
+            }, 300); // Debounce 300ms
 
-        return () => clearTimeout(timeoutId);
-    }, [footballFields._id]); // Chỉ depend vào ID, không phải toàn bộ object
+            return () => clearTimeout(timeoutId);
+        }
+    }, [footballFields?._id, initialData]); // Safe access to footballFields
 
 
     // Lọc trận đấu dựa trên các bộ lọc - Optimized with useMemo
@@ -88,8 +116,10 @@ const MainContent = memo(() => {
         // Lấy ngày hiện tại ở đầu ngày (00:00:00)
         const today = startOfDay(new Date());
 
-        // Lấy danh sách trận đấu từ Redux store
-        const matchs = matchState.value;
+        // ✅ Lấy danh sách trận đấu từ Redux store hoặc initialData
+        const matchs = Array.isArray(matchState.value) && matchState.value.length > 0
+            ? matchState.value
+            : (Array.isArray(initialData?.matches) ? initialData.matches : []);
 
         try {
             // Áp dụng tất cả các bộ lọc
@@ -136,7 +166,7 @@ const MainContent = memo(() => {
             console.error("Error filtering matches:", error);
             return [];
         }
-    }, [matchState.value, selectedDate, selectedTime]);
+    }, [matchState.value, initialData?.matches, selectedDate, selectedTime]);
 
     // Update filteredMatches when memo changes
     useEffect(() => {
@@ -145,6 +175,7 @@ const MainContent = memo(() => {
 
     // Lọc các timeslot duy nhất để hiển thị trong dropdown - Optimized with useMemo
     const uniqueTimeSlots = useMemo(() => {
+        if (!Array.isArray(timeSlots) || timeSlots.length === 0) return [];
         return [...new Set(timeSlots.map(slot => slot.time))].sort();
     }, [timeSlots]);
 

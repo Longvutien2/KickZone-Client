@@ -61,8 +61,14 @@ const timeSlotSlice = createSlice({
         detail: {},
         breadcrumb: ""
     },
-    reducers: {}
-    ,
+    reducers: {
+        // ✅ Set initial data from SSR
+        setInitialData: (state: any, action) => {
+            if (action.payload && action.payload.length > 0) {
+                state.value = action.payload;
+            }
+        }
+    },
     extraReducers: (builder) => {
         builder.addCase(getListTimeSlots.fulfilled, (state: any, action) => {
             state.value = action.payload
