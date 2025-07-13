@@ -19,8 +19,10 @@ import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getListNotificationManagerSlice, getListNotificationSlice } from "@/features/notification.slice";
+import { getListOrdersSlice } from "@/features/order.slice";
 import { toast } from "react-toastify";
 import { io } from "socket.io-client";
+import { playNotificationSound } from '@/utils/notificationSound';
 
 const { Header, Sider } = Layout;
 
@@ -32,7 +34,23 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
     const [notification, setNotification] = useState<any>([]);
 
     useEffect(() => {
+        if (!user.isLoggedIn) return;
+
         const socket = io(process.env.NEXT_PUBLIC_API_BACKEND_IO);
+
+        // Lắng nghe thông báo đặt sân mới giống như phần tìm đối
+        socket.on('newBookingNotification', (data: any) => {
+
+            if (data.targetUserId === user.value.user._id) {
+                // Phát âm thanh thông báo
+                playNotificationSound();
+                toast.success(data.message);
+                // Refresh orders data để cập nhật trang orders-schedule
+                dispatch(getListOrdersSlice());
+
+            }
+        });
+
         socket.on('pushNotification', (data: any) => {
             data && setNotification((prev: any) => [...prev, data]);
         });
@@ -47,10 +65,12 @@ const LayoutManager = ({ children }: { children: React.ReactNode }) => {
         });
 
         return () => {
+            socket.off('newBookingNotification');
             socket.off('pushNotification');
             socket.off('updateNotification');
+            socket.disconnect();
         };
-    }, []);
+    }, [user.isLoggedIn, user.value.user._id]);
 
     useEffect(() => {
         const getData = async () => {

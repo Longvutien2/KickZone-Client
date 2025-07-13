@@ -8,6 +8,7 @@ import viVN from 'antd/lib/locale/vi_VN';
 import { useAppDispatch, useAppSelector } from '@/store/hook';
 import { getListFieldsSlice } from '@/features/field.slice';
 import { getListTimeSlotsByFootballFieldId } from '@/features/timeSlot.slice';
+import { getListOrdersSlice } from '@/features/order.slice';
 import { FootballField } from '@/models/football_field';
 import FieldScheduleTable from '../../../components/manager/FieldScheduleTable';
 import BookingStatsChart from '../../../components/manager/BookingStatsChart';
@@ -116,6 +117,7 @@ const QuanLiSanBong = () => {
         if (footballField?._id) {
             dispatch(getListFieldsSlice(footballField._id));
             dispatch(getListTimeSlotsByFootballFieldId(footballField._id));
+            dispatch(getListOrdersSlice()); // Load orders data
         }
     }, [footballField?._id]);
 

@@ -20,9 +20,9 @@ interface CommentType {
 }
 
 const navigationItems = [
-    { href: "/detail", label: "Giới thiệu sân" },
+    { href: "/homepage/detail", label: "Giới thiệu sân" },
     { href: "/homepage", label: "Đặt sân" },
-    { href: "/find-team", label: "Tìm đối" },
+    { href: "/homepage/find-opponent", label: "Tìm đối" },
     { href: "/contact", label: "Liên hệ" },
 ];
 

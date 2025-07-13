@@ -37,10 +37,10 @@ const HomePage = () => {
   };
 
   const navigationItems = [
-    { href: "/detail", label: "Giới thiệu sân" },
+    { href: "/homepage/detail", label: "Giới thiệu sân" },
     { href: "/homepage", label: "Đặt sân" },
-    { href: "/find-team", label: "Tìm đối" },
-    { href: "/contact", label: "Liên hệ" },
+    { href: "/homepage/find-opponent", label: "Tìm đối" },
+    { href: "/homepage/detail", label: "Liên hệ" },
   ];
 
   return (
@@ -170,28 +170,28 @@ const HomePage = () => {
                   <Swiper {...swiperSettings} className="w-full h-full rounded-full">
                     <SwiperSlide className="rounded-full">
                       <img
-                        src="https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/FVR-1-1.png"
+                        src="https://i.postimg.cc/FR59CmYp/FVR-1-1.png"
                         alt="Soccer Player 4"
                         className="w-full h-full object-contain rounded-full"
                       />
                     </SwiperSlide>
                     <SwiperSlide className="rounded-full">
                       <img
-                        src="https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/fooooot-1.png"
+                        src="https://i.postimg.cc/m2DGwhdR/fooooot-1.png"
                         alt="Soccer Player 1"
                         className="w-full h-full object-contain rounded-full"
                       />
                     </SwiperSlide>
                     <SwiperSlide className="rounded-full">
                       <img
-                        src="https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/fooooot-bal-1.png"
+                        src="https://i.postimg.cc/J0zSPd5K/fooooot-bal-1.png"
                         alt="Soccer Player 2"
                         className="w-full h-full object-contain rounded-full"
                       />
                     </SwiperSlide>
                     <SwiperSlide className="rounded-full">
                       <img
-                        src="https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/football-Recoveredf-2-1.png"
+                        src="https://i.postimg.cc/zGg6thTm/football-Recoveredf-2-1.png"
                         alt="Soccer Player 3"
                         className="w-full h-full object-contain rounded-full"
                       />

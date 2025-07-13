@@ -12,6 +12,8 @@ import {
     PlusCircleOutlined
 } from '@ant-design/icons';
 import { io } from 'socket.io-client';
+import { toast } from 'react-toastify';
+import { playNotificationSound } from '@/utils/notificationSound';
 
 const { Text, Title } = Typography;
 
@@ -21,10 +23,21 @@ const NotificationManager = () => {
     const [filteredNotifications, setFilteredNotifications] = useState<Notification[]>([]);
     const [activeNotification, setActiveNotification] = useState<string>(); // Trạng thái thông báo đang được chọn
     const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
-    const user = useAppSelector(state => state.auth.value);
+    const user = useAppSelector(state => state.auth);
     
-    const socket = io(process.env.NEXT_PUBLIC_API_BACKEND_IO);
     useEffect(() => {
+        if (!user.isLoggedIn) return;
+
+        const socket = io(process.env.NEXT_PUBLIC_API_BACKEND_IO);
+
+        // Lắng nghe thông báo đặt sân mới giống như phần tìm đối
+        socket.on('newBookingNotification', (data: any) => {
+            if (data.targetUserId === user.value.user._id) {
+                playNotificationSound();
+                toast.success(data.message);
+            }
+        });
+
         socket.on('pushNotification', (data: any) => {
             data && setFilteredNotifications((prev: any) => [...prev, data]);
         });
@@ -36,10 +49,12 @@ const NotificationManager = () => {
             );
         });
         return () => {
+            socket.off('newBookingNotification');
             socket.off('pushNotification');
             socket.off('updateNotification');
+            socket.disconnect();
         };
-    }, []);
+    }, [user.isLoggedIn, user.value.user._id]);
 
     useEffect(() => {
         const getData = async () => {
