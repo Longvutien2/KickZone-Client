@@ -15,6 +15,8 @@ import { createOrder, getListOrders, getOrdersByUserId, updatePendingOrder } fro
 import { useOrderCleanup } from "@/utils/orderCleanup";
 import { Order, PaymentStatus } from "@/models/payment";
 import { checkOrderExists } from "@/utils/orderUtils";
+import { getListFieldsSlice } from "@/features/field.slice";
+import { getListTimeSlotsByFootballFieldId } from "@/features/timeSlot.slice";
 
 // Dynamic imports - chỉ load khi cần thiết
 const PaymentQR = dynamic(() => import("@/components/Payment"), {
@@ -235,6 +237,16 @@ const BookingPage = () => {
         if (id && slotId) {
             const getData = async () => {
                 try {
+                    // Nếu Redux store chưa có dữ liệu, load từ API
+                    if (!field || field.length === 0 || !timeSlot || timeSlot.length === 0) {
+                        const footballFieldId = "67ce9ea74c79326f98b8bf8e"; // Fixed football field ID
+                        await Promise.all([
+                            dispatch(getListFieldsSlice(footballFieldId)),
+                            dispatch(getListTimeSlotsByFootballFieldId(footballFieldId))
+                        ]);
+                        return;
+                    }
+
                     const fieldResponse = field.find((field: Field) => field._id === id) as any;
                     const timeslotResponse = timeSlot.find((timeSlot: TimeSlot) => timeSlot._id === slotId) as any;
 
@@ -260,7 +272,7 @@ const BookingPage = () => {
             }
             getData();
         }
-    }, [id, slotId]);
+    }, [id, slotId, field, timeSlot, date, dispatch]);
 
     // Nếu đã đặt sân thành công, hiển thị trang kết quả
     if (isSuccess && formValues) {

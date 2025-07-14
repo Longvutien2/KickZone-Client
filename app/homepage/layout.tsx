@@ -91,12 +91,12 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
       </div>,
       path: "/homepage/notification",
     },
-    user.value.user?.role === 0 && {
-      key: "newField",
-      label: "Tạo sân bóng",
-      icon: <UserOutlined />,
-      path: "/addField",
-    },
+    // user.value.user?.role === 0 && {
+    //   key: "newField",
+    //   label: "Tạo sân bóng",
+    //   icon: <UserOutlined />,
+    //   path: "/addField",
+    // },
     (user.value.user?.role === 1 || user.value.user?.role === 2) && {
       key: "manager",
       label: <div className='font-semibold text-red-500 flex items-center gap-2'>
