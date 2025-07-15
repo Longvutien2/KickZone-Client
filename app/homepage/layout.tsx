@@ -103,7 +103,7 @@ const LayoutHomepage = ({ children }: { children: React.ReactNode }) => {
         Quản lý sân bóng
       </div>,
       icon: <UserOutlined />,
-      path: "/manager/orders-schedule",
+      path: "/manager/statistics",
       className: 'bg-red-50 border-l-4 border-red-500 hover:bg-red-100'
     },
   ]

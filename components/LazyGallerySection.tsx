@@ -3,11 +3,11 @@ import React, { memo } from 'react';
 import { motion } from 'framer-motion';
 
 const images = [
-  'https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/Gallery-2-1.jpg',
-  'https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/Gallery-1-1-300x195.jpg',
-  'https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/Gallery.jpg',
-  'https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/Gallery-4.jpg',
-  'https://template-kit.evonicmedia.com/layout87/wp-content/uploads/2024/09/Gallery-3.jpg',
+  'https://i.postimg.cc/d1nNjhwC/Gallery-3.jpg',
+  'https://i.postimg.cc/PfynSq22/Gallery.jpg',
+  'https://i.postimg.cc/25LCJfV3/Gallery-1-1-300x195.jpg',
+  'https://i.postimg.cc/qqbY4zFr/Gallery-4.jpg',
+  'https://i.postimg.cc/ZKLnFZdS/Gallery-2-1.jpg',
 ];
 
 const LazyGallerySection = memo(() => {

@@ -36,6 +36,7 @@ const StatisticsPage: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [selectedMonth, setSelectedMonth] = useState<number>(dayjs().month() + 1); // Tháng hiện tại (1-12)
     const [selectedYear, setSelectedYear] = useState<number>(dayjs().year()); // Năm hiện tại
+    const [selectedDate, setSelectedDate] = useState<dayjs.Dayjs>(dayjs()); // Ngày được chọn cho TimeSlotChart
     const orders = useAppSelector(state => state.order.value) as Order[] | null;
     const footballField = useAppSelector(state => state.footballField.detail) as FootballField;
     const fields = useAppSelector(state => state.field.value);
@@ -103,10 +104,13 @@ const StatisticsPage: React.FC = () => {
             />
 
             {/* Thống kê khung giờ có nhiều lượt đặt nhất */}
-            <TimeSlotChart
+            {/* <TimeSlotChart
                 orders={orders}
                 loading={loading}
-            />
+                selectedDate={selectedDate}
+                selectedMonth={selectedMonth}
+                selectedYear={selectedYear}
+            /> */}
 
             {/* Thống kê sân bóng */}
             <FieldStats
@@ -114,6 +118,8 @@ const StatisticsPage: React.FC = () => {
                 fields={fields}
                 footballField={footballField}
                 loading={loading}
+                selectedMonth={selectedMonth}
+                selectedYear={selectedYear}
             />
         </div>
     );

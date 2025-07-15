@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Row, Col, Empty } from 'antd';
 import { BarChartOutlined } from '@ant-design/icons';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import dayjs from 'dayjs';
 
 interface Order {
     _id?: string;
@@ -24,17 +25,34 @@ interface TimeSlotBookingItem {
 interface TimeSlotChartProps {
     orders: Order[] | null;
     loading: boolean;
+    selectedDate?: dayjs.Dayjs;
+    selectedMonth?: number;
+    selectedYear?: number;
 }
 
-const TimeSlotChart: React.FC<TimeSlotChartProps> = ({ orders, loading }) => {
-    // Thống kê khung giờ có nhiều lượt đặt nhất
+const TimeSlotChart: React.FC<TimeSlotChartProps> = ({
+    orders,
+    loading,
+    selectedDate: propSelectedDate,
+    selectedMonth,
+    selectedYear
+}) => {
+    const [selectedDate, setSelectedDate] = useState<dayjs.Dayjs>(propSelectedDate || dayjs());
+    // Thống kê khung giờ có nhiều lượt đặt nhất theo ngày được chọn
     const timeSlotBookingStats = useMemo<TimeSlotBookingItem[]>(() => {
         if (!orders || orders.length === 0) return [];
 
         const bookingsByTimeSlot: Record<string, number> = {};
+        const targetDate = selectedDate.format('DD-MM-YYYY'); // Ngày được chọn
 
-        orders.forEach(order => {
-            if (!order.timeStart || order.paymentStatus !== 'success') return;
+        // Lọc orders theo ngày được chọn
+        const targetDateOrders = orders.filter(order => {
+            if (!order.date || order.paymentStatus !== 'success') return false;
+            return order.date === targetDate;
+        });
+
+        targetDateOrders.forEach(order => {
+            if (!order.timeStart) return;
 
             if (!bookingsByTimeSlot[order.timeStart]) {
                 bookingsByTimeSlot[order.timeStart] = 0;
@@ -62,6 +80,7 @@ const TimeSlotChart: React.FC<TimeSlotChartProps> = ({ orders, loading }) => {
             <div className="flex items-center mb-4">
                 <BarChartOutlined className="mr-2 text-orange-500" />
                 <h2 className="text-xl font-bold m-0">Khung giờ có nhiều lượt đặt nhất</h2>
+                <span className="text-sm text-gray-500 ml-2">Tháng {dayjs().format('MM/YYYY')}</span>
             </div>
             {timeSlotBookingStats.length > 0 && !loading ? (
                 <Row gutter={[24, 24]}>
@@ -94,7 +113,7 @@ const TimeSlotChart: React.FC<TimeSlotChartProps> = ({ orders, loading }) => {
                     </Col>
                     <Col xs={24} lg={12}>
                         <div className="space-y-3">
-                            <h3 className="text-lg font-semibold mb-4">Top 10 khung giờ được đặt nhiều nhất</h3>
+                            <h3 className="text-lg font-semibold mb-4">Top khung giờ được đặt nhiều nhất (Tháng {dayjs().format('MM/YYYY')})</h3>
                             {timeSlotBookingStats.map((item, index) => (
                                 <div key={item.timeSlot} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                     <div className="flex items-center">
