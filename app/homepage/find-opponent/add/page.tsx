@@ -17,6 +17,8 @@ import { Match } from '@/models/match'
 import { getOrdersByUserId } from '@/api/payment'
 import { Order } from '@/models/payment'
 import { upload } from '@/utils/upload'
+import { getFootballField } from '@/api/football_fields'
+import { getFootballFieldByIdSlice } from '@/features/footballField.slice'
 
 const { Option } = Select
 
@@ -39,6 +41,7 @@ const CreateMatchPage = () => {
 
         // Lấy danh sách đặt sân thành công của người dùng
         const bookingResponse = await getOrdersByUserId(user.value.user._id as string);
+        await dispatch(getFootballFieldByIdSlice('67ce9ea74c79326f98b8bf8e'));
         // Lọc chỉ lấy các đặt sân đã xác nhận và chưa diễn ra
         if (bookingResponse) {
           const confirmedBookings = bookingResponse.data.filter((booking: Order) => {
@@ -101,7 +104,7 @@ const CreateMatchPage = () => {
     // Tạo URL ảnh placeholder với UI Avatars
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=${bgColor.slice(1)}&color=ffffff&size=200&font-size=0.6&bold=true&format=png`;
   };
-
+  console.log("footballField",footballField);
   const handleSubmit = async (values: any) => {
     setLoading(true);
     try {
@@ -136,7 +139,8 @@ const CreateMatchPage = () => {
           orderId: values.orderId,
           description: values.description,
         } as any;
-
+      
+        
         // Thêm trận đấu mới
         const matchResponse = await dispatch(addMatchSlice(matchData));
 
@@ -152,7 +156,9 @@ const CreateMatchPage = () => {
           match: matchResponse.payload._id,
           orderId: values.orderId,
         };
-        await dispatch(addNotificationSlice(userNotification));
+       const data = await dispatch(addNotificationSlice(userNotification));
+       console.log("data nè", data);
+       
 
         // 4. Tải lại danh sách trận đấu
         await dispatch(getListMatchByFootballFieldIdSlice(footballField._id as string));

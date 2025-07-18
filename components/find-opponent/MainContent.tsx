@@ -37,7 +37,7 @@ const MainContent = memo(({ initialData }: MainContentProps) => {
     const matchState = useAppSelector(state => state.match);
     const footballFields = useAppSelector(state => state.footballField.detail) as FootballField;
     const timeSlotsFromRedux = useAppSelector(state => state.timeSlot.value) as TimeSlot[];
-
+    
     // ✅ Ensure timeSlots is always an array
     const timeSlots = Array.isArray(timeSlotsFromRedux)
         ? timeSlotsFromRedux
@@ -160,6 +160,29 @@ const MainContent = memo(({ initialData }: MainContentProps) => {
                     return match.time === selectedTime;
                 });
             }
+
+            // Sắp xếp theo ngày mới nhất tới các ngày tới, nếu cùng ngày thì sắp xếp theo timeStart
+            filtered.sort((a: Match, b: Match) => {
+                // Lấy ngày từ orderId.date
+                const dateA = a?.orderId?.date ? parse(a.orderId.date, "dd-MM-yyyy", new Date()) : new Date(0);
+                const dateB = b?.orderId?.date ? parse(b.orderId.date, "dd-MM-yyyy", new Date()) : new Date(0);
+
+                // So sánh ngày trước
+                const dateComparison = dateA.getTime() - dateB.getTime();
+                if (dateComparison !== 0) {
+                    return dateComparison; // Ngày sớm hơn sẽ hiển thị trước
+                }
+
+                // Nếu cùng ngày, sắp xếp theo timeStart
+                const timeA = a?.orderId?.timeStart || a?.time || '';
+                const timeB = b?.orderId?.timeStart || b?.time || '';
+
+                // Chuyển đổi thời gian thành số để so sánh (ví dụ: "08:00" -> 800)
+                const timeNumA = parseInt(timeA.replace(':', ''));
+                const timeNumB = parseInt(timeB.replace(':', ''));
+
+                return timeNumA - timeNumB; // Thời gian sớm hơn sẽ hiển thị trước
+            });
 
             return filtered;
         } catch (error) {

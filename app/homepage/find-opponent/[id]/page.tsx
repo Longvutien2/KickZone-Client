@@ -420,7 +420,7 @@ const MatchDetail = () => {
                             <div className="flex items-start sm:items-center space-x-3">
                                 <EnvironmentOutlined className="text-orange-500 mt-0.5 sm:mt-0 flex-shrink-0" />
                                 <span className="text-xs sm:text-sm text-gray-700 break-words">
-                                    <strong>Sân bóng: </strong>{match.footballField?.name || "Không có thông tin"}
+                                    <strong>Sân bóng: </strong>{match.orderId?.fieldName || "Không có thông tin"}
                                 </span>
                             </div>
 

@@ -606,15 +606,36 @@ const FieldStats: React.FC<FieldStatsProps> = ({
                 {/* Field Revenue Table */}
                 <Card title={`Danh sách sân và doanh thu (${currentPeriod.description})`} className="shadow-sm">
                     <Table
-                        dataSource={chartData.map((item, index) => ({
-                            key: index,
-                            rank: index + 1,
-                            name: item.name,
-                            revenue: item.revenue,
-                            bookings: item.bookings,
-                            avgRevenuePerBooking: item.bookings > 0 ? Math.round(item.revenue / item.bookings) : 0,
-                            isHighest: topRevenueFields.some(topField => topField.name === item.name)
-                        }))}
+                        dataSource={(() => {
+                            const tableData = chartData.map((item, index) => ({
+                                key: index,
+                                rank: index + 1,
+                                name: item.name,
+                                revenue: item.revenue,
+                                bookings: item.bookings,
+                                avgRevenuePerBooking: item.bookings > 0 ? Math.round(item.revenue / item.bookings) : 0,
+                                isHighest: topRevenueFields.some(topField => topField.name === item.name),
+                                isTotal: false
+                            }));
+
+                            // Tính tổng doanh thu và lượt đặt
+                            const totalRevenue = chartData.reduce((sum, item) => sum + (item.revenue || 0), 0);
+                            const totalBookings = chartData.reduce((sum, item) => sum + (item.bookings || 0), 0);
+
+                            // Thêm dòng tổng doanh thu
+                            tableData.push({
+                                key: 'total',
+                                rank: 0, // Sử dụng 0 thay vì chuỗi rỗng
+                                name: 'Tổng doanh thu',
+                                revenue: totalRevenue,
+                                bookings: totalBookings,
+                                avgRevenuePerBooking: 0,
+                                isHighest: false,
+                                isTotal: true
+                            } as any);
+
+                            return tableData;
+                        })()}
                         columns={[
                             {
                                 title: '#',
@@ -623,8 +644,8 @@ const FieldStats: React.FC<FieldStatsProps> = ({
                                 width: 50,
                                 render: (rank: number, record: any) => (
                                     <div className="flex items-center gap-1">
-                                        <span className={record.isHighest ? 'font-bold text-yellow-600' : ''}>
-                                            {rank}
+                                        <span className={record.isTotal ? 'font-bold text-blue-600' : (record.isHighest ? 'font-bold text-yellow-600' : '')}>
+                                            {record.isTotal ? '' : rank}
                                         </span>
                                     </div>
                                 )
@@ -634,9 +655,9 @@ const FieldStats: React.FC<FieldStatsProps> = ({
                                 dataIndex: 'name',
                                 key: 'name',
                                 render: (name: string, record: any) => (
-                                    <span className={record.isHighest ? 'font-bold text-yellow-600' : 'font-medium'}>
+                                    <span className={record.isTotal ? 'font-bold text-blue-600' : (record.isHighest ? 'font-bold text-yellow-600' : 'font-medium')}>
                                         {name}
-                                        {record.isHighest && <span className="ml-2 text-yellow-600"></span>}
+                                        {record.isHighest && !record.isTotal && <span className="ml-2 text-yellow-600"></span>}
                                     </span>
                                 )
                             },
@@ -646,7 +667,7 @@ const FieldStats: React.FC<FieldStatsProps> = ({
                                 key: 'revenue',
                                 sorter: (a: any, b: any) => a.revenue - b.revenue,
                                 render: (revenue: number, record: any) => (
-                                    <span className={`font-semibold ${record.isHighest ? 'text-yellow-600' : 'text-green-600'}`}>
+                                    <span className={`font-semibold ${record.isTotal ? 'text-blue-600' : (record.isHighest ? 'text-yellow-600' : 'text-green-600')}`}>
                                         {revenue.toLocaleString('vi-VN')} VNĐ
                                     </span>
                                 )
@@ -657,7 +678,7 @@ const FieldStats: React.FC<FieldStatsProps> = ({
                                 key: 'bookings',
                                 sorter: (a: any, b: any) => a.bookings - b.bookings,
                                 render: (bookings: number, record: any) => (
-                                    <span className={`font-semibold ${record.isHighest ? 'text-yellow-600' : 'text-blue-600'}`}>
+                                    <span className={`font-semibold ${record.isTotal ? 'text-blue-600' : (record.isHighest ? 'text-yellow-600' : 'text-blue-600')}`}>
                                         {bookings}
                                     </span>
                                 )
@@ -665,7 +686,28 @@ const FieldStats: React.FC<FieldStatsProps> = ({
                         ]}
                         pagination={false}
                         size="small"
+                        rowClassName={(record: any) => record.isTotal ? 'bg-blue-50 border-t-2 border-blue-200' : ''}
                     />
+
+                    {/* Tổng doanh thu hiển thị riêng */}
+                    {/* <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+                        <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-2">
+                                <DollarOutlined className="text-blue-600 text-lg" />
+                                <span className="font-bold text-blue-800 text-lg">
+                                    Tổng doanh thu {currentPeriod.description.toLowerCase()}:
+                                </span>
+                            </div>
+                            <div className="text-right">
+                                <div className="font-bold text-blue-600 text-xl">
+                                    {chartData.reduce((sum, item) => sum + (item.revenue || 0), 0).toLocaleString('vi-VN')} VNĐ
+                                </div>
+                                <div className="text-sm text-blue-500">
+                                    Tổng {chartData.reduce((sum, item) => sum + (item.bookings || 0), 0)} lượt đặt
+                                </div>
+                            </div>
+                        </div>
+                    </div> */}
                 </Card>
 
                 {/* Combined Pie Charts */}
